@@ -27,3 +27,5 @@ dist-ssr
 # Backend folders
 /auth0-admin-backend/
 /server/
+
+public/images
