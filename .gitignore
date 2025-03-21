@@ -28,4 +28,6 @@ dist-ssr
 /auth0-admin-backend/
 /server/
 
-public/images
+# Images
+public/images/
+scripts/
