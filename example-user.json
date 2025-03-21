@@ -1,0 +1,33 @@
+{
+  "auth0Id": "auth0|67bb70c5eedb5c4b0ea1ec93",
+  "email": "jameshenry2005@gmail.com",
+  "firstName": "James",
+  "lastName": "Redd",
+  "phoneNumber": "",
+  "profile": {
+    "dateOfBirth": null,
+    "gender": "",
+    "profilePictureUrl": "",
+    "marketingBudget": {
+      "adBudget": 0,
+      "costPerAcquisition": 0,
+      "dailySpendingLimit": 0,
+      "marketingChannels": "",
+      "monthlyBudget": 0,
+      "preferredPlatforms": "",
+      "notificationPreferences": [],
+      "roiTarget": 0,
+      "frequency": "monthly"
+    }
+  },
+  "address": {
+    "street": "",
+    "city": "",
+    "state": "",
+    "zipCode": "",
+    "country": ""
+  },
+  "isActive": true,
+  "createdAt": "2024-02-20T00:00:00.000Z",
+  "updatedAt": "2024-02-20T00:00:00.000Z"
+}
