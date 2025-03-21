@@ -31,3 +31,4 @@ dist-ssr
 # Images
 public/images/
 scripts/
+server
