@@ -14,7 +14,7 @@ import React from "react";
 import { SignedOut } from "./pages/SignedOut";
 import Loader from './components/common/Loader';
 import { useMongoDbClient } from './services/mongoDbClient';
-// import MongoInitializer from './components/MongoInitializer';
+
 
 interface UserMetadata {
   auth0Id: string;
