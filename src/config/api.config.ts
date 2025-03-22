@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: 'admin-backend-i0zeyrerf-jamesredd64s-projects.vercel.app',  // Add https://
+  BASE_URL: 'admin-backend-ndo5nentu-jamesredd64s-projects.vercel.app',
   ENDPOINTS: {
     USERS: '/users',
     USER_BY_ID: (id: string) => `/users/${encodeURIComponent(id)}`,
