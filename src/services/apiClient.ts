@@ -25,12 +25,19 @@ export const useApiClient = () => {
   };
 
   const handleError = (err: any) => {
-    console.error('Auth0 API Error:', err);
+    // Generic error message for production
     const apiError: ApiError = {
-      message: err instanceof Error ? err.message : 'An unknown error occurred',
+      message: process.env.NODE_ENV === 'development' 
+        ? (err instanceof Error ? err.message : 'An unknown error occurred')
+        : 'An error occurred',
     };
     setError(apiError);
     setLoading(false);
+    
+    // Log only in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('API Error:', err);
+    }
   };
 
   // Add Auth0-specific operations here if needed

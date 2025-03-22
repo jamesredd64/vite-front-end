@@ -25,11 +25,6 @@ export default {
           500: '#ef4444',
           600: '#dc2626'
         },
-        warning: {
-          50: '#fffbeb',
-          500: '#f59e0b',
-          600: '#d97706'
-        },
         gray: {
           50: '#f9fafb',
           100: '#f3f4f6',

@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import  UserMetadata  from "../../types/user.js";
 import Button from "../ui/button/Button.js";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useUserProfileStore } from "../../stores/userProfileStore";
+// import { useUserProfileStore } from "../../stores/userProfileStore";
 import Input from "../form/input/InputField.js";
 import Label from "../form/Label.js";
 import { useModal } from "../../hooks/useModal";
@@ -28,7 +28,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
 }) => {
   const { isOpen, openModal, closeModal } = useModal();
   const { user } = useAuth0();
-  const userProfile = useUserProfileStore();
+  // const userProfile = useUserProfileStore();
 
   // Initialize local state with initialData
   const [formData, setFormData] = useState({

@@ -1,11 +1,14 @@
 import { useAuth0 } from '@auth0/auth0-react';
 
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://admin-backend-fe464w9bo-jamesredd64s-projects.vercel.app'
-  : 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 
+  (process.env.NODE_ENV === 'production' 
+    ? 'https://admin-backend-eta.vercel.app/api'
+    : 'http://localhost:5000/api');
 
 export const useApi = () => {
   const { getAccessTokenSilently } = useAuth0();
+
+  // https://admin-backend-eta.vercel.app/api
 
   const getHeaders = async () => {
     const token = await getAccessTokenSilently();

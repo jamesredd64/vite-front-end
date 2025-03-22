@@ -22,13 +22,25 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Security and Environment
 .env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
 
-# Backend folders
-/auth0-admin-backend/
-/server/
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Images
-public/images/
-scripts/
-server
+# Build directories
+/dist
+/build
+/.vercel
+
+# Cache directories
+.cache
+.temp

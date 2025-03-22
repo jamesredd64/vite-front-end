@@ -11,20 +11,21 @@ interface HeaderProps {
   onToggle: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onClick, onToggle }) => {
-  const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
-  const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
+// eslint-disable-next-line no-empty-pattern
+const Header: React.FC<HeaderProps> = ({  }) => {
+  const [isApplicationMenuOpen] = useState(false);
+  const { isAuthenticated, loginWithRedirect } = useAuth0();
 
-  const handleTestLogout = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    logout({
-      logoutParams: {
-        returnTo: window.location.origin,
-        clientId: import.meta.env.VITE_AUTH0_CLIENT_ID
-      }
-    });
-  };
+  // const handleTestLogout = () => {
+  //   localStorage.clear();
+  //   sessionStorage.clear();
+  //   logout({
+  //     logoutParams: {
+  //       returnTo: window.location.origin,
+  //       clientId: import.meta.env.VITE_AUTH0_CLIENT_ID
+  //     }
+  //   });
+  // };
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">

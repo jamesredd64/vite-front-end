@@ -1,14 +1,10 @@
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  AUTH0_AUDIENCE: import.meta.env.VITE_AUTH0_AUDIENCE,
+  BASE_URL: 'http://localhost:5000/api',
   ENDPOINTS: {
     USERS: '/users',
     USER_BY_ID: (id: string) => `/users/${encodeURIComponent(id)}`,
     USER_BY_EMAIL: (email: string) => `/users/email/${encodeURIComponent(email)}`,
-    SAVE_USER_DATA: (id: string) => `/users/${encodeURIComponent(id)}/save`,
-    HEALTH: '/health'
+    SAVE_USER_DATA: (id: string) => `/users/${encodeURIComponent(id)}`,
+    USER_CALENDAR_EVENTS: (auth0Id: string) => `/calendar/events/user/${encodeURIComponent(auth0Id)}`
   }
-} as const;
-
-// Add type definition
-export type ApiConfig = typeof API_CONFIG;
+};

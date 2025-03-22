@@ -1,10 +1,7 @@
 import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+// import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 dotenv.config({ path: '../.env' });
 
@@ -71,6 +68,21 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
+const calendarEventSchema = new mongoose.Schema({
+  auth0Id: { type: String, required: true, index: true },
+  title: { type: String, required: true },
+  start: { type: Date, required: true },
+  end: { type: Date },
+  allDay: { type: Boolean, default: false },
+  extendedProps: {
+    calendar: { type: String, required: true }
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, {
+  timestamps: true
+});
+
 // Define indexes
 async function createIndexes() {
   try {
@@ -79,14 +91,18 @@ async function createIndexes() {
     console.log('Connected to MongoDB');
 
     // Drop existing collections if they exist
+    if (!mongoose.connection.db) {
+      throw new Error('Database connection not established');
+    }
     const collections = await mongoose.connection.db.collections();
-    for (let collection of collections) {
+    for (const collection of collections) {
       await collection.drop();
       console.log(`Dropped collection: ${collection.collectionName}`);
     }
 
     // Create User model
     const User = mongoose.model('User', userSchema);
+    const CalendarEvent = mongoose.model('CalendarEvent', calendarEventSchema);
 
     // Create indexes
     await User.collection.createIndex({ auth0Id: 1 }, { unique: true });
@@ -103,6 +119,9 @@ async function createIndexes() {
 
     await User.collection.createIndex({ updatedAt: 1 });
     console.log('Created index on updatedAt');
+
+    await CalendarEvent.collection.createIndex({ auth0Id: 1 });
+    console.log('Created index on auth0Id for CalendarEvent');
 
     console.log('All indexes created successfully');
 

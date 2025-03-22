@@ -1,7 +1,7 @@
 First, you already have a vercel.json in your server directory, which is good:
 
 ```
-## Vercel JSON
+Vercel JSON
 {
   "version": 2,
   "builds": [

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { UserMetadata } from '../types/user';
+import  UserMetadata  from '../types/user';
 import { API_CONFIG } from '../config/api.config';
 
 // Add this console log at the top of your file to verify the import
@@ -19,6 +19,17 @@ interface UpdateUserData {
   email: string;
   name: string;
   auth0Id: string;
+}
+
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end?: string;
+  allDay?: boolean;
+  extendedProps: {
+    calendar: string;
+  };
 }
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -174,39 +185,52 @@ export const useMongoDbClient = () => {
   }, [getAuthHeaders]);
 
   const checkAndInsertUser = async (auth0Id: string, userData: any) => {
+    console.group('checkAndInsertUser Operation');
     try {
-      console.log('userData:', userData);
+      console.log('Input Parameters:', {
+        auth0Id,
+        userData: JSON.stringify(userData, null, 2)
+      });
+
       const headers = await getAuthHeaders();
-      console.log('Checking for existing user:', auth0Id);
-      console.log('userData: ', userData);
-      console.log('API URL:', `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_BY_ID(auth0Id)}`);
+      console.log('Authorization Headers:', {
+        ...headers,
+        Authorization: headers.Authorization ? 'Bearer [REDACTED]' : 'Missing'
+      });
 
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_BY_ID(auth0Id)}`, 
-        {
-          headers,
-          method: 'GET'
-        }
-      );
+      // Ensure proper URL construction
+      const baseUrl = API_CONFIG.BASE_URL.endsWith('/') 
+        ? API_CONFIG.BASE_URL.slice(0, -1) 
+        : API_CONFIG.BASE_URL;
+      
+      const checkUrl = `${baseUrl}${API_CONFIG.ENDPOINTS.USER_BY_ID(auth0Id)}`;
+      console.log('Checking existing user at:', checkUrl);
 
-      console.log('Response status:', response.status);
+      const response = await fetch(checkUrl, {
+        headers,
+        method: 'GET'
+      });
 
-      if (response.status === 404 || response.status === 204) {
-        console.log('User not found, creating new user');
-        const createResponse = await fetch(
-          `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`,
-          {
-            method: 'POST',
-            headers: {
-              ...headers,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              ...userData,
-              auth0Id
-            }),
-          }
-        );
+      // If user not found, create new user
+      if (response.status === 404 || response.headers.get('content-type')?.includes('text/html')) {
+        const createUrl = `${baseUrl}${API_CONFIG.ENDPOINTS.USERS}`;
+        console.log('Creating user at:', createUrl);
+        
+        const newUserData = {
+          ...userData,
+          auth0Id,
+          createdAt: new Date().toISOString()
+        };
+        console.log('New user payload:', JSON.stringify(newUserData, null, 2));
+
+        const createResponse = await fetch(createUrl, {
+          method: 'POST',
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newUserData)
+        });
 
         if (!createResponse.ok) {
           throw new Error(`Failed to create user. Status: ${createResponse.status}`);
@@ -215,14 +239,14 @@ export const useMongoDbClient = () => {
         return await createResponse.json();
       }
 
-      if (!response.ok) {
-        throw new Error(`Unexpected response status: ${response.status}`);
-      }
-
+      // If user found, return the user data
       return await response.json();
+
     } catch (error) {
       console.error('Error in checkAndInsertUser:', error);
       throw error;
+    } finally {
+      console.groupEnd();
     }
   };
   
@@ -419,5 +443,53 @@ export const useMongoDbClient = () => {
     }
   }, [getAccessTokenSilently]);
 
-  return { fetchUserData, error, loading, updateUser, getUserById, checkAndInsertUser, saveUserData };
+  const fetchCalendarEvents = useCallback(async (userId: string) => {
+    console.group('Fetching Calendar Events');
+    try {
+      // Ensure we're using the full auth0 ID format
+      const auth0Id = userId.startsWith('auth0|') ? userId : `auth0|${userId}`;
+      console.log('Fetching events for auth0Id:', auth0Id);
+      
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_CALENDAR_EVENTS(auth0Id)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('Calendar API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const events = await response.json();
+      console.log('Fetched calendar events:', events);
+      return events as CalendarEvent[];
+    } catch (error) {
+      console.error('Error fetching calendar events:', error);
+      throw error;
+    } finally {
+      console.groupEnd();
+    }
+  }, []);
+
+  return { 
+    fetchUserData, 
+    error, 
+    loading, 
+    updateUser, 
+    getUserById, 
+    checkAndInsertUser, 
+    saveUserData,
+    fetchCalendarEvents
+  };
 };

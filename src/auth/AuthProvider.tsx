@@ -13,6 +13,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }}
       cacheLocation="localstorage"
       useRefreshTokens={true}
+      skipRedirectCallback={window.location.pathname === '/signed-out'}
     >
       {children}
     </Auth0Provider>

@@ -91,18 +91,6 @@
     @apply flex-col gap-4 px-6 pt-6 sm:flex-row sm:items-center sm:justify-between;
   }
 
-  /* Add these new styles for the calendar title */
-  .fc .fc-toolbar-title {
-    @apply text-base font-semibold text-gray-800 dark:text-gray-200 !important;
-  }
-
-  /* Optional: Add responsive styles for different screen sizes */
-  @media (min-width: 640px) {
-    .fc .fc-toolbar-title {
-      @apply text-2xl;
-    }
-  }
-
   .fc-button-group {
     @apply inline-flex gap-2;
   }
@@ -229,6 +217,20 @@
   .fc-addEventButton-button {
     @apply bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-800 dark:hover:bg-gray-800;
   }
+
+  /* Update the calendar event styles */
+  .fc-h-event {
+    @apply border-0 !important;
+  }
+
+  .fc-event {
+    @apply cursor-pointer !important;
+  }
+
+  /* Make sure events take full width */
+  .fc-daygrid-event-harness {
+    @apply w-full !important;
+  }
 }
 
 @layer utilities {
@@ -341,38 +343,4 @@
   .event-fc-color.fc-bg-warning .fc-daygrid-event-dot {
     @apply bg-orange-500;
   }
-}
-
-/* Add this to your existing styles */
-.fc-event-main {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-.fc-event {
-  cursor: pointer;
-}
-
-/* Add these styles for the radio buttons */
-.form-check-primary input:checked ~ span {
-  @apply bg-brand-500 border-brand-500;
-}
-
-.form-check-success input:checked ~ span {
-  @apply bg-success-500 border-success-500;
-}
-
-.form-check-danger input:checked ~ span {
-  @apply bg-error-500 border-error-500;
-}
-
-.form-check-warning input:checked ~ span {
-  @apply bg-orange-500 border-orange-500;
-}
-
-/* Add hover states */
-.form-check label:hover span {
-  @apply border-gray-400 dark:border-gray-600;
 }
