@@ -19,22 +19,22 @@ export const SignedOut = () => {
         {/* Content Container */}
         <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-8 shadow-lg dark:bg-gray-800/90 backdrop-blur-sm">
           {/* Logo */}
-          <div className="mb-8 flex justify-center">
+          {/* <div className="mb-8 flex justify-center">
             <img
-              src="/images/logo/logo.svg"
+              src="/images/logo/logo.webp"
               alt="Logo"
               className="h-12 w-auto dark:hidden"
             />
             <img
-              src="/images/logo/logo-dark.svg"
+              src="/images/logo/logo.webp"
               alt="Logo"
               className="hidden h-12 w-auto dark:block"
             />
-          </div>
+          </div> */}
 
           {/* Welcome Text */}
           <h1 className="mb-3 text-center text-2xl font-bold text-gray-900 dark:text-white">
-            Welcome to Your Dashboard
+            Welcome to Our Dashboard
           </h1>
           
           <p className="mb-8 text-center text-gray-600 dark:text-gray-300">
@@ -74,7 +74,7 @@ export const SignedOut = () => {
 
           {/* Footer */}
           <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-            &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+            &copy; {new Date().getFullYear()} All rights reserved.
           </p>
         </div>
       </div>
