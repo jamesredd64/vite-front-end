@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:5000/api',
+  BASE_URL: 'https://admin-backend-eta.vercel.app/api',
   ENDPOINTS: {
     USERS: '/users',
     USER_BY_ID: (id: string) => `/users/${encodeURIComponent(id)}`,
