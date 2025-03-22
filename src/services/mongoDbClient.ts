@@ -193,60 +193,36 @@ export const useMongoDbClient = () => {
       });
 
       const headers = await getAuthHeaders();
-      console.log('Authorization Headers:', {
-        ...headers,
-        Authorization: headers.Authorization ? 'Bearer [REDACTED]' : 'Missing'
-      });
-
-      // Ensure proper URL construction
-      const baseUrl = API_CONFIG.BASE_URL.endsWith('/') 
-        ? API_CONFIG.BASE_URL.slice(0, -1) 
-        : API_CONFIG.BASE_URL;
       
-      const checkUrl = `${baseUrl}${API_CONFIG.ENDPOINTS.USER_BY_ID(auth0Id)}`;
-      console.log('Checking existing user at:', checkUrl);
+      // Ensure proper URL construction
+      const baseUrl = `https://${API_CONFIG.BASE_URL}`;
+      const createUrl = `${baseUrl}${API_CONFIG.ENDPOINTS.USERS}`;
+      console.log('Creating user at:', createUrl);
+      
+      const newUserData = {
+        ...userData,
+        auth0Id,
+        createdAt: new Date().toISOString()
+      };
+      console.log('New user payload:', JSON.stringify(newUserData, null, 2));
 
-      const response = await fetch(checkUrl, {
-        headers,
-        method: 'GET'
+      const createResponse = await fetch(createUrl, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUserData)
       });
 
-      // If user not found, create new user
-      if (response.status === 404 || response.headers.get('content-type')?.includes('text/html')) {
-        const createUrl = `${baseUrl}${API_CONFIG.ENDPOINTS.USERS}`;
-        console.log('Creating user at:', createUrl);
-        
-        const newUserData = {
-          ...userData,
-          auth0Id,
-          createdAt: new Date().toISOString()
-        };
-        console.log('New user payload:', JSON.stringify(newUserData, null, 2));
-
-        const createResponse = await fetch(createUrl, {
-          method: 'POST',
-          headers: {
-            ...headers,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(newUserData)
-        });
-
-        if (!createResponse.ok) {
-          throw new Error(`Failed to create user. Status: ${createResponse.status}`);
-        }
-
-        return await createResponse.json();
+      if (!createResponse.ok) {
+        throw new Error(`Failed to create user. Status: ${createResponse.status}`);
       }
 
-      // If user found, return the user data
-      return await response.json();
-
+      return await createResponse.json();
     } catch (error) {
       console.error('Error in checkAndInsertUser:', error);
       throw error;
-    } finally {
-      console.groupEnd();
     }
   };
   
