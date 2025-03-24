@@ -9,38 +9,68 @@ interface UserData {
   email: string;
   name?: string;
   picture?: string;
-  // Add other user fields as needed based on your application's requirements
+}
+
+interface ApiError {
+  message: string;
+  status: number;
 }
 
 export const useApi = () => {
   const { getAccessTokenSilently } = useAuth0();
-
-  // https://admin-backend-eta.vercel.app/api
 
   const getHeaders = async () => {
     const token = await getAccessTokenSilently();
     return {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Origin': window.location.origin
     };
   };
 
-  const saveUser = async (userData: UserData) => {
-    const headers = await getHeaders();
-    const response = await fetch(`${API_URL}/users`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(userData),
-    });
+  const handleResponse = async (response: Response) => {
+    if (!response.ok) {
+      const error: ApiError = {
+        message: await response.text(),
+        status: response.status
+      };
+      throw error;
+    }
     return response.json();
   };
 
+  const saveUser = async (userData: UserData) => {
+    try {
+      const headers = await getHeaders();
+      const response = await fetch(`${API_URL}/users`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(userData),
+        credentials: 'include',
+        mode: 'cors'
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Save user error:', error);
+      throw error;
+    }
+  };
+
   const getUserByEmail = async (email: string) => {
-    const headers = await getHeaders();
-    const response = await fetch(`${API_URL}/users/email/${email}`, {
-      headers,
-    });
-    return response.json();
+    try {
+      const headers = await getHeaders();
+      const response = await fetch(`${API_URL}/users/email/${email}`, {
+        method: 'GET',
+        headers,
+        credentials: 'include',
+        mode: 'cors'
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Get user error:', error);
+      throw error;
+    }
   };
 
   return {
