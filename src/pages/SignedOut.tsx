@@ -21,12 +21,12 @@ export const SignedOut = () => {
           {/* Logo */}
           {/* <div className="mb-8 flex justify-center">
             <img
-              src="/images/logo/logo.webp"
+              src="{`${import.meta.env.VITE_APP_URL}/images/logo/logo-dark.svg`} logo.webp"
               alt="Logo"
               className="h-12 w-auto dark:hidden"
             />
             <img
-              src="/images/logo/logo.webp"
+              src="{`${import.meta.env.VITE_APP_URL}/images/logo/logo-dark.svg`} logo.webp"
               alt="Logo"
               className="hidden h-12 w-auto dark:block"
             />
