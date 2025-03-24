@@ -44,3 +44,4 @@ yarn-error.log*
 # Cache directories
 .cache
 .temp
+.vercel
