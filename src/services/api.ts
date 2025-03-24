@@ -2,8 +2,8 @@ import { useAuth0 } from '@auth0/auth0-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (process.env.NODE_ENV === 'production' 
-    ? 'admin-backend-eta.vercel.app'
-    : 'admin-backend-eta.vercel.app');
+    ? 'https://admin-backend-eta.vercel.app'
+    : 'https://admin-backend-eta.vercel.app');
 
 interface UserData {
   email: string;
@@ -28,7 +28,7 @@ export const useApi = () => {
       'Origin': window.location.origin
     };
   };
-  
+
 
   const handleResponse = async (response: Response) => {
     if (!response.ok) {
