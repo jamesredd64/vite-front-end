@@ -28,6 +28,7 @@ export const useApi = () => {
       'Origin': window.location.origin
     };
   };
+  
 
   const handleResponse = async (response: Response) => {
     if (!response.ok) {
