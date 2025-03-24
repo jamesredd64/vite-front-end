@@ -35,7 +35,7 @@ export const useMongoDbClient = () => {
   const requestInProgress = useRef<boolean>(false);
   // const [userMetadata, setUserMetadata] = useState<UserMetadata | null>(null);
 
-  const getAuthHeaders = useCallback(async () => {
+  const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const token = await getAccessTokenSilently({
       authorizationParams: {
         audience: 'https://dev-uizu7j8qzflxzjpy.us.auth0.com/api/v2/',
@@ -45,21 +45,51 @@ export const useMongoDbClient = () => {
     return {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
     };
   }, [getAccessTokenSilently]);
 
   const getUserById = useCallback(async (auth0Id: string) => {
+    console.group('getUserById Operation');
     try {
       const headers = await getAuthHeaders();
-      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_BY_ID(auth0Id)}`, { headers });
+      const encodedAuth0Id = encodeURIComponent(auth0Id);
+      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_BY_ID(encodedAuth0Id)}`;
+      
+      console.log('Fetching from URL:', url);
+      console.log('Headers:', headers);
+  
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      });
+  
+      console.log('Response status:', response.status);
+  
+      // Handle 204 No Content
+      if (response.status === 204) {
+        console.log('No user found');
+        return null;
+      }
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+  
       const result = await response.json();
-      return result; // Return the full response which includes user data
+      console.log('User data received:', result);
+      return result;
     } catch (error) {
-      console.error('Error checking user existence:', error);
-      return null;  // Return null instead of throwing error
+      console.error('Error in getUserById:', error);
+      throw error;
+    } finally {
+      console.groupEnd();
     }
   }, [getAuthHeaders]);
 
