@@ -2,8 +2,15 @@ import { useAuth0 } from '@auth0/auth0-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 
   (process.env.NODE_ENV === 'production' 
-    ? 'admin-backend-ndo5nentu-jamesredd64s-projects.vercel.app'
+    ? 'admin-backend-eta.vercel.app'
     : 'admin-backend-eta.vercel.app');
+
+interface UserData {
+  email: string;
+  name?: string;
+  picture?: string;
+  // Add other user fields as needed based on your application's requirements
+}
 
 export const useApi = () => {
   const { getAccessTokenSilently } = useAuth0();
@@ -18,7 +25,7 @@ export const useApi = () => {
     };
   };
 
-  const saveUser = async (userData: any) => {
+  const saveUser = async (userData: UserData) => {
     const headers = await getHeaders();
     const response = await fetch(`${API_URL}/users`, {
       method: 'POST',
