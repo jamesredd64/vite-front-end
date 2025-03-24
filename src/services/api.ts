@@ -20,7 +20,12 @@ export const useApi = () => {
   const { getAccessTokenSilently } = useAuth0();
 
   const getHeaders = async () => {
-    const token = await getAccessTokenSilently();
+    const token = await getAccessTokenSilently({
+      authorizationParams: {
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+        scope: 'openid profile email'
+      }
+    });
     return {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -29,11 +34,18 @@ export const useApi = () => {
     };
   };
 
-
   const handleResponse = async (response: Response) => {
     if (!response.ok) {
+      let errorMessage: string;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || 'An error occurred';
+      } catch {
+        errorMessage = await response.text();
+      }
+      
       const error: ApiError = {
-        message: await response.text(),
+        message: errorMessage,
         status: response.status
       };
       throw error;
@@ -41,17 +53,29 @@ export const useApi = () => {
     return response.json();
   };
 
+  const fetchWithConfig = async (url: string, options: RequestInit = {}) => {
+    const headers = await getHeaders();
+    const defaultOptions: RequestInit = {
+      headers,
+      credentials: 'include',
+      mode: 'cors'
+    };
+
+    const response = await fetch(url, {
+      ...defaultOptions,
+      ...options,
+      headers: { ...headers, ...options.headers }
+    });
+
+    return handleResponse(response);
+  };
+
   const saveUser = async (userData: UserData) => {
     try {
-      const headers = await getHeaders();
-      const response = await fetch(`${API_URL}/users`, {
+      return await fetchWithConfig(`${API_URL}/users`, {
         method: 'POST',
-        headers,
-        body: JSON.stringify(userData),
-        credentials: 'include',
-        mode: 'cors'
+        body: JSON.stringify(userData)
       });
-      return handleResponse(response);
     } catch (error) {
       console.error('Save user error:', error);
       throw error;
@@ -60,14 +84,9 @@ export const useApi = () => {
 
   const getUserByEmail = async (email: string) => {
     try {
-      const headers = await getHeaders();
-      const response = await fetch(`${API_URL}/users/email/${email}`, {
-        method: 'GET',
-        headers,
-        credentials: 'include',
-        mode: 'cors'
+      return await fetchWithConfig(`${API_URL}/users/email/${encodeURIComponent(email)}`, {
+        method: 'GET'
       });
-      return handleResponse(response);
     } catch (error) {
       console.error('Get user error:', error);
       throw error;
