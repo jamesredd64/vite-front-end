@@ -180,3 +180,130 @@ TailAdmin React.js Free Version is released under the MIT License.
 ## Support
 
 If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing and maintaining this template.
+
+
+changed image src from 
+// Instead of:
+// <img src="/images/logo/logo-dark.svg" />
+
+// Use:
+<img src={`${import.meta.env.VITE_APP_URL}/images/logo/logo-dark.svg`} />
+
+# Moving Images to back end server
+---
+#### Based on the code excerpts, I see you have several image references in components like ResponsiveImage.tsx, ThreeColumnImageGrid.tsx, and AppHeader.tsx. Here's my recommendation:
+#### For a production environment, it's better to serve static assets like images through your backend for several reasons:
+#### Better asset management and caching
+#### Centralized storage
+#### Ability to implement CDN easily
+#### Better security control
+
+##Here's how to implement this:
+### 1. First, create a static assets route in your backend. Update your backend's vercel.json:
+```
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/images/(.*)",
+      "dest": "/public/images/$1"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "server.js"
+    }
+  ]
+}
+```
+### 2. Move your images from the frontend to a new structure in your backend:
+backend-app/
+└── public/
+    └── images/
+        ├── logo/
+        │   ├── logo-dark.svg
+        │   └── logo.svg
+        └── grid-image/
+            ├── image-01.png
+            ├── image-02.png
+            └── image-03.png
+### 3. Create an images configuration file in your frontend:
+
+```
+src/config
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://admin-backend-eta.vercel.app'
+  : 'http://localhost:5000';
+
+export const getImageUrl = (path: string): string => {
+  return `${API_URL}/images/${path}`;
+};
+```
+
+### 4. Update your components to use the new image URLs. For example:
+
+src/components/ui/images
+ResponsiveImage.tsx - Create New in FE App
+```
+###
+```
+
+```
+ src/layout/AppHeader.tsx
+ import { getImageUrl } from '../config/images.config';
+
+// In your component:
+<Link to="/" className="lg:hidden">
+  <img
+    className="dark:hidden"
+    src={getImageUrl('logo/logo.svg')}
+    alt="Logo"
+  />
+  <img
+    className="hidden dark:block"
+    src={getImageUrl('logo/logo-dark.svg')}
+    alt="Logo"
+  />
+</Link>
+```
+
+## For development environment, add a static file serving middleware to your backend Express app:
+
+```
+const express = require('express');
+const path = require('path');
+const app = express();
+
+// Serve static files from the public directory
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
+```
+
+### 5. Update your environment variables:
+```
+### VITE_API_URL=http://localhost:5000/api
+### VITE_ASSETS_URL=http://localhost:5000
+### VITE_API_URL=https://admin-backend-eta.vercel.app/api
+### VITE_ASSETS_URL=https://admin-backend-eta.vercel.app
+```
+
+## This setup will:
+### Serve images through your backend in both development and production
+### Keep your image assets centralized
+### Make it easier to implement CDN or other optimizations later
+### Maintain consistent URLs across environments
+### Allow for better caching and asset management
+
+## Remember to:
+### Update all image references in your components
+### Test the image loading in both development and production environments
+### Consider implementing image optimization middleware in your backend
+### Set up proper caching headers for static assets

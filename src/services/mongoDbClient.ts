@@ -102,7 +102,7 @@ export const useMongoDbClient = () => {
     name: string;
     firstName: string;
     lastName: string;
-    [key: string]: unknown;  // Allow for additional properties
+    [key: string]: unknown;
   }) => {
     console.group('checkAndInsertUser Operation');
     try {
@@ -113,9 +113,8 @@ export const useMongoDbClient = () => {
 
       const headers = await getAuthHeaders();
       
-      // Ensure proper URL construction
-      const baseUrl = `https://${API_CONFIG.BASE_URL}`;
-      const createUrl = `${baseUrl}${API_CONFIG.ENDPOINTS.USERS}`;
+      // Fixed URL construction
+      const createUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`;
       console.log('Creating user at:', createUrl);
       
       const newUserData = {
