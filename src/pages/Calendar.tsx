@@ -131,6 +131,7 @@ const Calendar = () => {
     const endDate = event.end ? new Date(event.end) : startDate;
     
     // For multi-day events, subtract one day from end date for display in form
+    // eslint-disable-next-line prefer-const
     let adjustedEndDate = new Date(endDate);
     if (endDate > startDate) {
       adjustedEndDate.setDate(adjustedEndDate.getDate() - 1);
