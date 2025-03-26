@@ -21,7 +21,7 @@ export default function AuthLayout({
                 <img
                   width={231}
                   height={48}
-                  src="/images/logo/auth-logo.svg"
+                  src="{`${import.meta.env.VITE_APP_URL}/images/logo/logo-dark.svg`} auth-logo.svg"
                   alt="Logo"
                 />
               </Link>
