@@ -1,0 +1,29 @@
+/* Calendar event colors */
+.bg-primary {
+  background-color: #3788d8;
+}
+
+.bg-success {
+  background-color: #28a745;
+}
+
+.bg-danger {
+  background-color: #dc3545;
+}
+
+.bg-warning {
+  background-color: #ffc107;
+}
+
+/* Make calendar events more visible */
+.fc-event {
+  cursor: pointer;
+  padding: 2px;
+  margin: 1px 0;
+}
+
+.fc-event-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

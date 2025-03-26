@@ -1,0 +1,64 @@
+{
+    "events": [
+      {
+        "auth0Id": "auth0|67bb70c5eedb5c4b0ea1ec93",
+        "title": "Strategic Planning Meeting",
+        "start": "2024-03-25T09:00:00.000Z",
+        "end": "2024-03-25T11:00:00.000Z",
+        "allDay": false,
+        "extendedProps": {
+          "calendar": "primary",
+          "description": "Q2 2024 strategic planning session with leadership team",
+          "location": "Conference Room A"
+        }
+      },
+      {
+        "auth0Id": "auth0|67bb70c5eedb5c4b0ea1ec93",
+        "title": "Product Launch",
+        "start": "2024-03-28T00:00:00.000Z",
+        "end": "2024-03-28T23:59:59.999Z",
+        "allDay": true,
+        "extendedProps": {
+          "calendar": "success",
+          "description": "Official launch of new product line XYZ",
+          "location": "Main Auditorium"
+        }
+      },
+      {
+        "auth0Id": "auth0|67bb70c5eedb5c4b0ea1ec93",
+        "title": "System Maintenance Window",
+        "start": "2024-03-30T22:00:00.000Z",
+        "end": "2024-03-31T02:00:00.000Z",
+        "allDay": false,
+        "extendedProps": {
+          "calendar": "danger",
+          "description": "Critical system updates and maintenance",
+          "location": "Server Room"
+        }
+      },
+      {
+        "auth0Id": "auth0|67bb70c5eedb5c4b0ea1ec93",
+        "title": "Budget Review",
+        "start": "2024-04-01T14:00:00.000Z",
+        "end": "2024-04-01T16:00:00.000Z",
+        "allDay": false,
+        "extendedProps": {
+          "calendar": "warning",
+          "description": "Monthly budget review and forecast discussion",
+          "location": "Finance Department"
+        }
+      },
+      {
+        "auth0Id": "auth0|67bb70c5eedb5c4b0ea1ec93",
+        "title": "Team Training Day",
+        "start": "2024-04-03T09:00:00.000Z",
+        "end": "2024-04-03T17:00:00.000Z",
+        "allDay": true,
+        "extendedProps": {
+          "calendar": "primary",
+          "description": "Full-day team training on new technologies",
+          "location": "Training Center"
+        }
+      }
+    ]
+  }

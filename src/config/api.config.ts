@@ -1,8 +1,15 @@
 import UserMetadata from '../types/user';
 import { useApi } from '../services/api.service';
 
+export const getApiUrl = () => {
+  if (import.meta.env.DEV) {
+    return 'http://localhost:5000';
+  }
+  return import.meta.env.VITE_API_URL;
+};
+
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || 'https://admin-backend-eta.vercel.app',
+  BASE_URL: getApiUrl(),
   ENDPOINTS: {
     USERS: '/api/users',
     USER_BY_ID: (id: string) => `/api/users/${encodeURIComponent(id)}`,

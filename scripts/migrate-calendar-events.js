@@ -1,34 +1,57 @@
+require('dotenv').config();
 const { MongoClient } = require('mongodb');
 
-const uri = 'mongodb+srv://jredd2013:X9iwELRRwqCCb7kc@mern-cluster.oistpfp.mongodb.net/?retryWrites=true&w=majority';
-const dbName = 'your_database_name'; // Replace with your database name
+const uri = process.env.MONGODB_URI;
+if (!uri) {
+    console.error('MONGODB_URI environment variable is not set');
+    process.exit(1);
+}
 
 async function migrateCalendarEvents() {
     const client = new MongoClient(uri);
     
     try {
         await client.connect();
-        console.log('mongo-users-react');
-        const db = client.db(dbName);
+        console.log('Connected to MongoDB');
+        const db = client.db();
         const collection = db.collection('calendar_events');
 
-        // Perform the migration
+        // First, add auth0Id field based on existing userId
         const result = await collection.updateMany(
-            { auth0Id: { $exists: false } },
+            { 
+                userId: { $exists: true },
+                auth0Id: { $exists: false }  // Only update documents without auth0Id
+            },
             [
                 { 
-                    $addFields: { 
-                        auth0Id: "$userId"
-                    } 
+                    $set: { 
+                        auth0Id: {
+                            $cond: {
+                                if: { $regexMatch: { input: "$userId", regex: /^auth0\|/ } },
+                                then: "$userId",
+                                else: { $concat: ["auth0|", "$userId"] }
+                            }
+                        }
+                    }
                 }
             ]
         );
 
-        console.log(`Modified ${result.modifiedCount} documents`);
+        console.log(`Added auth0Id to ${result.modifiedCount} documents`);
 
         // Verify the migration
-        const verificationResults = await collection.find({}, { projection: { auth0Id: 1, userId: 1 } }).limit(5).toArray();
-        console.log('Sample of updated documents:', verificationResults);
+        const verificationResults = await collection.find({}, { 
+            projection: { 
+                userId: 1,
+                auth0Id: 1
+            } 
+        }).limit(5).toArray();
+        
+        console.log('Sample of updated documents:', JSON.stringify(verificationResults, null, 2));
+
+        // Optional: Create an index on auth0Id
+        await collection.createIndex({ auth0Id: 1 });
+        console.log('Created index on auth0Id field');
 
     } catch (error) {
         console.error('Error during migration:', error);

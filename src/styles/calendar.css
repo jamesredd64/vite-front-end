@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* Calendar Events */
+  .calendar-event {
+    @apply rounded-md border px-2 py-1 text-white;
+  }
+
+  .calendar-event-primary {
+    @apply bg-brand-500 border-brand-600;
+  }
+
+  .calendar-event-success {
+    @apply bg-success-500 border-success-600;
+  }
+
+  .calendar-event-danger {
+    @apply bg-error-500 border-error-600;
+  }
+
+  .calendar-event-warning {
+    @apply bg-warning-500 border-warning-600;
+  }
+
+  /* Make calendar events more visible */
+  .fc-event {
+    cursor: pointer !important;
+    padding: 2px !important;
+    margin: 1px 0 !important;
+  }
+
+  .fc-event-title {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Override FullCalendar's default styles */
+  .fc .fc-event-main {
+    padding: 2px 4px !important;
+  }
+
+  .fc .fc-daygrid-event {
+    white-space: nowrap !important;
+    border-radius: 4px !important;
+    margin: 1px 2px !important;
+  }
+
+  /* Radio button colors */
+  .bg-primary {
+    @apply bg-brand-500;
+  }
+
+  .bg-success {
+    @apply bg-success-500;
+  }
+
+  .bg-danger {
+    @apply bg-error-500;
+  }
+
+  .bg-warning {
+    @apply bg-warning-500;
+  }
+
+  .border-primary {
+    @apply border-brand-500;
+  }
+
+  .border-success {
+    @apply border-success-500;
+  }
+
+  .border-danger {
+    @apply border-error-500;
+  }
+
+  .border-warning {
+    @apply border-warning-500;
+  }
+
+  /* FullCalendar Overrides */
+  .fc .fc-daygrid-day-frame {
+    @apply min-h-[100px];
+  }
+
+  .fc .fc-daygrid-event {
+    @apply mb-1 whitespace-nowrap;
+  }
+
+  .fc-direction-ltr .fc-daygrid-event.fc-event-start {
+    @apply mr-0;
+  }
+
+  .fc-direction-ltr .fc-daygrid-event.fc-event-end {
+    @apply ml-0;
+  }
+
+  .fc-event-time {
+    @apply hidden;
+  }
+
+  .fc-event-title {
+    @apply block truncate px-1 text-sm font-medium;
+  }
+
+  /* Make events more visible */
+  .fc-daygrid-event-harness {
+    @apply mx-1;
+  }
+
+  /* Context Menu Styles */
+  .context-menu {
+    @apply border border-gray-200 shadow-lg;
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 rounded-full;
+  }
+
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-700;
+  }
+}
+
+
+
+
+
+

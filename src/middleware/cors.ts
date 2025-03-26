@@ -1,8 +1,6 @@
-// Import the CORS lib code you provided here
-// ... [CORS lib code] ...
+import cors from 'cors';
 
-// Create a configured CORS middleware instance
-export const corsMiddleware = initCors({
+export const corsMiddleware = cors({
   origin: [
     'http://localhost:3000',
     'http://localhost:5173',
@@ -10,7 +8,7 @@ export const corsMiddleware = initCors({
     'https://vite-front-end.vercel.app',
     'https://admin-backend-eta.vercel.app'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Added PATCH
   allowedHeaders: [
     'X-CSRF-Token',
     'X-Requested-With',
@@ -26,3 +24,4 @@ export const corsMiddleware = initCors({
   credentials: true,
   maxAge: 86400 // 24 hours
 });
+

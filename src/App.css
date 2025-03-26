@@ -1,0 +1,9 @@
+img[alt="Logo"] {
+  width: 250px !important;  height: 250px !important;
+  object-fit: contain !important;  max-width: 250px !important;
+  max-height: 250px !important;
+}
+
+
+
+

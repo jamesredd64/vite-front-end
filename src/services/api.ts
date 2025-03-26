@@ -1,9 +1,8 @@
 import { useAuth0 } from '@auth0/auth0-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 
-  (process.env.NODE_ENV === 'production' 
-    ? 'https://admin-backend-eta.vercel.app'
-    : 'https://admin-backend-eta.vercel.app');
+const API_URL = import.meta.env.DEV 
+  ? 'http://localhost:5000'
+  : import.meta.env.VITE_API_URL;
 
 interface UserData {
   email: string;
