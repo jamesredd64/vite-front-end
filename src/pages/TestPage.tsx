@@ -226,7 +226,7 @@ const UserProfile = () => {
     event.preventDefault();
     try {
       const transformedData: Partial<UserMetadata> = {
-        auth0Id: userData.auth0Id,
+        // auth0Id: userData.auth0Id,
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
@@ -377,9 +377,6 @@ const UserProfile = () => {
 
 export default UserProfile;
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 314cf83a350f080bb1aecec35652ef7f2ca4930a
 
 

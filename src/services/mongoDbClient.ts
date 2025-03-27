@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import  UserMetadata  from '../types/user';
 import { API_CONFIG } from '../config/api.config';
-
+import { CalendarEvent, CalendarApiResponse } from '../types/calendar.types';
 
 // const MAX_RETRIES = 2;
 // const RETRY_DELAY = 1000;
@@ -19,17 +19,6 @@ const TIMEOUT = 5000; // 5 seconds timeout
 interface ApiError {
   message: string;
   status?: number;
-}
-
-interface CalendarEvent {
-  id: string;
-  title: string;
-  start: string;
-  end?: string;
-  allDay?: boolean;
-  extendedProps: {
-    calendar: string;
-  };
 }
 
 // const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -270,42 +259,75 @@ export const useMongoDbClient = () => {
     }
   }, [getAccessTokenSilently]);
 
-  const fetchCalendarEvents = useCallback(async (userId: string) => {
-    console.group('Fetching Calendar Events');
+  const fetchCalendarEvents = useCallback(async (userId: string): Promise<CalendarEvent[]> => {
     try {
-      // Ensure we're using the full auth0 ID format
       const auth0Id = userId.startsWith('auth0|') ? userId : `auth0|${userId}`;
-      console.log('Fetching events for auth0Id:', auth0Id);
-      
       const response = await fetch(
         `${API_CONFIG.BASE_URL}/api/calendar/${auth0Id}`,
         {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' }
         }
       );
 
-      console.log('Calendar API Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        url: response.url,
-        headers: Object.fromEntries(response.headers.entries())
-      });
-      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const events = await response.json();
-      console.log('Fetched calendar events:', events);
-      return events as CalendarEvent[];
+      const data = await response.json();
+      return data;
     } catch (error) {
-      console.error('Error fetching calendar events:', error);
-      throw error;
-    } finally {
-      console.groupEnd();
+      throw error instanceof Error ? error : new Error('Failed to fetch events');
+    }
+  }, []);
+
+  const createCalendarEvent = useCallback(async (eventData: Omit<CalendarEvent, 'id'>): Promise<CalendarEvent> => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/api/calendar`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(eventData)
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: CalendarApiResponse = await response.json();
+      if (!data.event) {
+        throw new Error('No event data returned');
+      }
+      return data.event;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('Failed to create event');
+    }
+  }, []);
+
+  const updateCalendarEvent = useCallback(async (eventId: string, eventData: Partial<CalendarEvent>): Promise<CalendarEvent> => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/api/calendar/${eventId}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(eventData)
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: CalendarApiResponse = await response.json();
+      if (!data.event) {
+        throw new Error('No event data returned');
+      }
+      return data.event;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('Failed to update event');
     }
   }, []);
 
@@ -317,7 +339,9 @@ export const useMongoDbClient = () => {
     getUserById, 
     checkAndInsertUser, 
     saveUserData,
-    fetchCalendarEvents
+    fetchCalendarEvents,
+    createCalendarEvent,
+    updateCalendarEvent
   };
 }; 
   

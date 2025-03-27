@@ -10,7 +10,7 @@ import PageMeta from "../components/common/PageMeta";
 // import ChevronLeftIcon from '../icons/chevron-left.svg?react';
 // import ChevronRightIcon from '../icons/chevron-right.svg?react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useMongoDbClient } from '../services/mongoDbClient';
+import { useMongoDbClient } from "../services/mongoDbClient";
 
 interface CalendarEvent extends EventInput {
   extendedProps: {
@@ -20,7 +20,7 @@ interface CalendarEvent extends EventInput {
 
 const Calendar: React.FC = () => {
   const { user } = useAuth0();
-  const { fetchCalendarEvents } = useMongoDbClient();
+  const { fetchCalendarEvents, createCalendarEvent, updateCalendarEvent } = useMongoDbClient();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
@@ -42,41 +42,22 @@ const Calendar: React.FC = () => {
 
   useEffect(() => {
     const loadEvents = async () => {
+      console.log('Starting loadEvents function');
       if (!user?.sub) {
         console.log('No user ID available');
         return;
       }
+      console.log('Loading events for user:', user.sub);
 
       try {
-        console.log('Attempting to fetch calendar events for user:', user.sub);
+        console.log('Fetching calendar events...');
         const fetchedEvents = await fetchCalendarEvents(user.sub);
-        console.log('Successfully fetched events:', fetchedEvents);
+        console.log('Successfully fetched events:', fetchedEvents.length);
+        console.log('Event data:', fetchedEvents);
         setEvents(fetchedEvents);
       } catch (err) {
         console.error('Failed to fetch calendar events:', err);
         setError(err instanceof Error ? err.message : 'Failed to load events');
-        // Fallback to demo events if fetch fails
-        setEvents([
-          {
-            id: "1",
-            title: "Event Conf.",
-            start: new Date().toISOString().split("T")[0],
-            extendedProps: { calendar: "Danger" },
-          },
-          {
-            id: "2",
-            title: "Meeting",
-            start: new Date(Date.now() + 86400000).toISOString().split("T")[0],
-            extendedProps: { calendar: "Success" },
-          },
-          {
-            id: "3",
-            title: "Workshop",
-            start: new Date(Date.now() + 172800000).toISOString().split("T")[0],
-            end: new Date(Date.now() + 259200000).toISOString().split("T")[0],
-            extendedProps: { calendar: "Primary" },
-          },
-        ]);
       }
     };
 
@@ -85,72 +66,134 @@ const Calendar: React.FC = () => {
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     resetModalFields();
-    setEventStartDate(selectInfo.startStr);
-    setEventEndDate(selectInfo.endStr || selectInfo.startStr);
+    const startDate = selectInfo.startStr;
+    setEventStartDate(startDate);
+    
+    // Set end date to the next day for new events
+    const endDate = new Date(selectInfo.startStr);
+    endDate.setDate(endDate.getDate() + 1);
+    setEventEndDate(endDate.toISOString().split('T')[0]);
+    
     openModal();
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const event = clickInfo.event;
+    console.log('Clicked event data:', event); // Add logging to see full event data
+    
     setSelectedEvent(event as unknown as CalendarEvent);
     setEventTitle(event.title);
     
-    // For existing events, we need to subtract one day from the end date
-    // to show the correct date in the modal
-    const startDate = event.start?.toISOString().split("T")[0] || "";
+    // Handle start date
+    const startDate = event.start ? event.start.toISOString().split('T')[0] : event.startStr.split('T')[0];
     setEventStartDate(startDate);
     
-    if (event.end) {
-      const endDate = new Date(event.end);
-      endDate.setDate(endDate.getDate() - 1); // Subtract one day for display
-      setEventEndDate(endDate.toISOString().split("T")[0]);
-    } else {
-      setEventEndDate(startDate);
-    }
+    // Handle end date
+    const endDate = event.end ? event.end.toISOString().split('T')[0] : event.endStr.split('T')[0];
+    setEventEndDate(endDate);
     
     setEventLevel(event.extendedProps.calendar);
     openModal();
   };
 
-  const handleAddOrUpdateEvent = () => {
-    if (selectedEvent) {
-      // Update existing event
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.id === selectedEvent.id
-            ? {
-                ...event,
-                title: eventTitle,
-                start: eventStartDate,
-                // Fix the date handling
-                end: (() => {
-                  const endDate = new Date(eventEndDate + 'T00:00:00');
-                  endDate.setDate(endDate.getDate() + 1);
-                  return endDate.toISOString().split("T")[0];
-                })(),
-                extendedProps: { calendar: eventLevel },
-              }
-            : event
-        )
-      );
-    } else {
-      // Add new event
-      const adjustedEndDate = new Date(eventEndDate + 'T00:00:00');
-      adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
-      const endDateStr = adjustedEndDate.toISOString().split('T')[0];
+  const handleAddOrUpdateEvent = async () => {
+    console.log('Starting handleAddOrUpdateEvent');
+    console.log('Current form values:', {
+      eventTitle,
+      eventStartDate,
+      eventEndDate,
+      eventLevel,
+      selectedEvent: selectedEvent ? selectedEvent.id : 'none'
+    });
 
-      const newEvent: CalendarEvent = {
-        id: Date.now().toString(),
-        title: eventTitle,
-        start: eventStartDate,
-        end: endDateStr,
-        allDay: true,
-        extendedProps: { calendar: eventLevel },
-      };
-      setEvents((prevEvents) => [...prevEvents, newEvent]);
+    if (!user?.sub) {
+      console.error('No user ID available');
+      return;
     }
-    closeModal();
-    resetModalFields();
+
+    try {
+      const createEventData = (date: string) => {
+        const utcDate = new Date(Date.UTC(
+          new Date(date).getUTCFullYear(),
+          new Date(date).getUTCMonth(),
+          new Date(date).getUTCDate(),
+          0, 0, 0, 0
+        ));
+        console.log(`Converting start date ${date} to UTC:`, utcDate.toISOString());
+        return utcDate.toISOString();
+      };
+
+      const createEndDate = (date: string) => {
+        const utcDate = new Date(Date.UTC(
+          new Date(date).getUTCFullYear(),
+          new Date(date).getUTCMonth(),
+          new Date(date).getUTCDate(),
+          23, 59, 59, 999
+        ));
+        console.log(`Converting end date ${date} to UTC:`, utcDate.toISOString());
+        return utcDate.toISOString();
+      };
+
+      if (selectedEvent) {
+        console.log('Updating existing event:', selectedEvent.id);
+        const updatedEventData = {
+          title: eventTitle,
+          start: createEventData(eventStartDate),
+          end: createEndDate(eventEndDate),
+          allDay: true,
+          auth0Id: user.sub,
+          extendedProps: { 
+            calendar: eventLevel as 'primary' | 'success' | 'danger' | 'warning'
+          }
+        };
+        console.log('Updated event data:', updatedEventData);
+
+        if (!selectedEvent.id) {
+          throw new Error('Event ID is missing');
+        }
+        await updateCalendarEvent(selectedEvent.id, updatedEventData);
+        console.log('Event updated successfully');
+
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.id === selectedEvent.id
+              ? {
+                  ...event,
+                  ...updatedEventData
+                }
+              : event
+          )
+        );
+      } else {
+        console.log('Creating new event');
+        const newEventData = {
+          title: eventTitle,
+          start: createEventData(eventStartDate),
+          end: createEndDate(eventEndDate),
+          allDay: true,
+          auth0Id: user.sub,
+          extendedProps: {
+            calendar: eventLevel as 'primary' | 'success' | 'danger' | 'warning'
+          }
+        };
+        console.log('New event data:', newEventData);
+
+        const savedEvent = await createCalendarEvent(newEventData);
+        console.log('Event created successfully:', savedEvent);
+
+        setEvents((prevEvents) => [...prevEvents, {
+          ...newEventData,
+          id: savedEvent.id
+        }]);
+      }
+
+      console.log('Closing modal and resetting fields');
+      closeModal();
+      resetModalFields();
+    } catch (error) {
+      console.error('Failed to save event:', error);
+      setError(error instanceof Error ? error.message : 'Failed to save event');
+    }
   };
 
   const resetModalFields = () => {
@@ -220,6 +263,17 @@ const Calendar: React.FC = () => {
               today: 'Today'
             }}
             bootstrapFontAwesome={false}
+            timeZone="UTC"
+            slotMinTime="00:00:00"
+            slotMaxTime="24:00:00"
+            dayMaxEvents={true}
+            nextDayThreshold="00:00:00"
+            displayEventEnd={true}
+            eventTimeFormat={{
+              hour: 'numeric',
+              minute: '2-digit',
+              meridiem: 'short'
+            }}
           />
         </div>
         <Modal

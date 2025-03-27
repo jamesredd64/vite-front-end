@@ -9,11 +9,9 @@ import UserMetadata from "../../types/user";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-<<<<<<< HEAD
-  const { logout, getIdTokenClaims, user } = useAuth0();
-=======
-  const { logout, user } = useAuth0(); // Add user here
->>>>>>> 314cf83a350f080bb1aecec35652ef7f2ca4930a
+
+  const { logout,  user } = useAuth0();
+
   const [userMetadata] = useGlobalStorage<UserMetadata | null>(
     "userMetadata",
     null
