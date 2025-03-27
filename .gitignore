@@ -22,7 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
+fe-saved
 # Security and Environment
 .env
 .env.local
@@ -45,3 +45,47 @@ yarn-error.log*
 .cache
 .temp
 .vercel
+
+# Development and backup directories
+_Dev/
+**/fe-saved/
+**/_Dev/
+**/vite-frontend/
+
+# Specific backup patterns
+fe-saved/
+fe-saved*/
+**/fe-saved/**
+repo-backup/
+repo-backup*/
+
+# Test and development files
+*.test.tsx
+*.test.ts
+test.tsx
+TestPage.tsx
+TestMongoDB.tsx
+
+# VS Code workspace settings
+.vscode/*
+!.vscode/extensions.json
+*.code-workspace
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Build and cache directories
+dist/
+build/
+.vercel/
+.cache/
+.temp/
+
+# If these files are already tracked, run:
+# git rm -r --cached _Dev/
+# git rm -r --cached fe-saved/
