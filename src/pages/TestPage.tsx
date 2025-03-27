@@ -377,5 +377,9 @@ const UserProfile = () => {
 
 export default UserProfile;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 314cf83a350f080bb1aecec35652ef7f2ca4930a
 
 

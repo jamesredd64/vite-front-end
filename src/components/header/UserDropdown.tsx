@@ -6,26 +6,23 @@ import React from "react";
 import { useGlobalStorage } from "../../hooks/useGlobalStorage";
 import UserMetadata from "../../types/user";
 
-type BackgroundType = "brand" | "success" | "error" | "warning" | "gray";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+<<<<<<< HEAD
   const { logout, getIdTokenClaims, user } = useAuth0();
+=======
+  const { logout, user } = useAuth0(); // Add user here
+>>>>>>> 314cf83a350f080bb1aecec35652ef7f2ca4930a
   const [userMetadata] = useGlobalStorage<UserMetadata | null>(
     "userMetadata",
     null
   );
 
-  const backgroundColors = {
-    brand: "bg-brand-50",
-    success: "bg-success-50",
-    error: "bg-error-50",
-    warning: "bg-warning-50",
-    gray: "bg-gray-50",
-  } as const;
+
 
   // Use the background color - defaulting to 'gray' if not specified
-  const backgroundClass = backgroundColors["gray" as BackgroundType];
+  // const backgroundClass = backgroundColors["gray" as BackgroundType];
 
   // Display name logic - use metadata first, fallback to Auth0 user info
   const displayName = useMemo(() => {
