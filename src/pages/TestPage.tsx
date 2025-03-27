@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { UserInfoCard } from "../components/UserProfile/UserInfoCard";
+// import { UserInfoCard } from "../components/UserProfile/UserInfoCard";
 import { UserMetaCard } from "../components/UserProfile/UserMetaCard";
 import { UserAddressCard } from "../components/UserProfile/UserAddressCard";
 import { UserMarketingCard } from "../components/UserProfile/UserMarketingCard";
@@ -377,9 +377,7 @@ const UserProfile = () => {
 
 export default UserProfile;
 
-function getUserById(sub: any) {
-  throw new Error("Function not implemented.");
-}
+
 
 // import React, { useState, useEffect } from 'react';
 // import { useAuth0 } from '@auth0/auth0-react';
