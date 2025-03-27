@@ -1,6 +1,6 @@
 interface UserMetadata {
-  auth0Id: string;
   email: string;
+  profilePictureUrl?: string;
   firstName: string;
   lastName: string;
   name: string;

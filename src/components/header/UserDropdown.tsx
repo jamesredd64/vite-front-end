@@ -10,7 +10,7 @@ type BackgroundType = "brand" | "success" | "error" | "warning" | "gray";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { logout, getIdTokenClaims, user } = useAuth0(); // Add user here
+  const { logout, getIdTokenClaims, user } = useAuth0();
   const [userMetadata] = useGlobalStorage<UserMetadata | null>(
     "userMetadata",
     null
@@ -31,17 +31,13 @@ export default function UserDropdown() {
   const displayName = useMemo(() => {
     return userMetadata?.email || user?.email || user?.name || "Guest";
   }, [userMetadata?.email, user?.email, user?.name]);
+
+  // Fixed profile picture logic to handle undefined paths safely
   const profilePicture = useMemo(() => {
-    try {
-      return (
-        user?.picture ||
-        userMetadata?.profile.profilePictureUrl ||
-        "/icons/default-avatar.png"
-      );
-    } catch {
-      return "/icons/default-avatar.png";
-    }
-  }, [user?.picture, userMetadata?.profile.profilePictureUrl]);
+    if (user?.picture) return user.picture;
+    if (userMetadata?.profilePictureUrl) return userMetadata.profilePictureUrl;
+    return "/icons/default-avatar.png";
+  }, [user?.picture, userMetadata?.profilePictureUrl]);
 
   const toggleDropdown = (e: React.MouseEvent) => {
     e.stopPropagation();
