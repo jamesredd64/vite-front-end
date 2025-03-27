@@ -44,19 +44,19 @@ const Header: React.FC<HeaderProps> = ({  }) => {
           <Link to="/" className="lg:hidden">
             <img
               className="dark:hidden"
-              src="{`${import.meta.env.VITE_APP_URL}{`${import.meta.env.VITE_APP_URL}/images/logo/logo-dark.svg`}"
+              src="/images/logo/logo.svg"
               alt="Logo"
-              width="125 !important"
-              height="125 !important"
-              style={{ width: '250px !important', height: '250px !important' }}
+              width="125"
+              height="125"
+              style={{ width: '250px', height: '250px' }}
             />
             <img
               className="hidden dark:block"
-              src="{`${import.meta.env.VITE_APP_URL}{`${import.meta.env.VITE_APP_URL}/images/logo/logo-dark.svg`}"
+              src="/images/logo/logo-dark.svg"
               alt="Logo"
-              width="125 !important"
-              height="125 !important"
-              style={{ width: '250px !important', height: '250px !important' }}
+              width="125"
+              height="125"
+              style={{ width: '250px', height: '250px' }}
             />
           </Link>
 
