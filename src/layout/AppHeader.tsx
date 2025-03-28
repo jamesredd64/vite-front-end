@@ -1,4 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+// import { useAuth0 } from "@auth0/auth0-react";
+import { useSearch } from "../context/SearchContext";
+import { useCalendar } from '../context/CalendarContext';
+import { useNavigate } from "react-router-dom";
 
 import { Link } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
@@ -7,7 +11,87 @@ import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
 
+// interface SearchResult {
+//   id: string;
+//   title: string;
+//   type: 'event';
+//   url: string;
+//   start?: string;
+//   end?: string;
+//   extendedProps: Record<string, unknown>;
+// }
+
 const AppHeader: React.FC = () => {
+  // const { user } = useAuth0();
+  const { searchQuery, setSearchQuery, searchResults, setSearchResults } = useSearch();
+  const navigate = useNavigate();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const { events } = useCalendar(); // This is already correctly imported
+
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const searchTerm = query.trim().toLowerCase();
+      console.log('Searching for:', searchTerm);
+      console.log('Total events available in context:', events.length);
+      
+      const filteredEvents = events.filter((event) => {
+        const title = (event.title || '').toLowerCase();
+        const description = (event.extendedProps?.description || '').toLowerCase();
+        const isMatch = title.includes(searchTerm) || description.includes(searchTerm);
+        if (isMatch) {
+          console.log('Found matching event:', event.title);
+        }
+        return isMatch;
+      });
+      
+      console.log('Filtered events:', filteredEvents);
+      const formattedResults = filteredEvents.map(event => ({
+        id: event.id,
+        title: event.title,
+        type: 'event' as const, // Add type assertion to ensure it matches SearchResult type
+        url: `/calendar/${event.id}`,
+        start: event.start,
+        end: event.end,
+        extendedProps: event.extendedProps
+      }));
+      setSearchResults(formattedResults);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const query = e.target.value;
+  //   setSearchQuery(query);
+  //   handleSearch(query); // Search on each keystroke
+  // };
+
+  const handleResultClick = (eventId: string) => {
+    console.log('Navigating to event:', eventId); // Add logging
+    
+    // Navigate to calendar page with the selected event
+    navigate('/calendar', { 
+      state: { 
+        selectedEventId: eventId,
+        scrollToEvent: true
+      } 
+    });
+    
+    // Clear the search
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -24,22 +108,37 @@ const AppHeader: React.FC = () => {
     setApplicationMenuOpen(!isApplicationMenuOpen);
   };
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (searchQuery.trim() && searchResults.length > 0) {
+      // Navigate to the first matching result
+      handleResultClick(searchResults[0].id);
+    }
+  };
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
-        event.preventDefault();
-        inputRef.current?.focus();
+  const handleSearchClick = () => {
+    if (searchQuery.trim()) {
+      handleSearch(searchQuery);
+      if (searchResults.length > 0) {
+        handleResultClick(searchResults[0].id);
       }
-    };
+    }
+  };
 
-    document.addEventListener("keydown", handleKeyDown);
+  // useEffect(() => {
+  //   const handleKeyDown = (event: KeyboardEvent) => {
+  //     if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+  //       event.preventDefault();
+  //       inputRef.current?.focus();
+  //     }
+  //   };
 
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+  //   document.addEventListener("keydown", handleKeyDown);
+
+  //   return () => {
+  //     document.removeEventListener("keydown", handleKeyDown);
+  //   };
+  // }, []);
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -117,12 +216,11 @@ const AppHeader: React.FC = () => {
             </svg>
           </button>
 
-          <div className="hidden lg:block">
-            <form>
+          <div className="hidden lg:block relative">
+            <form onSubmit={handleSubmit} className="relative">
               <div className="relative">
-                <span className="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2">
                   <svg
-                    className="fill-gray-500 dark:fill-gray-400"
                     width="20"
                     height="20"
                     viewBox="0 0 20 20"
@@ -130,8 +228,6 @@ const AppHeader: React.FC = () => {
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
                       d="M3.04175 9.37363C3.04175 5.87693 5.87711 3.04199 9.37508 3.04199C12.8731 3.04199 15.7084 5.87693 15.7084 9.37363C15.7084 12.8703 12.8731 15.7053 9.37508 15.7053C5.87711 15.7053 3.04175 12.8703 3.04175 9.37363ZM9.37508 1.54199C5.04902 1.54199 1.54175 5.04817 1.54175 9.37363C1.54175 13.6991 5.04902 17.2053 9.37508 17.2053C11.2674 17.2053 13.003 16.5344 14.357 15.4176L17.177 18.238C17.4699 18.5309 17.9448 18.5309 18.2377 18.238C18.5306 17.9451 18.5306 17.4703 18.2377 17.1774L15.418 14.3573C16.5365 13.0033 17.2084 11.2669 17.2084 9.37363C17.2084 5.04817 13.7011 1.54199 9.37508 1.54199Z"
                       fill=""
                     />
@@ -140,16 +236,73 @@ const AppHeader: React.FC = () => {
                 <input
                   ref={inputRef}
                   type="text"
-                  placeholder="Search or type command..."
-                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]"
+                  placeholder="Search events..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    const query = e.target.value;
+                    setSearchQuery(query);
+                    // Removed handleSearch(query) from here
+                  }}
+                  className="w-full pl-12 pr-24 py-3 bg-transparent border border-gray-200 rounded-lg outline-none focus:border-primary dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
                 />
-
-                <button className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
-                  <span> ⌘ </span>
-                  <span> K </span>
-                </button>
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSearchClick}
+                    className="inline-flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                    aria-label="Search"
+                  >
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M19.707 18.293l-4.825-4.825a8.5 8.5 0 1 0-1.414 1.414l4.825 4.825a1 1 0 0 0 1.414-1.414zM2 8.5a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0z"
+                      />
+                    </svg>
+                  </button>
+                  <button 
+                    type="button" 
+                    className="inline-flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400"
+                  >
+                    <span>⌘</span>
+                    <span>K</span>
+                  </button>
+                </div>
               </div>
             </form>
+
+            {/* Search Results Dropdown */}
+            {isSearching ? (
+              <div className="absolute top-full left-0 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+                <div className="p-4 text-center text-gray-500">
+                  Searching...
+                </div>
+              </div>
+            ) : searchResults.length > 0 && (
+              <div className="absolute top-full left-0 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+                {searchResults.map((result) => (
+                  <button
+                    key={result.id}
+                    onClick={() => handleResultClick(result.id)}
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <div className="font-medium text-gray-900 dark:text-gray-100">
+                      {result.title}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {result.start 
+                        ? new Date(result.start).toLocaleDateString() 
+                        : 'No date'
+                      }
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         <div

@@ -12,6 +12,8 @@ import PageMeta from "../components/common/PageMeta";
 import { useAuth0 } from '@auth0/auth0-react';
 import { useMongoDbClient } from "../services/mongoDbClient";
 import Toast from "../components/ui/Toast";
+import { useLocation } from 'react-router-dom';
+import { useCalendar } from "../context/CalendarContext";
 
 interface CalendarEvent extends EventInput {
   extendedProps: {
@@ -22,7 +24,8 @@ interface CalendarEvent extends EventInput {
 const Calendar: React.FC = () => {
   const { user } = useAuth0();
   const { fetchCalendarEvents, createCalendarEvent, updateCalendarEvent } = useMongoDbClient();
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const { setEvents } = useCalendar(); // Add this line to get the context setter
+  const [localEvents, setLocalEvents] = useState<CalendarEvent[]>([]); // Rename to localEvents
   const [error, setError] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
@@ -34,6 +37,50 @@ const Calendar: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
   const { isOpen, openModal, closeModal } = useModal();
+  const location = useLocation();
+  
+  // Add this useEffect to handle navigation to specific events
+  useEffect(() => {
+    const state = location.state as { selectedEventId?: string; scrollToEvent?: boolean };
+    if (state?.selectedEventId && state?.scrollToEvent && calendarRef.current) {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        const calendar = calendarRef.current?.getApi();
+        if (!calendar) return;
+
+        if (!state.selectedEventId) return;
+        const event = calendar.getEventById(state.selectedEventId);
+        if (!event) return;
+
+        // Go to the date of the event
+        calendar.gotoDate(event.start || new Date());
+
+        // Use setTimeout to ensure the calendar has updated
+        setTimeout(() => {
+          // First ensure selectedEventId exists
+          if (!state.selectedEventId) return;
+          
+          // Get the event and cast it to include the el property
+          const event = calendar.getEventById(state.selectedEventId);
+          if (!event) return;
+          
+          // Access the DOM element using getEl() method
+          const eventEl = document.getElementById(`event-${state.selectedEventId}`);
+          if (eventEl) {
+            eventEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Highlight the event
+            event.setProp('backgroundColor', '#ffeb3b');
+            
+            // Reset the highlight after a delay
+            setTimeout(() => {
+              event.setProp('backgroundColor', '');
+            }, 2000);
+          }
+        }, 100);
+      });
+    }
+  }, [location.state]);
 
   const calendarsEvents = {
     Danger: "danger",
@@ -56,7 +103,14 @@ const Calendar: React.FC = () => {
         const fetchedEvents = await fetchCalendarEvents(user.sub);
         console.log('Successfully fetched events:', fetchedEvents.length);
         console.log('Event data:', fetchedEvents);
-        setEvents(fetchedEvents);
+        setLocalEvents(fetchedEvents);
+        setEvents(fetchedEvents.map(event => ({
+          ...event,
+          id: event.id || '', // Ensure id is always a string, never undefined
+          extendedProps: {
+            calendar: event.extendedProps?.calendar || 'primary' // Provide default value
+          }
+        })));
       } catch (err) {
         console.error('Failed to fetch calendar events:', err);
         setError(err instanceof Error ? err.message : 'Failed to load events');
@@ -64,7 +118,7 @@ const Calendar: React.FC = () => {
     };
 
     loadEvents();
-  }, [user?.sub, fetchCalendarEvents]);
+  }, [user?.sub, fetchCalendarEvents, setEvents]);
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     resetModalFields();
@@ -185,15 +239,22 @@ const Calendar: React.FC = () => {
         const savedEvent = await createCalendarEvent(newEventData);
         console.log('Event created successfully:', savedEvent);
 
+        if (!savedEvent.id) {
+          throw new Error('Server returned event without ID');
+        }
+
         setEvents((prevEvents) => [...prevEvents, {
           ...newEventData,
-          id: savedEvent.id
+          id: savedEvent.id || '', // Ensure id is always a string
+          extendedProps: {
+            calendar: eventLevel as 'primary' | 'success' | 'danger' | 'warning'
+          }
         }]);
       }
 
       console.log('Closing modal and resetting fields');
       closeModal();
-      resetModalFields();
+      // resetModalFields();
     } catch (error) {
       console.error('Failed to save event:', error);
       setError(error instanceof Error ? error.message : 'Failed to save event');
@@ -243,7 +304,7 @@ const Calendar: React.FC = () => {
             //   // month: 'short yyyy' // Will display as "Sep 2023"
             //   // month: "MMM yyyy" // Will display as "Sep 2023"
             // }}
-            events={events}
+            events={localEvents}
             selectable={true}
             select={handleDateSelect}
             eventClick={handleEventClick}
@@ -420,6 +481,7 @@ const renderEventContent = (eventInfo: EventContentArg): JSX.Element => {
   return (
     <div
       className={`event-fc-color flex fc-event-main ${colorClass} p-1 rounded-sm`}
+      id={`event-${eventInfo.event.id}`} // Add an ID to make finding the event easier
     >
       <div className="fc-daygrid-event-dot"></div>
       <div className="fc-event-time">{eventInfo.timeText}</div>

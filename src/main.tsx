@@ -10,6 +10,8 @@ import { Auth0Provider } from '@auth0/auth0-react';
 import { HelmetProvider } from 'react-helmet-async';
 import { SidebarProvider } from './context/SidebarContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { SearchProvider } from './context/SearchContext';
+import { CalendarProvider } from './context/CalendarContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -22,19 +24,24 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           audience: import.meta.env.VITE_AUTH0_AUDIENCE,
           scope: 'openid profile email'
         }}
+       
         cacheLocation="localstorage"
         useRefreshTokens={false}
         skipRedirectCallback={window.location.pathname === '/signed-out'}
       >
+         <CalendarProvider>
         <Provider store={store}>
           <ThemeProvider>
             <SidebarProvider>
-              <BrowserRouter>
-                <App />
-              </BrowserRouter>
+              <SearchProvider>
+                <BrowserRouter>
+                  <App />
+                </BrowserRouter>
+              </SearchProvider>
             </SidebarProvider>
           </ThemeProvider>
         </Provider>
+        </CalendarProvider>
       </Auth0Provider>
     </HelmetProvider>
   </React.StrictMode>

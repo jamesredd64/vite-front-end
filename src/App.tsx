@@ -14,6 +14,8 @@ import React from "react";
 import { SignedOut } from "./pages/SignedOut";
 import Loader from './components/common/Loader';
 import { useMongoDbClient } from './services/mongoDbClient';
+// import MarketingDashboard from "./pages/Marketing/MarketingDashboard";
+import Marketing from "./pages/Dashboard/Marketing";
 
 
 interface UserMetadata {
@@ -158,6 +160,7 @@ function App() {
                 <Route path="/dashboard" element={<Home />} />
                 <Route path="/profile" element={<UserProfile />} />
                 <Route path="/calendar" element={<Calendar />} />
+                <Route path="/marketing" element={<Marketing />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             ) : (
