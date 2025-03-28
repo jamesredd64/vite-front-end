@@ -11,6 +11,7 @@ import PageMeta from "../components/common/PageMeta";
 // import ChevronRightIcon from '../icons/chevron-right.svg?react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useMongoDbClient } from "../services/mongoDbClient";
+import Toast from "../components/ui/Toast";
 
 interface CalendarEvent extends EventInput {
   extendedProps: {
@@ -30,6 +31,7 @@ const Calendar: React.FC = () => {
   const [eventStartDate, setEventStartDate] = useState("");
   const [eventEndDate, setEventEndDate] = useState("");
   const [eventLevel, setEventLevel] = useState("");
+  const [showToast, setShowToast] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
   const { isOpen, openModal, closeModal } = useModal();
 
@@ -210,13 +212,20 @@ const Calendar: React.FC = () => {
         title="React.js Calendar Dashboard | TailAdmin - Next.js Admin Dashboard Template"
         description="This is React.js Calendar Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
       />
+      <Toast 
+        message="Please click on a date to add an event!" 
+        isVisible={showToast} 
+        onClose={() => setShowToast(false)}
+        type="info"
+        position="center" // This will center the toast both vertically and horizontally
+      />
       {error && (
-        <div className="mb-4 rounded-lg bg-error-50 p-4 text-error-500">
+        <div className="p-2 mb-4 rounded-lg bg-error-50 p-4 text-error-500">
           <p>{error}</p>
         </div>
       )}
-      <div className="rounded-2xl border  border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] mt-24">
-        <div className="custom-calendar">
+      <div className="p-2 md:p-6 2xl:p-3">
+        <div className="mx-auto max-w-full">
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -226,6 +235,12 @@ const Calendar: React.FC = () => {
               center: "title",
               right: "dayGridMonth,timeGridWeek,timeGridDay",
             }}
+            // titleFormat={{ // Add this prop
+            //   month: 'long yyyy', // Will display as "September 2023"
+            //   // Alternative formats:
+            //   // month: 'short yyyy' // Will display as "Sep 2023"
+            //   // month: "MMM yyyy" // Will display as "Sep 2023"
+            // }}
             events={events}
             selectable={true}
             select={handleDateSelect}
@@ -252,7 +267,10 @@ const Calendar: React.FC = () => {
               },
               addEventButton: {
                 text: "Add Event +",
-                click: openModal
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                click: function(ev: MouseEvent, element: HTMLElement) {
+                  setShowToast(true);
+                }
               }
             }}
             buttonIcons={{
@@ -267,6 +285,7 @@ const Calendar: React.FC = () => {
             slotMinTime="00:00:00"
             slotMaxTime="24:00:00"
             dayMaxEvents={true}
+            height="auto"
             nextDayThreshold="00:00:00"
             displayEventEnd={true}
             eventTimeFormat={{
@@ -393,25 +412,40 @@ const Calendar: React.FC = () => {
   );
 };
 
-const renderEventContent = (eventInfo: EventContentArg) => {
-  const colorMap = {
-    success: "bg-success-500",
-    danger: "bg-error-500",
-    primary: "bg-brand-500",
-    warning: "bg-orange-500"
-  };
 
-  const colorClass = colorMap[eventInfo.event.extendedProps.calendar.toLowerCase() as keyof typeof colorMap];
-
+const renderEventContent = (eventInfo: EventContentArg): JSX.Element => {
+  const colorClass = `fc-bg-${eventInfo.event.extendedProps.calendar.toLowerCase()}`;
   return (
-    <div className={`flex items-center w-full gap-2 px-2 py-1 rounded ${colorClass} text-white`}>
+    <div
+      className={`event-fc-color flex fc-event-main ${colorClass} p-1 rounded-sm`}
+    >
+      <div className="fc-daygrid-event-dot"></div>
+      <div className="fc-event-time">{eventInfo.timeText}</div>
       <div className="fc-event-title">{eventInfo.event.title}</div>
-      {eventInfo.timeText && <div className="fc-event-time">{eventInfo.timeText}</div>}
     </div>
   );
 };
 
 export default Calendar;
+// const renderEventContent = (eventInfo: EventContentArg) => {
+//   const colorMap = {
+//     success: "bg-success-500",
+//     danger: "bg-error-500",
+//     primary: "bg-brand-500",
+//     warning: "bg-orange-500"
+//   };
+
+//   const colorClass = colorMap[eventInfo.event.extendedProps.calendar.toLowerCase() as keyof typeof colorMap];
+
+//   return (
+//     <div className={`flex items-center w-full gap-2 px-2 py-1 rounded ${colorClass} text-white`}>
+//       <div className="fc-event-title">{eventInfo.event.title}</div>
+//       {eventInfo.timeText && <div className="fc-event-time">{eventInfo.timeText}</div>}
+//     </div>
+//   );
+// };
+
+
 
 
 

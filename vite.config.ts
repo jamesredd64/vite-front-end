@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     svgr({
@@ -13,7 +13,8 @@ export default defineConfig({
     }),
   ],
   css: {
-    postcss: './postcss.config.js',
+    // Disable PostCSS in development
+    postcss: mode === 'development' ? null : './postcss.config.js',
   },
   build: {
     outDir: 'dist',
@@ -22,4 +23,4 @@ export default defineConfig({
   server: {
     port: 3000
   }
-});
+}));

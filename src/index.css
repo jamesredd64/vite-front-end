@@ -1,4 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+
+
+
+/* @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"); */
 @import "./styles/calendar.css";
 
 @tailwind base;
@@ -329,19 +332,129 @@
     -webkit-appearance: none;
   }
 
+  .fc .fc-col-header-cell-cushion {
+    @apply px-5! py-4! text-sm font-medium uppercase text-gray-400;
+  }
+  .fc .fc-daygrid-day.fc-day-today {
+    @apply bg-transparent;
+  }
+  .fc .fc-daygrid-day {
+    @apply p-2;
+  }
+  .fc .fc-daygrid-day.fc-day-today .fc-scrollgrid-sync-inner {
+    @apply rounded-sm bg-gray-100 dark:bg-white/[0.03];
+  }
+  .fc .fc-daygrid-day-number {
+    @apply p-3! text-sm font-medium text-gray-700 dark:text-gray-400;
+  }
+  .fc .fc-daygrid-day-top {
+    @apply flex-row!;
+  }
+  .fc .fc-day-other .fc-daygrid-day-top {
+    opacity: 1;
+  }
+  .fc .fc-day-other .fc-daygrid-day-top .fc-daygrid-day-number {
+    @apply text-gray-400 dark:text-white/30;
+  }
+  .event-fc-color {
+    @apply rounded-lg py-2.5 pl-4 pr-3;
+  }
+  .event-fc-color .fc-event-title {
+    @apply p-0 text-sm font-normal text-gray-700;
+  }
+  .fc-daygrid-event-dot {
+    @apply w-1 h-5 ml-0 mr-3 border-none rounded-sm;
+  }
+  .fc-event {
+    @apply focus:shadow-none;
+  }
+  .fc-daygrid-event.fc-event-start {
+    @apply ml-3!;
+  }
+  .event-fc-color.fc-bg-success {
+    @apply border-success-50 bg-success-50;
+  }
+  .event-fc-color.fc-bg-danger {
+    @apply border-error-50 bg-error-50;
+  }
+  .event-fc-color.fc-bg-primary {
+    @apply border-brand-50 bg-brand-50;
+  }
+  .event-fc-color.fc-bg-warning {
+    @apply border-orange-50 bg-orange-50;
+  }
   .event-fc-color.fc-bg-success .fc-daygrid-event-dot {
     @apply bg-success-500;
   }
-
   .event-fc-color.fc-bg-danger .fc-daygrid-event-dot {
     @apply bg-error-500;
   }
-
   .event-fc-color.fc-bg-primary .fc-daygrid-event-dot {
     @apply bg-brand-500;
   }
-
   .event-fc-color.fc-bg-warning .fc-daygrid-event-dot {
     @apply bg-orange-500;
   }
+  .fc-direction-ltr .fc-timegrid-slot-label-frame {
+    @apply px-3 py-1.5 text-left text-sm font-medium text-gray-500 dark:text-gray-400;
+  }
+  .fc .fc-timegrid-axis-cushion {
+    @apply text-sm font-medium text-gray-500 dark:text-gray-400;  }
+
+    @utility logo {
+      &-container {
+        @apply w-auto h-auto;
+      }
+    
+      &-default {
+        @apply max-w-[100px] 
+               2xsm:hidden /* Hide at smallest breakpoint */
+               xsm:hidden  /* Hide at smallest breakpoint */
+               sm:max-w-[120px] 
+               md:max-w-[120px] !important;
+      }
+    
+      &-collapsed {
+        /* @apply w-4 h-4; */
+      }
+    
+      &-dark {
+        @apply hidden dark:block;
+      }
+    
+      &-light {
+        @apply dark:hidden;
+      }
+      .logo-default {
+        @apply max-w-[120px] max-h-[40px]  /* smaller base size */
+               2xsm:max-w-[130px] 2xsm:max-h-[40px]
+               xsm:max-w-[140px] xsm:max-h-[42px]
+               sm:max-w-[150px] sm:max-h-[45px]
+               md:max-w-[120px] md:max-h-[48px] !important;
+      }
+    
+    
+      /* Default logo size for desktop */
+    .logo-default {
+      width: 125px; /* Adjust size as needed */
+      height: auto; /* Maintains aspect ratio */
+    }
+    
+    /* Tablet breakpoint */
+    @media screen and (max-width: 768px) {
+      .logo {
+        width: 110px; /* Smaller size for tablets */
+      }
+    }
+    
+    /* Mobile breakpoint */
+    @media screen and (max-width: 480px) {
+      .logo {
+        width: 50px; /* Smallest size for mobile */
+        display:none !important;
+      }
+    }
+    }  
+ 
+
 }

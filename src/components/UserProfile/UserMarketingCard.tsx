@@ -120,15 +120,16 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
   };
 
   return (
-    <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6 group hover:bg-gray-50 dark:hover:bg-gray-800/50">
-      <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-        <h3 className="font-medium text-black dark:text-white">
-          Marketing Information
-        </h3>
-      </div>
-       {/* changed from 2 to 3 cols below [md:grid-cols-3] */}
-      
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6 group hover:bg-gray-50 dark:hover:bg-gray-800/50 bottom-40">
+      <div className="flex flex-col gap-4"> {/* Added flex container */}
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+          <h3 className="font-medium text-black dark:text-white">
+            Marketing Information
+          </h3>
+        </div>
+         {/* changed from 2 to 3 cols below [md:grid-cols-3] */}
+        
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6"> {/* Changed from grid-cols-4 to grid-cols-5 */}
           {/* First Column */}
           <div className="space-y-4">
             <div>
@@ -177,8 +178,18 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
             </div>
           </div>
 
-          {/* Fourth Column - Edit Button */}
-          <div className="flex items-center justify-end"> {/* Changed justify-center to justify-end */}
+          {/* Fourth Column - Frequency */}
+          <div className="space-y-4">
+            <div>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Frequency</span>
+              <p className="text-gray-600 dark:text-gray-400 capitalize">
+                {formData.marketingBudget.frequency}
+              </p>
+            </div>
+          </div>
+
+          {/* Fifth Column - Edit Button */}
+          <div className="flex items-center justify-end">
             <button 
               onClick={openModal}
               className="flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 min-w-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
@@ -202,7 +213,7 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
             </button>
           </div>
         </div>
-     
+      </div>
 
       <Modal isOpen={isOpen} onClose={closeModal} className="!w-[33vw]">
         <div className="p-6 bg-white rounded-lg dark:bg-gray-800">

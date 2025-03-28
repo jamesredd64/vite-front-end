@@ -161,12 +161,231 @@
   @apply mb-1 whitespace-nowrap z-10;
 }
 
+/* Calendar title styling */
+.fc .fc-toolbar-title {
+  @apply text-lg font-semibold text-gray-800 dark:text-white/90;
+}
 
+.fc .fc-col-header {
+  @apply text-sm font-semibold text-gray-800 dark:text-white/50;
 
+}
 
+/* Calendar day cell styling */
+.fc .fc-daygrid-day,
+.fc-theme-standard td.fc-daygrid-day {
+  @apply border border-gray-200 bg-white dark:bg-gray-800/90 dark:border-gray-600;
+}
 
+/* Optional: Add some padding inside the cells */
+.fc .fc-daygrid-day-frame {
+  @apply p-2;
+}
 
+/* Fix for border overlap issues */
+.fc .fc-scrollgrid-section > td {
+  border: none !important;
+}
 
+.fc-theme-standard td {
+  @apply border-gray-200 dark:border-gray-600;
+}
 
+/* Remove default FullCalendar borders if needed */
+.fc-theme-standard .fc-scrollgrid {
+  border: none !important;
+}
 
+/* Calendar day number styling */
+.fc .fc-daygrid-day-number {
+  @apply p-3 text-sm font-medium text-gray-700 dark:text-gray-400;
+}
 
+/* Style for past dates (days before today) */
+.fc .fc-day-past .fc-daygrid-day-number {
+  @apply text-gray-400 dark:text-white/30;
+}
+
+/* Style for today's date */
+.fc .fc-day-today .fc-daygrid-day-number {
+  @apply text-gray-800 dark:text-white/90;
+}
+
+/* Style for future dates */
+.fc .fc-day-future .fc-daygrid-day-number {
+  @apply text-gray-800 dark:text-white/90;
+}
+
+/* Ensure the day numbers align properly */
+.fc .fc-daygrid-day-top {
+  @apply flex-row;
+}
+
+/* Calendar base container */
+.fc {
+  @apply h-full bg-white dark:bg-gray-900 rounded-xl;
+}
+
+/* Calendar header and cells - slightly lighter than darkest theme */
+.fc .fc-toolbar,
+.fc .fc-daygrid-day,
+.fc td.fc-daygrid-day {
+  @apply dark:bg-gray-900/50;
+}
+
+/* Calendar header specific styles */
+.fc .fc-toolbar {
+  @apply flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-gray-200 dark:border-gray-700;
+}
+
+/* Calendar day cell styling - be more specific */
+.fc .fc-daygrid-day,
+.fc-theme-standard td.fc-daygrid-day {
+  @apply border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 !important;
+}
+
+/* Day cell frame - ensure background color is applied */
+.fc .fc-daygrid-day-frame {
+  @apply dark:bg-gray-900/50 !important;
+}
+
+/* Today cell highlight */
+.fc .fc-day-today,
+.fc .fc-day-today .fc-daygrid-day-frame {
+  @apply bg-gray-50 dark:bg-gray-800;
+}
+
+/* Day labels header - keep darkest color */
+.fc .fc-col-header-cell {
+  @apply py-4 dark:bg-gray-900 border-0;
+}
+
+.fc .fc-scrollgrid-section-header {
+  @apply dark:bg-gray-900;
+}
+
+.fc .fc-scrollgrid-section-header > td {
+  @apply border-0 dark:bg-gray-900;
+}
+
+/* Remove any competing background colors */
+.fc-theme-standard .fc-scrollgrid-section > td {
+  @apply dark:bg-gray-800/90;
+}
+
+.fc-theme-standard td {
+  @apply dark:bg-gray-800/90;
+}
+
+/* Ensure proper border contrast */
+.fc-theme-standard td {
+  @apply border-gray-200 dark:border-gray-700;
+}
+
+/* Calendar grid */
+.fc-theme-standard .fc-scrollgrid {
+  @apply border-0;
+}
+
+/* Keep borders only on the day cells */
+.fc .fc-daygrid-day {
+  @apply border border-gray-200 bg-white dark:bg-gray-800/90 dark:border-gray-600;
+}
+
+/* Day number styling */
+.fc .fc-daygrid-day-top {
+  @apply flex justify-end;
+}
+
+.fc .fc-daygrid-day-number {
+  @apply p-2 text-sm font-medium;
+}
+
+.fc .fc-day-past .fc-daygrid-day-number {
+  @apply text-gray-400 dark:text-gray-600;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  @apply text-gray-900 dark:text-white;
+}
+
+.fc .fc-day-future .fc-daygrid-day-number {
+  @apply text-gray-700 dark:text-gray-300;
+}
+
+/* Today cell highlight */
+.fc .fc-day-today {
+  @apply bg-gray-50 dark:bg-gray-800/50;
+}
+
+/* Event styling */
+.fc-event {
+  @apply cursor-pointer border-none rounded-md;
+}
+
+.fc-event-main {
+  @apply p-2 rounded-md;
+}
+
+.calendar-event-primary {
+  @apply bg-brand-500/10 text-brand-500 dark:text-brand-400;
+}
+
+.calendar-event-success {
+  @apply bg-success-500/10 text-success-500 dark:text-success-400;
+}
+
+.calendar-event-danger {
+  @apply bg-error-500/10 text-error-500 dark:text-error-400;
+}
+
+.calendar-event-warning {
+  @apply bg-warning-500/10 text-warning-500 dark:text-warning-400;
+}
+
+/* Event title */
+.fc-event-title {
+  @apply block truncate text-sm font-medium px-1;
+}
+
+/* More events popup */
+.fc-more-popover {
+  @apply border border-gray-200 rounded-lg shadow-lg dark:border-gray-700 dark:bg-gray-800;
+}
+
+.fc-more-popover .fc-popover-header {
+  @apply bg-gray-50 dark:bg-gray-700/50 rounded-t-lg px-4 py-2;
+}
+
+/* Make sure the header row has proper spacing and borders */
+.fc .fc-scrollgrid-section-header > td {
+  @apply border-0 dark:bg-gray-900;
+}
+
+.fc .fc-scrollgrid-section-header {
+  @apply dark:bg-gray-900;
+}
+
+/* Remove borders from header cells specifically */
+.fc-theme-standard th {
+  @apply border-0;
+}
+
+/* Ensure the grid borders start from the day cells, not the headers */
+.fc-theme-standard .fc-scrollgrid {
+  @apply border-0;
+}
+
+/* Keep borders only on the day cells */
+.fc .fc-daygrid-day {
+  @apply border border-gray-200 bg-white dark:bg-gray-800/90 dark:border-gray-600;
+}
+
+/* Remove or update these overriding styles */
+img[alt="Logo"] {
+  width: 175px !important;
+  height: 175px !important;
+  object-fit: contain !important;
+  max-width: 250px !important;
+  max-height: 250px !important;
+}

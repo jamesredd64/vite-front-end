@@ -43,20 +43,14 @@ const Header: React.FC<HeaderProps> = ({  }) => {
 
           <Link to="/" className="lg:hidden">
             <img
-              className="dark:hidden"
+              className="dark:hidden logo-default"
               src="/images/logo/logo.svg"
               alt="Logo"
-              width="125"
-              height="125"
-              style={{ width: '250px', height: '250px' }}
             />
             <img
-              className="hidden dark:block"
+              className="hidden dark:block logo-default"
               src="/images/logo/logo-dark.svg"
               alt="Logo"
-              width="125"
-              height="125"
-              style={{ width: '250px', height: '250px' }}
             />
           </Link>
 
