@@ -52,3 +52,4 @@ export const fetchCalendarEvents = async (auth0Id: string) => {
   return response.json();
 };
 
+

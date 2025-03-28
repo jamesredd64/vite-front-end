@@ -70,10 +70,11 @@ const Calendar: React.FC = () => {
     resetModalFields();
     const startDate = selectInfo.startStr;
     setEventStartDate(startDate);
-    
+    console.log("Just clicked event to edit and start date =:", startDate);
     // Set end date to the next day for new events
     const endDate = new Date(selectInfo.startStr);
     endDate.setDate(endDate.getDate() + 1);
+    console.log("Just clicked event to edit and end date = :", endDate.getDate() + 1 );
     setEventEndDate(endDate.toISOString().split('T')[0]);
     
     openModal();
@@ -89,10 +90,11 @@ const Calendar: React.FC = () => {
     // Handle start date
     const startDate = event.start ? event.start.toISOString().split('T')[0] : event.startStr.split('T')[0];
     setEventStartDate(startDate);
-    
+    console.log('startDate: ', startDate); // Add logging to see full event data
     // Handle end date
     const endDate = event.end ? event.end.toISOString().split('T')[0] : event.endStr.split('T')[0];
     setEventEndDate(endDate);
+    console.log('endDate: ', endDate); // Add logging to see full event data
     
     setEventLevel(event.extendedProps.calendar);
     openModal();

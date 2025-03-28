@@ -18,7 +18,8 @@
     "test:user": "cd server && npm run test:user",
     "recreate-db": "cross-env NODE_OPTIONS=\"--loader ts-node/esm\" node scripts/recreate-mongodb-schema.ts",
     "migrate:calendar": "node scripts/migrate-calendar-events.js",
-    "populate:calendar": "node scripts/populate-calendar-events.js"
+    "populate:calendar": "node scripts/populate-calendar-events.js",
+    "kill-port": "scripts\\kill-port.cmd"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
