@@ -10,7 +10,9 @@ function Show-GitMenu {
     Write-Host "7: Clean working directory"
     Write-Host "8: View status"    
     Write-Host "9: Push changes"
-    Write-Host "10: View commit history"    
+    Write-Host "10: View commit history"
+    Write-Host "11: Overwrite main with backup branch"
+    Write-Host "12: Switch Environment (Dev/Prod)"
     Write-Host "Q: Quit"
     Write-Host "=================================================="
 }
@@ -43,7 +45,6 @@ function Reset-Changes {
     Write-Host "2: Hard reset (delete all changes)"    
     Write-Host "3: Reset to specific commit"
     Write-Host "4: Cancel"    
-    
     $resetChoice = Read-Host "Choose reset type"    
     switch ($resetChoice) {
         '1' {            
@@ -162,6 +163,72 @@ function Push-Changes {
     }
 }
 
+function Reset-ToBackupBranch {
+    $backupBranch = Read-Host "Enter the name of your backup branch"
+    
+    Write-Host "`nThis will completely overwrite main branch with $backupBranch"
+    Write-Host "WARNING: This operation cannot be undone!"
+    $confirm = Read-Host "Are you sure you want to continue? (y/n)"
+    
+    if ($confirm -eq 'y') {
+        # First check if there are uncommitted changes
+        $status = git status --porcelain
+        if ($status) {
+            Write-Host "You have uncommitted changes. Please commit or stash them first."
+            Write-Host "Would you like to:"
+            Write-Host "1: Stash changes"
+            Write-Host "2: Force reset (lose changes)"
+            Write-Host "3: Cancel"
+            $choice = Read-Host "Choose option"
+            
+            switch ($choice) {
+                '1' {
+                    git stash
+                }
+                '2' {
+                    git reset --hard HEAD
+                    git clean -fd
+                }
+                default {
+                    Write-Host "Operation cancelled"
+                    return
+                }
+            }
+        }
+        
+        # Perform the branch overwrite
+        git checkout main
+        git reset --hard $backupBranch
+        git push --force origin main
+        
+        Write-Host "`nMain branch has been successfully overwritten with $backupBranch"
+    } else {
+        Write-Host "Operation cancelled"
+    }
+}
+
+function Switch-Environment {
+    Write-Host "`nSwitch between development and production environments"
+    Write-Host "1: Switch to development"
+    Write-Host "2: Switch to production (Vercel-ready)"
+    
+    $choice = Read-Host "Choose option"
+    
+    switch ($choice) {
+        '1' {
+            git checkout development
+            Write-Host "Switched to development environment"
+        }
+        '2' {
+            $confirm = Read-Host "This will switch to production-ready main branch. Continue? (y/n)"
+            if ($confirm -eq 'y') {
+                git checkout main
+                Write-Host "Switched to production environment"
+            }
+        }
+    }
+}
+
 # Main loop
 do {
     Show-GitMenu
@@ -205,6 +272,8 @@ do {
             Write-Host "3. Choose option 3 (Reset to specific commit)"
             Write-Host "4. Paste the commit hash when prompted"
         }
+        '11' { Reset-ToBackupBranch }
+        '12' { Switch-Environment }
     }
     if ($selection -ne 'q') {
         Write-Host "`nPress any key to continue..."

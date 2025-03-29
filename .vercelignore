@@ -1,0 +1,43 @@
+# Development and backup directories
+_Dev/
+fe-saved/
+**/fe-saved/
+repo-backup/
+repo-backup*/
+
+# Test files
+*.test.tsx
+*.test.ts
+test.tsx
+TestPage.tsx
+TestMongoDB.tsx
+insertTestCalendarEvents.js
+testFetchUser.jsx
+
+# Scripts directory
+scripts/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+
+# Editor directories
+.vscode/
+.idea/
+
+# Cache directories
+.cache/
+.temp/
+
+# Misc
+*.log
+.DS_Store
+Thumbs.db

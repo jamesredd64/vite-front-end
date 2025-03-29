@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* Calendar Container */
+  #calendar {
+    @apply min-h-screen bg-white dark:bg-gray-900;
+  }
+
+  /* FullCalendar Core Overrides */
+  .fc {
+    @apply h-full rounded-xl;
+  }
+
+  .fc .fc-toolbar {
+    @apply mb-4 px-4 py-4 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between 
+           bg-gray-50 dark:bg-gray-800/50 border-0 !important;
+  }
+
+  .fc .fc-toolbar-title {
+    @apply text-xl font-semibold text-gray-800 dark:text-white !important;
+  }
+
+  /* Calendar Grid and Cells */
+  .fc .fc-daygrid-day-frame {
+    @apply min-h-[180px] p-2 bg-gray-50 dark:bg-gray-800/50 !important;
+  }
+
+  .fc .fc-daygrid-day-events {
+    @apply min-h-[140px] !important;
+  }
+
+  .fc .fc-daygrid-day-number {
+    @apply p-3 text-sm font-medium text-gray-700 dark:text-gray-400;
+  }
+
+  /* Day States */
+  .fc .fc-day-past .fc-daygrid-day-number {
+    @apply text-gray-400 dark:text-white/30;
+  }
+
+  .fc .fc-day-today .fc-daygrid-day-number {
+    @apply text-gray-800 dark:text-white/90;
+  }
+
+  .fc .fc-day-today,
+  .fc .fc-day-today .fc-daygrid-day-frame {
+    @apply bg-white dark:bg-gray-900 !important;
+  }
+
+  /* Event Styling */
+  .fc-event {
+    @apply cursor-pointer border-none rounded-md;
+  }
+
+  .fc-event-main {
+    @apply p-2 rounded-md;
+  }
+
+  .fc-event-title {
+    @apply block truncate text-sm font-medium px-1 text-white;
+  }
+
+  .fc-event-time {
+    @apply hidden;
+  }
+
+  /* Event Colors */
+  .calendar-event-primary {
+    @apply bg-brand-500 border-brand-600;
+  }
+
+  .calendar-event-success {
+    @apply bg-success-500 border-success-600;
+  }
+
+  .calendar-event-danger {
+    @apply bg-error-500 border-error-600;
+  }
+
+  .calendar-event-warning {
+    @apply bg-warning-500 border-warning-600;
+  }
+
+  /* Modal Styles */
+  .modal {
+    @apply fixed inset-0 z-[99999] hidden min-h-screen overflow-x-hidden overflow-y-auto 
+           bg-black/50 p-4 backdrop-blur-[32px];
+  }
+
+  .modal-dialog {
+    @apply relative flex w-full max-w-[700px] flex-col rounded-2xl bg-white p-6 dark:bg-gray-900;
+  }
+
+  .modal-close-btn {
+    @apply absolute right-5 top-5 z-[999] flex h-8 w-8 items-center justify-center 
+           rounded-full bg-gray-50 text-gray-500 transition-all hover:bg-gray-100 
+           hover:text-gray-900 dark:bg-gray-800 dark:text-gray-400 
+           dark:hover:bg-gray-700 dark:hover:text-white;
+  }
+
+  /* Form Elements */
+  .form-input {
+    @apply h-11 w-full rounded-lg border border-gray-200 px-12 text-sm 
+           shadow-sm transition-all focus:border-brand-500 focus:ring-brand-500 
+           dark:border-gray-700 dark:bg-gray-900;
+  }
+
+  .form-check-input {
+    @apply absolute mt-1 -ml-6;
+  }
+
+  .form-check-label {
+    @apply inline-block pl-6 indent-[-1.5em];
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-200 rounded-full dark:bg-gray-700;
+  }
+}
