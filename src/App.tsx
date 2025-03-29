@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
 // import UserProfiles from "./pages/ProfilePage";
 import  Calendar from "./pages/Calendar";
-import Home from "./pages/Dashboard/Home";
+import DashboardHome from "./pages/Dashboard/Home";
 import Logout from "./pages/test";
 import UserProfile from "./pages/TestPage";
 import React from "react";
@@ -150,14 +150,15 @@ function App() {
             <Route path="/signed-out" element={<SignedOut />} />
             {isAuthenticated ? (
               <Route element={<AppLayout />}>
-                <Route path="/" element={<Home />} />
+                <Route index path="/" element={<Navigate to="/marketing" replace />} />
+                {/* <Route path="/" element={<Marketing />} /> */}
                 {/* <Route path="/test" element={
                   <ErrorBoundary>
                     <UserProfile />
                   </ErrorBoundary>
                 } /> */}
                 <Route path="/lg" element={<Logout />} />
-                <Route path="/dashboard" element={<Home />} />
+                <Route path="/dashboard" element={<DashboardHome />} />
                 <Route path="/profile" element={<UserProfile />} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/marketing" element={<Marketing />} />

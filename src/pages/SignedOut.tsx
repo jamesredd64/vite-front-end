@@ -3,36 +3,32 @@ import React from 'react';
 
 export const SignedOut = () => {
   const { loginWithRedirect } = useAuth0();
+  // const { theme } = useTheme();
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen w-full bg-white dark:bg-gray-900">
       <div className="relative flex min-h-screen w-full items-center justify-center p-6 overflow-hidden z-1">
-        {/* Grid Background Pattern */}
+        {/* Background Pattern */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-50/50 to-gray-100/50 dark:from-gray-900 dark:to-gray-800/50" />
-          <div className="absolute h-full w-full" style={{
-            backgroundImage: 'radial-gradient(#e5e7eb 1px, transparent 1px)',
-            backgroundSize: '20px 20px'
-          }} />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" />
+          <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.1]"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+              backgroundSize: '30px 30px'
+            }}
+          />
+          <div className="absolute inset-0">
+            <div className="h-full w-full"
+              style={{
+                backgroundImage: `radial-gradient(circle at 2px 2px, ${getComputedStyle(document.documentElement).getPropertyValue('--color-brand-400')}15 1px, transparent 0)`,
+                backgroundSize: '40px 40px'
+              }}
+            />
+          </div>
         </div>
 
         {/* Content Container */}
         <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-8 shadow-lg dark:bg-gray-800/90 backdrop-blur-sm">
-          {/* Logo */}
-          {/* <div className="mb-8 flex justify-center">
-            <img
-              src="{`${import.meta.env.VITE_APP_URL}/images/logo/logo-dark.svg`} logo.webp"
-              alt="Logo"
-              className="h-12 w-auto dark:hidden"
-            />
-            <img
-              src="{`${import.meta.env.VITE_APP_URL}/images/logo/logo-dark.svg`} logo.webp"
-              alt="Logo"
-              className="hidden h-12 w-auto dark:block"
-            />
-          </div> */}
-
-          {/* Welcome Text */}
           <h1 className="mb-3 text-center text-2xl font-bold text-gray-900 dark:text-white">
             Welcome to Our Dashboard
           </h1>
@@ -41,7 +37,6 @@ export const SignedOut = () => {
             Please sign in to access your personalized dashboard and manage your account.
           </p>
 
-          {/* Sign In Button */}
           <div className="flex justify-center">
             <button
               onClick={() => loginWithRedirect()}
@@ -72,7 +67,6 @@ export const SignedOut = () => {
             </button>
           </div>
 
-          {/* Footer */}
           <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
             &copy; {new Date().getFullYear()} All rights reserved.
           </p>

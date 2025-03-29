@@ -33,8 +33,8 @@
 
   .fc-event-title {
     white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    /* overflow: hidden !important; */
+    /* text-overflow: ellipsis !important; */
   }
 
   /* Override FullCalendar's default styles */
@@ -83,7 +83,43 @@
 
   /* FullCalendar Overrides */
   .fc .fc-daygrid-day-frame {
-    @apply min-h-[100px];
+    @apply min-h-[180px] !important;
+  }
+
+  /* Adjust the overall calendar proportions */
+  .fc-dayGridMonth-view.fc-view.fc-daygrid {
+    @apply min-w-[1200px] !important;
+  }
+
+  /* Ensure consistent height for day cells */
+  .fc .fc-daygrid-day,
+  .fc-theme-standard td.fc-daygrid-day {
+    @apply h-[180px] !important;
+  }
+
+  /* Ensure the day content fills the space */
+  .fc .fc-daygrid-day-events {
+    @apply min-h-[140px] !important;
+  }
+
+  /* Adjust the overall calendar container height */
+  .fc.fc-media-screen {
+    @apply h-auto !important;
+  }
+
+  /* Make sure the view takes up full height */
+  .fc-view-harness {
+    @apply h-auto !important;
+  }
+
+  /* Ensure proper height distribution */
+  .fc-daygrid-body {
+    @apply h-auto !important;
+  }
+
+  /* Force table cells to maintain height */
+  .fc-scrollgrid-sync-table {
+    @apply h-auto !important;
   }
 
   .fc .fc-daygrid-event {
@@ -167,7 +203,7 @@
 }
 
 .fc .fc-col-header {
-  @apply text-sm font-semibold text-gray-800 dark:text-white/50;
+  @apply text-sm font-semibold text-gray-800 dark:text-white/50 border border-gray-200 bg-white dark:bg-gray-800/90 dark:border-gray-600;
 
 }
 
@@ -226,11 +262,14 @@
   @apply h-full bg-white dark:bg-gray-900 rounded-xl;
 }
 
-/* Calendar header and cells - slightly lighter than darkest theme */
+/* Calendar header and cells - match date squares background */
 .fc .fc-toolbar,
 .fc .fc-daygrid-day,
-.fc td.fc-daygrid-day {
-  @apply dark:bg-gray-900/50;
+.fc td.fc-daygrid-day,
+.fc .fc-col-header-cell,
+.fc .fc-scrollgrid-section-header,
+.fc .fc-scrollgrid-section-header > td {
+  @apply bg-white dark:bg-gray-900 !important;
 }
 
 /* Calendar header specific styles */
@@ -238,10 +277,31 @@
   @apply flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-6 py-4 border-gray-200 dark:border-gray-700;
 }
 
-/* Calendar day cell styling - be more specific */
+/* Add border between header and calendar days */
+.fc .fc-scrollgrid-section-header {
+  @apply dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700;
+}
+
+/* Ensure consistent border styling for day cells */
 .fc .fc-daygrid-day,
 .fc-theme-standard td.fc-daygrid-day {
   @apply border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/50 !important;
+}
+
+/* Make sure borders don't double up */
+.fc-theme-standard .fc-scrollgrid {
+  @apply border-0 !important;
+}
+
+/* Ensure header cells also have matching borders */
+.fc .fc-col-header-cell {
+  @apply border-0 !important;
+}
+
+/* Remove any competing border styles */
+.fc-theme-standard td,
+.fc-theme-standard th {
+  @apply border-gray-200 dark:border-gray-700 !important;
 }
 
 /* Day cell frame - ensure background color is applied */
@@ -270,11 +330,11 @@
 
 /* Remove any competing background colors */
 .fc-theme-standard .fc-scrollgrid-section > td {
-  @apply dark:bg-gray-800/90;
+  @apply bg-white dark:bg-gray-900 !important;
 }
 
 .fc-theme-standard td {
-  @apply dark:bg-gray-800/90;
+  @apply bg-white dark:bg-gray-900 !important;
 }
 
 /* Ensure proper border contrast */
@@ -389,3 +449,150 @@ img[alt="Logo"] {
   max-width: 250px !important;
   max-height: 250px !important;
 }
+
+/* Ensure calendar buttons have a reasonable z-index */
+.fc-button-group,
+.fc-today-button,
+.fc-button {
+  @apply z-[100] relative;
+}
+
+/* Calendar header/toolbar container */
+.fc-header-toolbar {
+  @apply z-[100] relative;
+}
+
+/* Force calendar buttons to a lower z-index */
+.fc .fc-toolbar .fc-button-group,
+.fc .fc-toolbar .fc-button,
+.fc .fc-toolbar-title,
+.fc-header-toolbar,
+.fc .fc-toolbar {
+  @apply !z-[1] relative !important;
+}
+
+/* Ensure the calendar container doesn't create a new stacking context */
+.fc {
+  @apply !z-[1] relative !important;
+}
+
+/* Override any FullCalendar inline styles */
+.fc-view-harness {
+  @apply !z-[1] relative !important;
+}
+
+/* Force square proportions for calendar cells */
+.fc table {
+  @apply table-fixed !important;
+}
+
+.fc td {
+  @apply w-[140px] h-[140px] !important;
+}
+
+.fc .fc-daygrid-day {
+  @apply h-[140px] !important;
+}
+
+.fc .fc-daygrid-day-frame {
+  @apply h-full !important;
+}
+
+/* Adjust overall calendar width to accommodate squares */
+.fc .fc-view-harness {
+  @apply w-full !important;
+}
+
+.fc-dayGridMonth-view.fc-view.fc-daygrid {
+  @apply w-[1400px] !important;
+}
+
+/* Ensure content fits within squares */
+.fc .fc-daygrid-day-events {
+  @apply h-[10px] !important;
+}
+
+/* Maintain header alignment */
+.fc .fc-col-header-cell {
+  @apply w-[140px] !important;
+}
+
+.fc-header-toolbar fc-toolbar fc-toolbar-ltr {
+  @apply border border-gray-200 bg-white dark:bg-gray-600 dark:border-gray-500 !important;
+}
+
+/* Add bottom border to last calendar row */
+.fc-dayGridMonth-view .fc-scrollgrid-section:last-child td {
+  @apply border-b border-gray-200 dark:border-gray-700 !important;
+}
+
+/* Ensure the border extends full width */
+.fc-dayGridMonth-view .fc-scrollgrid-section:last-child {
+  @apply border-b border-gray-200 dark:border-gray-700 !important;
+}
+
+/* Add border around entire calendar */
+.fc {
+  @apply border border-gray-200 dark:border-gray-700 rounded-lg !important;
+}
+
+/* Ensure the toolbar respects the rounded corners */
+.fc .fc-toolbar {
+  @apply rounded-t-lg !important;
+}
+
+/* Ensure the bottom cells respect the rounded corners */
+.fc-dayGridMonth-view .fc-scrollgrid-section:last-child td:first-child {
+  @apply rounded-bl-lg !important;
+}
+
+.fc-dayGridMonth-view .fc-scrollgrid-section:last-child td:last-child {
+  @apply rounded-br-lg !important;
+}
+
+/* Add right border to last column of date squares */
+.fc .fc-daygrid-day:last-child,
+.fc .fc-scrollgrid-section td:last-child {
+  @apply border-r border-gray-200 dark:border-gray-700 !important;
+}
+
+/* Ensure the header's last column also has the border */
+.fc .fc-col-header-cell:last-child {
+  @apply border-r border-gray-200 dark:border-gray-700 !important;
+}
+
+/* Force square proportions and proper width */
+.fc table {
+  @apply w-full table-fixed !important;
+}
+
+.fc td {
+  @apply w-[calc(100%/7)] h-[140px] !important;
+}
+
+/* Adjust overall calendar width */
+.fc .fc-view-harness {
+  @apply w-full overflow-hidden !important;
+}
+
+.fc-dayGridMonth-view.fc-view.fc-daygrid {
+  @apply w-full !important;
+}
+
+/* Maintain header alignment */
+.fc .fc-col-header-cell {
+  @apply w-[calc(100%/7)] !important;
+}
+
+/* Ensure borders connect properly */
+.fc {
+  @apply w-full !important;
+}
+
+/* Make sure the last column connects with the border */
+.fc .fc-daygrid-day:last-child,
+.fc .fc-scrollgrid-section td:last-child,
+.fc .fc-col-header-cell:last-child {
+  @apply border-r border-gray-200 dark:border-gray-700 !important;
+}
+

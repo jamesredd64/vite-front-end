@@ -16,33 +16,32 @@ import { CalendarProvider } from './context/CalendarContext';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>
-      <Auth0Provider
-        domain={import.meta.env.VITE_AUTH0_DOMAIN}
-        clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
-        authorizationParams={{
-          redirect_uri: window.location.origin,
-          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-          scope: 'openid profile email'
-        }}
-       
-        cacheLocation="localstorage"
-        useRefreshTokens={false}
-        skipRedirectCallback={window.location.pathname === '/signed-out'}
-      >
-         <CalendarProvider>
-        <Provider store={store}>
-          <ThemeProvider>
-            <SidebarProvider>
-              <SearchProvider>
-                <BrowserRouter>
-                  <App />
-                </BrowserRouter>
-              </SearchProvider>
-            </SidebarProvider>
-          </ThemeProvider>
-        </Provider>
-        </CalendarProvider>
-      </Auth0Provider>
+      <ThemeProvider>
+        <Auth0Provider
+          domain={import.meta.env.VITE_AUTH0_DOMAIN}
+          clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
+          authorizationParams={{
+            redirect_uri: window.location.origin,
+            audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            scope: 'openid profile email'
+          }}
+          cacheLocation="localstorage"
+          useRefreshTokens={false}
+          skipRedirectCallback={window.location.pathname === '/signed-out'}
+        >
+          <CalendarProvider>
+            <Provider store={store}>
+              <SidebarProvider>
+                <SearchProvider>
+                  <BrowserRouter>
+                    <App />
+                  </BrowserRouter>
+                </SearchProvider>
+              </SidebarProvider>
+            </Provider>
+          </CalendarProvider>
+        </Auth0Provider>
+      </ThemeProvider>
     </HelmetProvider>
   </React.StrictMode>
 );

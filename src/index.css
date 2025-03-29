@@ -51,6 +51,14 @@
 }
 
 @layer components {
+  .dropdown-menu {
+    position: absolute; /* or fixed/relative depending on the context */
+    z-index: 999; /* A high value to ensure it's in front */
+    /* background-color: white; /* Dropdown background */
+    /* border: 1px solid #ccc; Optional styling */
+    /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); Add a subtle shadow for better visibility */ 
+}
+
   .menu-item {
     @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-sm;
   }

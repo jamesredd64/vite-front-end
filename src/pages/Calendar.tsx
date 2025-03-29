@@ -243,13 +243,19 @@ const Calendar: React.FC = () => {
           throw new Error('Server returned event without ID');
         }
 
-        setEvents((prevEvents) => [...prevEvents, {
+        const newEvent = {
           ...newEventData,
           id: savedEvent.id || '', // Ensure id is always a string
           extendedProps: {
             calendar: eventLevel as 'primary' | 'success' | 'danger' | 'warning'
           }
-        }]);
+        };
+
+        setEvents(prevEvents => [...prevEvents, newEvent]);
+        setLocalEvents(prevEvents => [...prevEvents, newEvent]); // Add this line
+
+        console.log('Closing modal and resetting fields');
+        closeModal();
       }
 
       console.log('Closing modal and resetting fields');

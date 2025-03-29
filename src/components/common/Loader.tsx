@@ -7,14 +7,31 @@ interface LoaderProps {
 
 const Loader: React.FC<LoaderProps> = ({ size = 'medium', className = '' }) => {
   const sizeClasses = {
-    small: 'h-6 w-6',
-    medium: 'h-12 w-12',
+    small: 'h-8 w-8',
+    medium: 'h-16 w-16',
     large: 'h-32 w-32'
   };
 
   return (
-    <div className="flex justify-center items-center h-full">
-      <div className={`animate-spin rounded-full border-b-2 border-primary ${sizeClasses[size]} ${className}`}></div>
+    <div className="fixed inset-0 flex justify-center items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50">
+      <div className="flex flex-col items-center gap-4">
+        <div 
+          className={`
+            animate-spin 
+            rounded-full 
+            border-4 
+            border-brand-400 
+            border-t-transparent 
+            border-b-transparent 
+            shadow-lg 
+            ${sizeClasses[size]} 
+            ${className}
+          `}
+        />
+        <span className="text-brand-500 dark:text-brand-400 font-semibold animate-pulse">
+          Loading...
+        </span>
+      </div>
     </div>
   );
 };
