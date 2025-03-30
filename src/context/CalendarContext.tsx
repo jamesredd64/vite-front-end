@@ -30,9 +30,11 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!user?.sub) return;
       try {
         const fetchedEvents = await fetchCalendarEvents(user.sub);
-        setEvents(fetchedEvents);
+        // Ensure we're setting an array
+        setEvents(Array.isArray(fetchedEvents) ? fetchedEvents : []);
       } catch (error) {
         console.error('Failed to load events:', error);
+        setEvents([]); // Reset to empty array on error
       }
     };
 

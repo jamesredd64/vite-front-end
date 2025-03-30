@@ -269,15 +269,17 @@ export const useMongoDbClient = () => {
           headers: { 'Content-Type': 'application/json' }
         }
       );
-      console.log('API_CONFIG.BASE_URL:', API_CONFIG.BASE_URL, '/calendar/${auth0Id}');
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      return data;
+      // Ensure we always return an array
+      return Array.isArray(data.events) ? data.events : [];
     } catch (error) {
-      throw error instanceof Error ? error : new Error('Failed to fetch events');
+      console.error('Error fetching events:', error);
+      return []; // Return empty array on error
     }
   }, []);
 
