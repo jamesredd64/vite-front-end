@@ -267,24 +267,23 @@ const Calendar: React.FC = () => {
 
         const newEvent = {
           ...newEventData,
-          id: savedEvent.id || '', // Ensure id is always a string
+          id: savedEvent.id,
           extendedProps: {
             calendar: eventLevel as 'primary' | 'success' | 'danger' | 'warning'
           }
         };
 
         setEvents(prevEvents => [...prevEvents, newEvent]);
-
-        console.log('Closing modal and resetting fields');
-        closeModal();
       }
 
-      console.log('Closing modal and resetting fields');
+      // Close modal and reset fields ONLY after successful save
       closeModal();
-      // resetModalFields();
+      resetModalFields();
+      
     } catch (error) {
       console.error('Failed to save event:', error);
       setError(error instanceof Error ? error.message : 'Failed to save event');
+      // Don't close modal on error so user can try again
     }
   };
 
