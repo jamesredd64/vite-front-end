@@ -5,6 +5,7 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import React from "react";
 import { useGlobalStorage } from "../../hooks/useGlobalStorage";
 import UserMetadata from "../../types/user";
+import { UserIcon } from "../../icons";
 // import { Link } from "react-router-dom";
 
 
@@ -120,22 +121,9 @@ export default function UserDropdown() {
               onItemClick={closeDropdown}
               tag="a"
               to="/profile"
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+              className="flex items-center gap-3 px-3 py-2 font-bold text-gray-800 rounded-lg group text-theme-sm hover:bg-gray-200 hover:text-gray-700 dark:text-gray-800 dark:hover:bg-white/5 dark:hover:text-gray-500"
             >
-              <svg
-                className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                />
-              </svg>
+              <UserIcon className="w-6 h-6 fill-gray-500 group-hover:fill-gray-200 dark:fill-gray-400 dark:group-hover:fill-gray-200 !important" />
               Profile
             </DropdownItem>
           </li>
@@ -166,7 +154,7 @@ export default function UserDropdown() {
         </ul>
         <button
           onClick={(e) => handleLogout(e)}
-          className="flex items-center gap-1 px-3 py-4 font-medium text-red-600 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-red-700 dark:text-red-500 dark:hover:bg-white/5 dark:hover:text-red-400"
+          className="flex items-center gap-1 px-3 py-4 font-medium text-red-600 rounded-lg group text-theme-sm hover:bg-gray-200 hover:text-red-700 dark:text-red-500 dark:hover:bg-white/5 dark:hover:text-red-400"
         >
           <svg
             className="fill-red-600 group-hover:fill-red-700 dark:fill-red-500 dark:group-hover:fill-red-400"
