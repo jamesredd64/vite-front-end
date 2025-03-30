@@ -263,7 +263,7 @@ export const useMongoDbClient = () => {
     try {
       const auth0Id = userId.startsWith('auth0|') ? userId : `auth0|${userId}`;
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}/api/calendar/${auth0Id}`,
+        `${API_CONFIG.BASE_URL}/calendar/${auth0Id}`,
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
@@ -284,7 +284,7 @@ export const useMongoDbClient = () => {
   const createCalendarEvent = useCallback(async (eventData: Omit<CalendarEvent, 'id'>): Promise<CalendarEvent> => {
     try {
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}/api/calendar`,
+        `${API_CONFIG.BASE_URL}/calendar`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
