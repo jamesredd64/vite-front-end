@@ -309,7 +309,7 @@ export const useMongoDbClient = () => {
   const updateCalendarEvent = useCallback(async (eventId: string, eventData: Partial<CalendarEvent>): Promise<CalendarEvent> => {
     try {
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}/api/calendar/${eventId}`,
+        `${API_CONFIG.BASE_URL}/calendar/${eventId}`,
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
