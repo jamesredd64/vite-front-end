@@ -5,6 +5,7 @@ import SocialMediaStats from "../../components/marketing/SocialMediaStats";
 import LeadConversion from "../../components/marketing/LeadConversion";
 import TopChannels from "../../components/marketing/TopChannels";
 import AudienceOverview from "../../components/marketing/AudienceOverview";
+import { getImageUrl } from '../../config/images.config';
 
 export default function Marketing() {
   return (
@@ -72,5 +73,6 @@ export default function Marketing() {
     </>
   );
 }
+
 
 

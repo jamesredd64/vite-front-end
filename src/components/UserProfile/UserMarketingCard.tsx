@@ -6,6 +6,7 @@ import Label from "../form/Label";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 import  UserMetadata  from "../../types/user.js";
+import { getImageUrl } from '../../config/images.config';
 
 interface MarketingBudget {
   frequency: "daily" | "monthly" | "quarterly" | "yearly";

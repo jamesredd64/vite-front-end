@@ -5,6 +5,7 @@ import NotificationDropdown from "./NotificationDropdown";
 import UserDropdown from "./UserDropdown";
 import { Link } from "react-router-dom";
 import React from "react";
+import { getImageUrl } from '../../config/images.config';
 
 interface HeaderProps {
   onClick?: () => void;
@@ -44,12 +45,12 @@ const Header: React.FC<HeaderProps> = ({  }) => {
           <Link to="/" className="lg:hidden">
             <img
               className="dark:hidden logo-default"
-              src="/images/logo/logo.svg"
-              alt="Logo"
+              src={getImageUrl('/images/logo/logo.svg')} 
+              alt="Logo dark"
             />
             <img
               className="hidden dark:block logo-default"
-              src="/images/logo/logo-dark.svg"
+              src={getImageUrl("/images/logo/logo-dark.svg")}
               alt="Logo"
             />
           </Link>

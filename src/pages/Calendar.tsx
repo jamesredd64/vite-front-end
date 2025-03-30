@@ -14,6 +14,7 @@ import { useMongoDbClient } from "../services/mongoDbClient";
 import Toast from "../components/ui/Toast";
 import { useLocation } from 'react-router-dom';
 import { useCalendar } from "../context/CalendarContext";
+import { getImageUrl } from '../config/images.config';
 
 interface CalendarEvent extends EventInput {
   extendedProps: {
