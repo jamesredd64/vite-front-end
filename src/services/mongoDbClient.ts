@@ -269,7 +269,7 @@ export const useMongoDbClient = () => {
           headers: { 'Content-Type': 'application/json' }
         }
       );
-      console.log('API_CONFIG.BASE_URL:', API_CONFIG.BASE_URL, '/api/calendar/${auth0Id}');
+      console.log('API_CONFIG.BASE_URL:', API_CONFIG.BASE_URL, '/calendar/${auth0Id}');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

@@ -11,7 +11,7 @@ interface CalendarEvent {
 }
 
 export const createCalendarEvent = async (eventData: CalendarEvent) => {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/api/calendar/events`, {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/calendar/events`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ export const createCalendarEvent = async (eventData: CalendarEvent) => {
 };
 
 export const updateCalendarEvent = async (eventId: string, eventData: CalendarEvent) => {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/api/calendar/events/${eventId}`, {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/calendar/events/${eventId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export const fetchCalendarEvents = async (auth0Id: string) => {
   console.log('Fetching events for auth0Id:', auth0Id);
   
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/api/calendar`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/calendar`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
