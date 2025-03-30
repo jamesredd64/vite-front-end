@@ -69,7 +69,7 @@ export const SignedOut = () => {
           </div>
 
           <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-            &copy; {new Date().getFullYear()} All rights reserved.
+            &copy; {new Date().getFullYear()} Stagholme Inc. All rights reserved.
           </p>
         </div>
       </div>
