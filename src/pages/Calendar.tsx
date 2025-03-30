@@ -25,8 +25,7 @@ interface CalendarEvent extends EventInput {
 const Calendar: React.FC = () => {
   const { user } = useAuth0();
   const { fetchCalendarEvents, createCalendarEvent, updateCalendarEvent } = useMongoDbClient();
-  const { setEvents } = useCalendar(); // Add this line to get the context setter
-  const [localEvents, setLocalEvents] = useState<CalendarEvent[]>([]); // Rename to localEvents
+  const { events, setEvents } = useCalendar();
   const [error, setError] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
@@ -104,7 +103,6 @@ const Calendar: React.FC = () => {
         const fetchedEvents = await fetchCalendarEvents(user.sub);
         console.log('Successfully fetched events:', fetchedEvents.length);
         console.log('Event data:', fetchedEvents);
-        setLocalEvents(fetchedEvents);
         setEvents(fetchedEvents.map(event => ({
           ...event,
           id: event.id || '', // Ensure id is always a string, never undefined
@@ -253,7 +251,6 @@ const Calendar: React.FC = () => {
         };
 
         setEvents(prevEvents => [...prevEvents, newEvent]);
-        setLocalEvents(prevEvents => [...prevEvents, newEvent]); // Add this line
 
         console.log('Closing modal and resetting fields');
         closeModal();
@@ -311,7 +308,7 @@ const Calendar: React.FC = () => {
             //   // month: 'short yyyy' // Will display as "Sep 2023"
             //   // month: "MMM yyyy" // Will display as "Sep 2023"
             // }}
-            events={localEvents}
+            events={events}
             selectable={true}
             select={handleDateSelect}
             eventClick={handleEventClick}
