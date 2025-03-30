@@ -262,11 +262,17 @@ export const useMongoDbClient = () => {
   const fetchCalendarEvents = useCallback(async (userId: string): Promise<CalendarEvent[]> => {
     try {
       const auth0Id = userId.startsWith('auth0|') ? userId : `auth0|${userId}`;
+      const headers = await getAuthHeaders(); // Use the existing getAuthHeaders function
+
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}/calendar/${auth0Id}`,
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_CALENDAR_EVENTS(auth0Id)}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
         }
       );
 
@@ -275,13 +281,15 @@ export const useMongoDbClient = () => {
       }
 
       const data = await response.json();
-      // Ensure we always return an array
-      return Array.isArray(data.events) ? data.events : [];
+      return Array.isArray(data) ? data : Array.isArray(data.events) ? data.events : [];
     } catch (error) {
       console.error('Error fetching events:', error);
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        console.error('Network error - check if the API is accessible and CORS is configured correctly');
+      }
       return []; // Return empty array on error
     }
-  }, []);
+  }, [getAuthHeaders]);
 
   const createCalendarEvent = useCallback(async (eventData: Omit<CalendarEvent, 'id'>): Promise<CalendarEvent> => {
     try {
