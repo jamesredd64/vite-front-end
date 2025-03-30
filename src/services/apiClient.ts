@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 
 interface ApiError {
@@ -8,8 +8,8 @@ interface ApiError {
 
 export const useApiClient = () => {
   const { getAccessTokenSilently } = useAuth0();
-  const [error, setError] = useState<ApiError | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [error] = useState<ApiError | null>(null);
+  const [loading] = useState(false);
 
   const getAuthHeaders = async () => {
     const token = await getAccessTokenSilently({
@@ -24,21 +24,21 @@ export const useApiClient = () => {
     };
   };
 
-  const handleError = (err: any) => {
-    // Generic error message for production
-    const apiError: ApiError = {
-      message: process.env.NODE_ENV === 'development' 
-        ? (err instanceof Error ? err.message : 'An unknown error occurred')
-        : 'An error occurred',
-    };
-    setError(apiError);
-    setLoading(false);
+  // const handleError = (err: unknown) => {
+  //   // Generic error message for production
+  //   const apiError: ApiError = {
+  //     message: process.env.NODE_ENV === 'development' 
+  //       ? (err instanceof Error ? err.message : 'An unknown error occurred')
+  //       : 'An error occurred',
+  //   };
+  //   setError(apiError);
+  //   setLoading(false);
     
-    // Log only in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('API Error:', err);
-    }
-  };
+  //   // Log only in development
+  //   if (process.env.NODE_ENV === 'development') {
+  //     console.error('API Error:', err);
+  //   }
+  // };
 
   // Add Auth0-specific operations here if needed
 
