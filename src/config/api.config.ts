@@ -2,10 +2,18 @@ import UserMetadata from '../types/user';
 import { useApi } from '../services/api.service';
 
 export const getApiUrl = () => {
-  if (import.meta.env.DEV) {
-    return 'http://localhost:5000';
-  }
-  return import.meta.env.VITE_API_URL;
+  const mode = import.meta.env.DEV ? 'development' : 'production';
+  const apiUrl = import.meta.env.DEV ? 'http://localhost:5000' : import.meta.env.VITE_API_URL;
+  
+  console.log(`🚀 App running in ${mode} mode`);
+  console.log(`📡 API URL: ${apiUrl}`);
+  console.log('Environment variables:', {
+    DEV: import.meta.env.DEV,
+    MODE: import.meta.env.MODE,
+    VITE_API_URL: import.meta.env.VITE_API_URL
+  });
+  
+  return apiUrl;
 };
 
 export const API_CONFIG = {

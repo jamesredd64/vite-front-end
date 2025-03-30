@@ -12,13 +12,19 @@ export default defineConfig(({ mode }) => ({
       },
     }),
   ],
-  css: {
-    // Disable PostCSS in development
-    postcss: mode === 'development' ? null : './postcss.config.js',
-  },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        // Skip certain warnings
+        if (warning.code === 'EVAL' && 
+            warning.id?.includes('@react-jvectormap/core')) {
+          return;
+        }
+        warn(warning);
+      }
+    }
   },
   server: {
     port: 3000
