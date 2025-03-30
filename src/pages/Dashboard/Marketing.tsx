@@ -5,7 +5,8 @@ import SocialMediaStats from "../../components/marketing/SocialMediaStats";
 import LeadConversion from "../../components/marketing/LeadConversion";
 import TopChannels from "../../components/marketing/TopChannels";
 import AudienceOverview from "../../components/marketing/AudienceOverview";
-import { getImageUrl } from '../../config/images.config';
+// import { getImageUrl } from '../../config/images.config';
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 
 export default function Marketing() {
   return (
@@ -14,6 +15,7 @@ export default function Marketing() {
         title="React.js Marketing Dashboard | TailAdmin - React.js Admin Dashboard Template"
         description="This is React.js Marketing Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
       />
+      <PageBreadcrumb pageTitle="marketing" />
       <div className="grid grid-cols-12 gap-4 md:gap-6">
         <div className="col-span-12 xl:col-span-7 flex flex-col gap-6">
           <MarketingMetrics />

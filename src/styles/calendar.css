@@ -251,8 +251,23 @@
 
 /* Style for future dates */
 .fc .fc-day-future .fc-daygrid-day-number {
-  @apply text-gray-700 dark:text-white/70;
+  @apply text-gray-800 dark:text-white/90;
 }
+
+/* Style for next month's dates */
+.fc .fc-day-other .fc-daygrid-day-number {
+  @apply text-gray-800 dark:text-white/90 !important;
+}
+
+/* If you want to also style the background of next month's dates */
+/* .fc .fc-day-other {
+  @apply bg-white/50 dark:bg-gray-800/50 !important;
+} */
+
+/* Ensure the day frame maintains the styling */
+/* .fc .fc-day-other .fc-daygrid-day-frame {
+  @apply bg-inherit !important;
+} */
 
 /* Calendar header and cells - match date squares background */
 .fc .fc-toolbar,
@@ -515,4 +530,17 @@ img[alt="Logo"] {
 /* Round the corners of the header section */
 .fc .fc-toolbar {
   @apply rounded-t-2xl !important;
+}
+
+/* Remove border from all header cells and specifically target the last one */
+.fc .fc-col-header-cell,
+.fc-theme-standard .fc-col-header-cell,
+.fc .fc-col-header-cell:last-child {
+  @apply h-[40px] bg-gray-50 dark:bg-gray-900 border-0 !important;
+}
+
+/* Ensure no borders on header cells in dark mode */
+.fc-theme-standard .fc-scrollgrid-section-header th,
+.fc-theme-standard .fc-scrollgrid-section-header th:last-child {
+  @apply border-0 dark:border-0 !important;
 }

@@ -14,6 +14,7 @@ import { useMongoDbClient } from "../services/mongoDbClient";
 import Toast from "../components/ui/Toast";
 import { useLocation } from 'react-router-dom';
 import { useCalendar } from "../context/CalendarContext";
+import PageBreadcrumb from "../components/common/PageBreadCrumb";
 // import { getImageUrl } from '../config/images.config';
 
 interface CalendarEvent extends EventInput {
@@ -279,6 +280,7 @@ const Calendar: React.FC = () => {
         title="React.js Calendar Dashboard | TailAdmin - Next.js Admin Dashboard Template"
         description="This is React.js Calendar Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
       />
+      <PageBreadcrumb pageTitle="Calendar" />
       <Toast 
         message="Please click on a date to add an event!" 
         isVisible={showToast} 
