@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 @layer components {
   .table-head {
     @apply bg-gray-50 dark:bg-gray-900 !important;
@@ -87,11 +88,11 @@
   .border-warning {
     @apply border-warning-500;
   }
-
+/* 
   /* FullCalendar Overrides */
-  /* .fc .fc-daygrid-day-frame fc-daygrid-day-frame fc-scrollgrid-sync-inner{
-    @apply min-h-[120px] !important;
-  } */
+   .fc .fc-daygrid-day-frame fc-daygrid-day-frame fc-scrollgrid-sync-inner{
+    @apply min-h-[120px] text-gray-900!important;
+  }  
 
   /* Ensure consistent height for day cells */
   .fc .fc-daygrid-day,
@@ -277,7 +278,16 @@
 /* here******************************************** */
 /* Day labels header - keep darkest color */
 .fc .fc-col-header-cell {
-  @apply py-1 dark:bg-gray-900 border-0;
+  @apply h-[40px] !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+  @apply flex h-full w-full items-center justify-center text-gray-900 dark:text-gray-100 !important;
+}
+
+/* Ensure the header cells themselves support centering */
+.fc-theme-standard .fc-scrollgrid-section-header th {
+  @apply align-middle text-center !important;
 }
 
 .fc .fc-scrollgrid-section-header > td {
@@ -300,7 +310,7 @@
 
 /* Make sure the header row has proper spacing and borders */
 .fc .fc-scrollgrid-section-header > td {
-  @apply border-0 dark:bg-gray-900;
+  @apply border-0  dark:bg-gray-900;
 }
 
 /* Remove borders from header cells specifically */
@@ -369,12 +379,12 @@ img[alt="Logo"] {
 }
 
 .fc-dayGridMonth-view.fc-view.fc-daygrid {
-  @apply w-full min-w-[718px] !important;
+  @apply text-gray-900 w-full min-w-[718px] !important;
 }
 
-/* Maintain header alignment */
+/* Maintain header alignment **************************************************************/
 .fc .fc-col-header-cell {
-  @apply w-[calc(100%/7)] !important;
+  @apply w-[calc(100%/7)] text-gray-900 !important;
 }
 
 .fc-col-header-cell fc-day fc-day-sun {
@@ -434,42 +444,75 @@ img[alt="Logo"] {
   @apply text-gray-600 dark:text-gray-300 !important;
 }
 
-/* Target individual header cells with maximum specificity */
+/* Target the header cells and their content with maximum specificity */
 .fc .fc-col-header-cell,
 .fc-theme-standard .fc-col-header-cell {
-  @apply h-[2px] bg-gray-900 dark:bg-gray-900 border-0 !important;
+  @apply h-[40px]  bg-gray-50 dark:bg-gray-900 !important;
+  /* flex items-center justify-center */
 }
 
-/* Target the text container inside header cells */
 .fc .fc-col-header-cell-cushion {
-  @apply flex items-center justify-center h-full text-gray-100 dark:text-gray-100 !important;
+  @apply m-0 p-0 flex items-center justify-center text-gray-900 dark:text-gray-100 !important;
 }
 
-/* Remove any competing background colors */
+/* Ensure the header row has proper alignment */
+.fc .fc-scrollgrid-section-header tr[role="row"] {
+  @apply flex items-center !important;
+}
+
+/* This section colors the Empty section below the date header section ***********************************************/
 .fc-theme-standard .fc-scrollgrid-section.fc-scrollgrid-section-header > td,
 .fc-theme-standard .fc-scrollgrid-section.fc-scrollgrid-section-header > th {
-  @apply bg-gray-900 dark:bg-gray-900 !important;
+  @apply h-[30px] bg-gray-50  dark:bg-gray-900 !important;
 }
 
+/* .fc-scrollgrid-section-header, .fc-theme-standard .fc-scrollgrid-section-header {
+  @apply h-[0px] bg-gray-50  dark:bg-gray-900 !important
+} */
 /* Target the row with role="row" in the header */
 .fc .fc-scrollgrid-section-header tr[role="row"],
 .fc-theme-standard .fc-scrollgrid-section-header tr[role="row"] {
-  @apply h-[30px] bg-gray-900 dark:bg-gray-900 !important;
+  @apply h-[30] bg-gray-50 dark:bg-gray-900 flex h-full w-full items-center justify-center !important;
 }
 
 /* Also target the containing elements to ensure the height propagates */
 .fc .fc-scrollgrid-section-header > td,
 .fc .fc-scrollgrid-section-header > th {
-  @apply h-[120px] bg-gray-900 dark:bg-gray-900 border-0 !important;
+  @apply h-[120px] bg-gray-50 dark:bg-gray-900 border-0 !important;
 }
 
-/* Ensure the header section maintains the height */
-.fc .fc-scrollgrid-section-header,
+/* This is the section below day section and above the calander-set to hide */
+ .fc .fc-scrollgrid-section-header, 
 .fc-theme-standard .fc-scrollgrid-section-header {
-  @apply h-[120px] bg-gray-900 dark:bg-gray-900 !important;
+  @apply h-[0px] bg-gray-50 dark:bg-gray-900 !important;
 }
 
 /* Target the scroller harness if needed */
 /* .fc-scroller-harness {
   @apply h-[120px] bg-gray-900 dark:bg-gray-900 border-0 !important;
 } */
+
+/* Add rounded corners to the main calendar container */
+.fc {
+  @apply w-full rounded-2xl overflow-hidden !important;
+}
+
+/* Ensure the view container also has rounded corners */
+.fc-view-harness {
+  @apply rounded-2xl overflow-hidden !important;
+}
+
+/* Round the corners of the main table */
+.fc-scrollgrid {
+  @apply rounded-2xl overflow-hidden !important;
+}
+
+/* Ensure the month view specifically has rounded corners */
+.fc-dayGridMonth-view.fc-view.fc-daygrid {
+  @apply rounded-2xl text-gray-900 w-full min-w-[718px] overflow-hidden !important;
+}
+
+/* Round the corners of the header section */
+.fc .fc-toolbar {
+  @apply rounded-t-2xl !important;
+}
