@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
 import { fetchCalendarEvents } from '../services/calendarApi';
 
-interface CalendarEvent {
+export interface CalendarEvent {
   id: string;
   title: string;
   start: string;
@@ -19,7 +19,7 @@ interface CalendarContextType {
   setEvents: React.Dispatch<React.SetStateAction<CalendarEvent[]>>;
 }
 
-const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
+export const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
 
 export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -28,21 +28,34 @@ export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const loadEvents = async () => {
       if (!user?.sub) return;
+      
       try {
+        console.log('Fetching events for user:', user.sub);
         const fetchedEvents = await fetchCalendarEvents(user.sub);
-        // Ensure we're setting an array
-        setEvents(Array.isArray(fetchedEvents) ? fetchedEvents : []);
+        console.log('Received events:', fetchedEvents);
+        
+        if (Array.isArray(fetchedEvents)) {
+          setEvents(fetchedEvents);
+        } else {
+          console.warn('Received non-array events:', fetchedEvents);
+          setEvents([]);
+        }
       } catch (error) {
         console.error('Failed to load events:', error);
-        setEvents([]); // Reset to empty array on error
+        setEvents([]);
       }
     };
 
     loadEvents();
   }, [user?.sub]);
 
+  const contextValue = useMemo(() => ({
+    events,
+    setEvents
+  }), [events]);
+
   return (
-    <CalendarContext.Provider value={{ events, setEvents }}>
+    <CalendarContext.Provider value={contextValue}>
       {children}
     </CalendarContext.Provider>
   );
