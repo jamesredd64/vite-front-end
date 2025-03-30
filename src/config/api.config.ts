@@ -16,6 +16,7 @@ export const getApiUrl = () => {
   return apiUrl;
 };
 
+
 export const API_CONFIG = {
   BASE_URL: getApiUrl(),
   ENDPOINTS: {
