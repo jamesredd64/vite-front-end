@@ -23,7 +23,7 @@ export const API_CONFIG = {
     USER_BY_ID: (id: string) => `/api/users/${encodeURIComponent(id)}`,
     USER_BY_EMAIL: (email: string) => `/api/users/email/${encodeURIComponent(email)}`,
     SAVE_USER_DATA: (id: string) => `/api/users/${encodeURIComponent(id)}`,
-    USER_CALENDAR_EVENTS: (id: string) => `/api/calendar/${encodeURIComponent(id)}`
+    USER_CALENDAR_EVENTS: (id: string) => `/calendar/${encodeURIComponent(id)}`
   }
 } as const;
 
