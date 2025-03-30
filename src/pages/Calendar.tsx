@@ -121,10 +121,15 @@ const Calendar: React.FC = () => {
   }, [user?.sub, fetchCalendarEvents, setEvents]);
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    // Prevent any default touch behavior
+    // Prevent any default touch/click behavior
     if (selectInfo.jsEvent) {
       selectInfo.jsEvent.preventDefault();
+      selectInfo.jsEvent.stopPropagation();
     }
+
+    // Unselect the date range immediately
+    const calendarApi = selectInfo.view.calendar;
+    calendarApi.unselect();
 
     resetModalFields();
     const startDate = selectInfo.startStr;
@@ -135,14 +140,10 @@ const Calendar: React.FC = () => {
     endDate.setDate(endDate.getDate() + 1);
     setEventEndDate(endDate.toISOString().split('T')[0]);
 
-    // Add small delay for mobile
+    // Add delay for mobile to ensure touch event is completed
     setTimeout(() => {
       openModal();
-    }, 50);
-
-    // Unselect the date range
-    const calendarApi = selectInfo.view.calendar;
-    calendarApi.unselect();
+    }, 100);
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
@@ -333,7 +334,11 @@ const Calendar: React.FC = () => {
             // }}
             events={events}
             selectable={true}
+            selectMirror={true}
             select={handleDateSelect}
+            selectLongPressDelay={0} // Reduce long press delay for mobile
+            longPressDelay={0} // Reduce general long press delay
+            selectMinDistance={0} // Reduce minimum drag distance for selection
             eventClick={handleEventClick}
             eventContent={renderEventContent}
             customButtons={{
