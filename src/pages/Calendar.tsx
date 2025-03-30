@@ -121,37 +121,58 @@ const Calendar: React.FC = () => {
   }, [user?.sub, fetchCalendarEvents, setEvents]);
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
+    // Prevent any default touch behavior
+    if (selectInfo.jsEvent) {
+      selectInfo.jsEvent.preventDefault();
+    }
+
     resetModalFields();
     const startDate = selectInfo.startStr;
     setEventStartDate(startDate);
-    console.log("Just clicked event to edit and start date =:", startDate);
+
     // Set end date to the next day for new events
     const endDate = new Date(selectInfo.startStr);
     endDate.setDate(endDate.getDate() + 1);
-    console.log("Just clicked event to edit and end date = :", endDate.getDate() + 1 );
     setEventEndDate(endDate.toISOString().split('T')[0]);
-    
-    openModal();
+
+    // Add small delay for mobile
+    setTimeout(() => {
+      openModal();
+    }, 50);
+
+    // Unselect the date range
+    const calendarApi = selectInfo.view.calendar;
+    calendarApi.unselect();
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
+    // Prevent any default touch behavior
+    if (clickInfo.jsEvent) {
+      clickInfo.jsEvent.preventDefault();
+    }
+
     const event = clickInfo.event;
-    console.log('Clicked event data:', event); // Add logging to see full event data
+    console.log('Clicked event data:', event);
     
     setSelectedEvent(event as unknown as CalendarEvent);
     setEventTitle(event.title);
     
-    // Handle start date
-    const startDate = event.start ? event.start.toISOString().split('T')[0] : event.startStr.split('T')[0];
+    const startDate = event.start 
+      ? event.start.toISOString().split('T')[0] 
+      : event.startStr.split('T')[0];
     setEventStartDate(startDate);
-    console.log('startDate: ', startDate); // Add logging to see full event data
-    // Handle end date
-    const endDate = event.end ? event.end.toISOString().split('T')[0] : event.endStr.split('T')[0];
+    
+    const endDate = event.end 
+      ? event.end.toISOString().split('T')[0] 
+      : event.endStr.split('T')[0];
     setEventEndDate(endDate);
-    console.log('endDate: ', endDate); // Add logging to see full event data
     
     setEventLevel(event.extendedProps.calendar);
-    openModal();
+
+    // Add small delay for mobile
+    setTimeout(() => {
+      openModal();
+    }, 50);
   };
 
   const handleAddOrUpdateEvent = async () => {

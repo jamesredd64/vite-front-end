@@ -97,7 +97,7 @@ const AppHeader: React.FC = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   const handleToggle = () => {
-    if (window.innerWidth >= 991) {
+    if (window.innerWidth >= 768) {  // Changed from 991 to 768 to match other components
       toggleSidebar();
     } else {
       toggleMobileSidebar();

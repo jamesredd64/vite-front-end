@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import React from 'react';
-import { getImageUrl } from '../config/images.config';
+// import { getImageUrl } from '../config/images.config';
 
 export const SignedOut = () => {
   const { loginWithRedirect } = useAuth0();
