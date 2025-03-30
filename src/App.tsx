@@ -8,15 +8,11 @@ import NotFound from "./pages/OtherPage/NotFound";
 import UserProfile from "./pages/ProfilePage";
 import  Calendar from "./pages/Calendar";
 import DashboardHome from "./pages/Dashboard/Home";
-import Logout from "./pages/test";
-// import UserProfile from "./pages/TestPage";
 import React from "react";
 import { SignedOut } from "./pages/SignedOut";
 import Loader from './components/common/Loader';
 import { useMongoDbClient } from './services/mongoDbClient';
-// import MarketingDashboard from "./pages/Marketing/MarketingDashboard";
 import Marketing from "./pages/Dashboard/Marketing";
-// import { getImageUrl } from './config/images.config';
 
 interface UserMetadata {
   auth0Id: string;
@@ -150,18 +146,10 @@ function App() {
             <Route path="/signed-out" element={<SignedOut />} />
             {isAuthenticated ? (
               <Route element={<AppLayout />}>
-                <Route index path="/" element={<Navigate to="/marketing" replace />} />
-                {/* <Route path="/" element={<Marketing />} /> */}
-                {/* <Route path="/test" element={
-                  <ErrorBoundary>
-                    <UserProfile />
-                  </ErrorBoundary>
-                } /> */}
-                <Route path="/lg" element={<Logout />} />
+                <Route index path="/" element={<Navigate to="/marketing" replace />} />              
                 <Route path="/dashboard" element={<DashboardHome />} />
                 {/* <Route path="/profile" element={<UserProfile />} /> */}
-                <Route path="/profile" element={<UserProfile/>} />
-                
+                <Route path="/profile" element={<UserProfile/>} />                
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/marketing" element={<Marketing />} />
                 <Route path="*" element={<NotFound />} />

@@ -10,23 +10,27 @@
       "use": "@vercel/static"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/images/(.*)",
-      "dest": "/public/images/$1"
+      "source": "/",
+      "destination": "server.js"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "server.js"
+      "source": "/favicon.ico",
+      "destination": "/public/favicon.ico"
+    },
+    {
+      "source": "/favicon.png",
+      "destination": "/public/favicon.png"
+    },
+    {
+      "source": "/images/:path*",
+      "destination": "/public/images/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "server.js"
     }
-  ],
-  "ignoreCommand": "git check-ignore",
-  "excludeFiles": [
-    "scripts/**",
-    "test/**",
-    "_Dev/**",
-    "fe-saved/**",
-    "repo-backup/**"
   ],
   "headers": [
     {
@@ -38,11 +42,6 @@
         { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" }
       ]
     }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "MONGODB_URI": "@mongodb_uri",
-    "AUTH0_AUDIENCE": "@auth0_audience",
-    "AUTH0_ISSUER_BASE_URL": "@auth0_issuer_base_url"
-  }
+  ]
+  
 }
