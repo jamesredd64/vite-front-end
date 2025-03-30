@@ -7,7 +7,7 @@
     "dev": "vite",
     "server": "cd server && cross-env NODE_ENV=development nodemon server.js",
     "dev:full": "concurrently \"npm run dev\" \"npm run server\"",
-    "build": "cross-env NODE_NO_WARNINGS=1 vite build",
+    "build": "vite build",
     "vercel-build": "vite build",
     "lint": "eslint .",
     "test:mongodb": "cd server && npm run test:mongodb",
