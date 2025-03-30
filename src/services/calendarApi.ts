@@ -43,18 +43,24 @@ export const updateCalendarEvent = async (eventId: string, eventData: CalendarEv
 };
 
 export const fetchCalendarEvents = async (auth0Id: string) => {
-  console.log('Fetching events for auth0Id:', auth0Id); // Debug log
+  console.log('Fetching events for auth0Id:', auth0Id);
   
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/api/calendar/events/${auth0Id}`);
-    console.log('API Response status:', response.status); // Debug log
+    const response = await fetch(`${API_CONFIG.BASE_URL}/api/calendar`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    console.log('API Response status:', response.status);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('Fetched events:', data); // Debug log
+    console.log('Fetched events from api:', data);
     return data;
   } catch (error) {
     console.error('Error fetching calendar events:', error);
