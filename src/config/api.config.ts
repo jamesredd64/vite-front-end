@@ -19,11 +19,11 @@ export const getApiUrl = () => {
 export const API_CONFIG = {
   BASE_URL: getApiUrl(),
   ENDPOINTS: {
-    USERS: '/api/users',
-    USER_BY_ID: (id: string) => `/api/users/${encodeURIComponent(id)}`,
-    USER_BY_EMAIL: (email: string) => `/api/users/email/${encodeURIComponent(email)}`,
-    SAVE_USER_DATA: (id: string) => `/api/users/${encodeURIComponent(id)}`,
-    
+
+    USERS: '/users',
+    USER_BY_ID: (id: string) => `/users/${encodeURIComponent(id)}`,
+    USER_BY_EMAIL: (email: string) => `/users/email/${encodeURIComponent(email)}`,
+    SAVE_USER_DATA: (id: string) => `/users/${encodeURIComponent(id)}`,
     USER_CALENDAR_EVENTS: (id: string) => `/calendar/${encodeURIComponent(id)}`
   }
 } as const;
