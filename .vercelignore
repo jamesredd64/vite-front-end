@@ -48,3 +48,6 @@ yarn-error.log*
 *.log
 .DS_Store
 Thumbs.db
+
+# Important: DO NOT ignore config directory
+!config/
