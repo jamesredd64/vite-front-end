@@ -13,6 +13,14 @@ import { SignedOut } from "./pages/SignedOut";
 import Loader from './components/common/Loader';
 import { useMongoDbClient } from './services/mongoDbClient';
 import Marketing from "./pages/Dashboard/Marketing";
+// import About from "./pages/Company/About";
+// import Careers from "./pages/Company/Careers";
+// import Contact from "./pages/Company/Contact";
+// import Blog from "./pages/Resources/Blog";
+// import Documentation from "./pages/Resources/Documentation";
+// import Help from "./pages/Resources/Help";
+// import Privacy from "./pages/Legal/Privacy";
+// import Terms from "./pages/Legal/Terms";
 
 interface UserMetadata {
   auth0Id: string;
@@ -148,10 +156,17 @@ function App() {
               <Route element={<AppLayout />}>
                 <Route index path="/" element={<Navigate to="/marketing" replace />} />              
                 <Route path="/dashboard" element={<DashboardHome />} />
-                {/* <Route path="/profile" element={<UserProfile />} /> */}
                 <Route path="/profile" element={<UserProfile/>} />                
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/marketing" element={<Marketing />} />
+                {/* <Route path="/about" element={<About />} /> */}
+                {/* <Route path="/careers" element={<Careers />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/documentation" element={<Documentation />} />
+                <Route path="/help" element={<Help />} />
+                <Route path="/privacy" element={<Privacy />} /> */}
+                {/* <Route path="/terms" element={<Terms />} /> */}
                 <Route path="*" element={<NotFound />} />
               </Route>
             ) : (

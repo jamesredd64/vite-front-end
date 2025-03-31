@@ -1,10 +1,11 @@
 {
   "name": "vite-frontend",
   "private": true,
-  "version": "2.0.4",
+  "version": "2.0.5",
   "scripts": {
     "prebuild": "node src/config/update-version.js",
     "build": "vite build",
+    "start": "vite",
     "vercel-build": "node src/config/update-version.js && vite build"
   },
   "dependencies": {
