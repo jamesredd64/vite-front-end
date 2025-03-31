@@ -243,7 +243,7 @@ const AppHeader: React.FC = () => {
                     setSearchQuery(query);
                     // Removed handleSearch(query) from here
                   }}
-                  className="w-full pl-12 pr-24 py-3 bg-transparent border border-gray-200 rounded-lg outline-none focus:border-primary dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                  className="w-[600px] pl-12 pr-24 py-3 bg-transparent border border-gray-200 rounded-lg outline-none focus:border-primary dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
                 />
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
                   <button
