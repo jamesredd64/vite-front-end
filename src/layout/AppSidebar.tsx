@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import MarketingOverview from "../pages/MarketingOverview";
 
 // Assume these icons are imported from an icon library
 import {
   CalenderIcon,
   ChevronDownIcon,
-  DollarLineIcon,
   GridIcon,
   HorizontaLDots, 
   UserCircleIcon,
@@ -30,10 +30,12 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Dashboard",
     subItems: [
-      { name: "Ecommerce", path: "/dashboard", pro: false },
-      { name: "Marketing", path: "/marketing", pro: false, icon: <DollarLineIcon /> },
       { name: "Calendar", path: "/calendar", pro: false, icon: <CalenderIcon /> },
+      { name: "Ecommerce", path: "/dashboard", pro: false },
+      { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview /> },      
       { name: "User Profile", path: "/profile", pro: false, icon: <UserCircleIcon /> },
+
+      
     ],
   },
   // {

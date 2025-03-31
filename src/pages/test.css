@@ -1,0 +1,56 @@
+.dashboard {
+    display: flex;
+    background-color: #1e1e1e;
+    color: white;
+  }
+  
+  .sidebar {
+    width: 200px;
+    padding: 20px;
+    background-color: #232323;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar li {
+    margin: 15px 0;
+    cursor: pointer;
+  }
+  
+  .main-content {
+    flex-grow: 1;
+    padding: 20px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+  }
+  
+  .stat-card {
+    background-color: #2a2a2a;
+    padding: 15px;
+    border-radius: 5px;
+  }
+  
+  .traffic-chart, .traffic-stats, .featured-campaigns {
+    margin: 20px 0;
+  }
+  
+  .chart-placeholder {
+    height: 200px;
+    background-color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }

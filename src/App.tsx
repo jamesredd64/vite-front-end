@@ -13,6 +13,12 @@ import { SignedOut } from "./pages/SignedOut";
 import Loader from './components/common/Loader';
 import { useMongoDbClient } from './services/mongoDbClient';
 import Marketing from "./pages/Dashboard/Marketing";
+import MarketingOverview from "./pages/MarketingOverview";
+
+// import Mypage from "./pages/test";
+
+// import Marketing2 from './pages/Dashboard/Main/Marketing';
+// import Marketing from "./pages/Dashboard/Main/Marketing";
 // import About from "./pages/Company/About";
 // import Careers from "./pages/Company/Careers";
 // import Contact from "./pages/Company/Contact";
@@ -150,8 +156,8 @@ function App() {
     <div className="dark:bg-boxdark-2 dark:text-bodydark min-h-screen">
       <div className="flex h-screen overflow-hidden">
         <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-          <Routes>
-            <Route path="/signed-out" element={<SignedOut />} />
+          <Routes>        
+           <Route path="/signed-out" element={<SignedOut />} />
             {isAuthenticated ? (
               <Route element={<AppLayout />}>
                 <Route index path="/" element={<Navigate to="/marketing" replace />} />              
@@ -159,14 +165,8 @@ function App() {
                 <Route path="/profile" element={<UserProfile/>} />                
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/marketing" element={<Marketing />} />
-                {/* <Route path="/about" element={<About />} /> */}
-                {/* <Route path="/careers" element={<Careers />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/documentation" element={<Documentation />} />
-                <Route path="/help" element={<Help />} />
-                <Route path="/privacy" element={<Privacy />} /> */}
-                {/* <Route path="/terms" element={<Terms />} /> */}
+                <Route path="/marketing-overview" element={<MarketingOverview />} />
+                {/* <Route path="/mypage" element={<Mypage />} /> */}
                 <Route path="*" element={<NotFound />} />
               </Route>
             ) : (
