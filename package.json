@@ -3,9 +3,9 @@
   "private": true,
   "version": "2.0.3",
   "scripts": {
-    "prebuild": "node scripts/update-version.js",
+    "prebuild": "node update-version.js",
     "build": "vite build",
-    "vercel-build": "node scripts/update-version.js && vite build"
+    "vercel-build": "node update-version.js && vite build"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
