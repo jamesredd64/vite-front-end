@@ -1,7 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { VERSION } from '../config/version';
 
 const AppFooter: React.FC = () => {
+  const buildDate = new Date(VERSION.buildDate).toLocaleDateString();
+  
   return (
     <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
       <div className="max-w-(--breakpoint-2xl) mx-auto px-4 py-6">
@@ -83,11 +86,19 @@ const AppFooter: React.FC = () => {
           </div>
         </div>
 
-        {/* Copyright */}
+        {/* Copyright and Version */}
         <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
-          <p className="text-sm text-center text-gray-500 dark:text-gray-400">
-            &copy; {new Date().getFullYear()} Stagholme Inc. All rights reserved.
-          </p>
+          <div className="flex flex-col items-center justify-center space-y-2">
+            <p className="text-sm text-center text-gray-500 dark:text-gray-400">
+              &copy; {new Date().getFullYear()} Stagholme Inc. All rights reserved.
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              Version {VERSION.number} 
+              {VERSION.isVercel && ' • Vercel'} 
+              {VERSION.environment !== 'production' && ` • ${VERSION.environment}`}
+              {' • '}{buildDate}
+            </p>
+          </div>
         </div>
       </div>
     </footer>

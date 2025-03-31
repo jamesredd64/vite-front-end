@@ -45,3 +45,6 @@ yarn-error.log*
 *.log
 .DS_Store
 Thumbs.db
+
+# Keep version update script
+!scripts/update-version.js

@@ -1,14 +1,15 @@
 {
   "name": "vite-frontend",
   "private": true,
-  "version": "2.0.1",
+  "version": "2.0.2",
   "scripts": {
     "update-svg": "scripts\\update-svg-imports.cmd",
     "dev": "vite",
     "server": "cd server && cross-env NODE_ENV=development nodemon server.js",
     "dev:full": "concurrently \"npm run dev\" \"npm run server\"",
+    "prebuild": "node scripts/update-version.js",
     "build": "vite build",
-    "vercel-build": "vite build",
+    "vercel-build": "node scripts/update-version.js && vite build",
     "lint": "eslint .",
     "test:mongodb": "cd server && npm run test:mongodb",
     "preview": "vite preview",
