@@ -16,6 +16,8 @@ export const createCalendarEvent = async (eventData: CalendarEvent) => {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
+    mode: 'cors',
     body: JSON.stringify(eventData),
   });
 
@@ -50,17 +52,16 @@ export const fetchCalendarEvents = async (auth0Id: string) => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
+      credentials: 'include',
+      mode: 'cors'
     });
-    
-    console.log('API Response status:', response.status);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('Fetched events from api:', data);
     return data;
   } catch (error) {
     console.error('Error fetching calendar events:', error);
