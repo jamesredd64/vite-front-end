@@ -17,7 +17,6 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       onwarn(warning, warn) {
-        // Skip certain warnings
         if (warning.code === 'EVAL' && 
             warning.id?.includes('@react-jvectormap/core')) {
           return;
@@ -27,6 +26,12 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3000
+    port: 3000,
+    cors: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
+      'Access-Control-Allow-Headers': 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
+    }
   }
 });
