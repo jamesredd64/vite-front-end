@@ -18,6 +18,7 @@ import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import '../styles/calendar.css';
+import { useNavigate } from 'react-router-dom';
 
 interface CalendarEvent extends EventInput {
   extendedProps: {
@@ -42,6 +43,7 @@ const Calendar: React.FC = () => {
   const calendarRef = useRef<FullCalendar>(null);
   const { isOpen, openModal, closeModal } = useModal();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Add this useEffect to handle navigation to specific events
   useEffect(() => {
@@ -328,7 +330,10 @@ const Calendar: React.FC = () => {
         title="React.js Calendar Dashboard | TailAdmin - Next.js Admin Dashboard Template"
         description="This is React.js Calendar Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
       />
-      <PageBreadcrumb pageTitle="Calendar" />
+      <PageBreadcrumb 
+        pageTitle="Calendar" 
+        onNavigate={(path) => navigate(path)}
+      />
       <Toast 
         message="Please click on a date to add an event!" 
         isVisible={showToast} 

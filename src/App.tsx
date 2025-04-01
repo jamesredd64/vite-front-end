@@ -1,9 +1,9 @@
 
-import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth0 } from '@auth0/auth0-react';
 import { useGlobalStorage } from './hooks/useGlobalStorage';
 import AppLayout from "./layout/AppLayout";
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfile from "./pages/ProfilePage";
 import  Calendar from "./pages/Calendar";
@@ -14,6 +14,7 @@ import Loader from './components/common/Loader';
 import { useMongoDbClient } from './services/mongoDbClient';
 import Marketing from "./pages/Dashboard/Marketing";
 import MarketingOverview from "./pages/MarketingOverview";
+import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 
 // import Mypage from "./pages/test";
 
@@ -60,12 +61,64 @@ interface UserMetadata {
   };
 }
 
+interface NavigationContextType {
+  handleNavigation: (path: string) => boolean;
+  hasUnsavedChanges: boolean;
+  setHasUnsavedChanges: (value: boolean) => void;
+}
+
+type NavigationState = {
+  isModalOpen: boolean;
+  pendingPath: string | null;
+};
+
+export const NavigationContext = React.createContext<NavigationContextType | undefined>(undefined);
+
 function App() {
   const { isLoading, isAuthenticated, error: auth0Error, user } = useAuth0();
   const navigate = useNavigate();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const location = useLocation();
   const [userMetadata, setUserMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const { updateUser } = useMongoDbClient();
   const initializationAttempted = useRef(false);
+  
+  // Add state for handling unsaved changes
+  const [navigationState, setNavigationState] = useState<NavigationState>({
+    isModalOpen: false,
+    pendingPath: null,
+  });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Add context or global state management for unsaved changes
+  const handleNavigation = useCallback((path: string) => {
+    if (hasUnsavedChanges) {
+      setNavigationState({
+        isModalOpen: true,
+        pendingPath: path,
+      });
+      return false; // Prevent immediate navigation
+    }
+    return true; // Allow navigation
+  }, [hasUnsavedChanges]);
+
+  const handleConfirmNavigation = () => {
+    if (navigationState.pendingPath) {
+      setHasUnsavedChanges(false);
+      navigate(navigationState.pendingPath);
+      setNavigationState({
+        isModalOpen: false,
+        pendingPath: null,
+      });
+    }
+  };
+
+  const handleCancelNavigation = () => {
+    setNavigationState({
+      isModalOpen: false,
+      pendingPath: null,
+    });
+  };
 
   // Update profile picture only when user data changes
   useEffect(() => {
@@ -101,8 +154,8 @@ function App() {
         const userData = await updateUser(user.sub, {
           email: user?.email || '',
           name: user?.name || '',          
-          firstName: user?.given_name || '',
-          lastName: user?.family_name || '',
+          // firstName: user?.given_name || '',
+          // lastName: user?.family_name || '',
           // profilePictureUrl: user?.picture || '',
           // phoneNumber: '',
           // dateOfBirth: '',
@@ -153,29 +206,43 @@ function App() {
   }
 
   return (
-    <div className="dark:bg-boxdark-2 dark:text-bodydark min-h-screen">
-      <div className="flex h-screen overflow-hidden">
-        <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-          <Routes>        
-           <Route path="/signed-out" element={<SignedOut />} />
-            {isAuthenticated ? (
-              <Route element={<AppLayout />}>
-                <Route index path="/" element={<Navigate to="/marketing-overview" replace />} />              
-                <Route path="/dashboard" element={<DashboardHome />} />
-                <Route path="/profile" element={<UserProfile/>} />                
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/marketing" element={<Marketing />} />
-                <Route path="/marketing-overview" element={<MarketingOverview />} />
-                {/* <Route path="/mypage" element={<Mypage />} /> */}
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            ) : (
-              <Route path="*" element={<Navigate to="/signed-out" replace />} />
-            )}
-          </Routes>
+    <NavigationContext.Provider value={{ 
+      handleNavigation, 
+      hasUnsavedChanges, 
+      setHasUnsavedChanges 
+    }}>
+      <div className="dark:bg-boxdark-2 dark:text-bodydark min-h-screen">
+        <div className="flex h-screen overflow-hidden">
+          <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+            <Routes>        
+             <Route path="/signed-out" element={<SignedOut />} />
+              {isAuthenticated ? (
+                <Route element={<AppLayout />}>
+                  <Route index path="/" element={<Navigate to="/marketing-overview" replace />} />              
+                  <Route path="/dashboard" element={<DashboardHome />} />
+                  <Route path="/profile" element={<UserProfile/>} />                
+                  <Route path="/calendar" element={<Calendar />} />
+                  <Route path="/marketing" element={<Marketing />} />
+                  <Route path="/marketing-overview" element={<MarketingOverview />} />
+                  {/* <Route path="/mypage" element={<Mypage />} /> */}
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              ) : (
+                <Route path="*" element={<Navigate to="/signed-out" replace />} />
+              )}
+            </Routes>
+            
+            {/* Add the blocking modal */}
+            <UnsavedChangesModal
+              isOpen={navigationState.isModalOpen}
+              onConfirm={handleConfirmNavigation}
+              onDiscard={handleConfirmNavigation}
+              onClose={handleCancelNavigation}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </NavigationContext.Provider>
   );
 }
 

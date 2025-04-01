@@ -1,78 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
-import { useModal } from '../../hooks/useModal';
-import { useUserProfileStore } from '../../stores/userProfileStore';
+import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 
-interface UserAddressCardProps {
-  onUpdate: (data: unknown) => void;
-  initialData: {
-    address?: {
-      street?: string;
-      city?: string;
-      state?: string;
-      zipCode?: string;
-      country?: string;
-    };
-  };
-}
-
-export const UserAddressCard: React.FC<UserAddressCardProps> = ({ onUpdate, initialData }) => {
+export default function UserAddressCard() {
   const { isOpen, openModal, closeModal } = useModal();
-  const { user } = useAuth0();
-  const userProfile = useUserProfileStore();
-  const [saveResult, setSaveResult] = useState<string | null>(null);
-  
-  const [formData, setFormData] = useState({
-    address: {
-      street: initialData.address?.street || '',
-      city: initialData.address?.city || '',
-      state: initialData.address?.state || '',
-      zipCode: initialData.address?.zipCode || '',
-      country: initialData.address?.country || ''
-    }
-  });
-
-  useEffect(() => {
-    const newFormData = {
-      address: {
-        street: initialData.address?.street || '',
-        city: initialData.address?.city || '',
-        state: initialData.address?.state || '',
-        zipCode: initialData.address?.zipCode || '',
-        country: initialData.address?.country || ''
-      }
-    };
-
-    if (JSON.stringify(formData) !== JSON.stringify(newFormData)) {
-      setFormData(newFormData);
-    }
-  }, [initialData]);
-
-  const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      address: {
-        ...prev.address,
-        [field]: e.target.value
-      }
-    }));
-    userProfile.setHasUnsavedChanges(true);
+  const handleSave = () => {
+    // Handle save logic here
+    console.log("Saving changes...");
+    closeModal();
   };
-
-  const handleSave = async () => {
-    try {
-      if (!user?.sub) return;
-      onUpdate(formData);
-      closeModal();
-    } catch (error) {
-      console.error('Error saving address info:', error);
-      setSaveResult('Error saving address');
-    }
-  };
-
   return (
     <>
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -82,23 +20,22 @@ export const UserAddressCard: React.FC<UserAddressCardProps> = ({ onUpdate, init
               Address
             </h4>
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-7 2xl:gap-x-32">
-            <div>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
+              <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Street Address
+                  Country
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {formData.address.street}
+                  United States.
                 </p>
               </div>
-              
 
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                   City/State
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {formData.address.city}, {formData.address.state}
+                  Phoenix, Arizona, United States.
                 </p>
               </div>
 
@@ -107,16 +44,16 @@ export const UserAddressCard: React.FC<UserAddressCardProps> = ({ onUpdate, init
                   Postal Code
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {formData.address.zipCode}
+                  ERT 2489
                 </p>
               </div>
 
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Country
+                  TAX ID
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {formData.address.country}
+                  AS4568384
                 </p>
               </div>
             </div>
@@ -145,7 +82,6 @@ export const UserAddressCard: React.FC<UserAddressCardProps> = ({ onUpdate, init
           </button>
         </div>
       </div>
-
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
@@ -158,73 +94,42 @@ export const UserAddressCard: React.FC<UserAddressCardProps> = ({ onUpdate, init
           </div>
           <form className="flex flex-col">
             <div className="px-2 overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
                   <Label>Country</Label>
-                  <Input 
-                    type="text" 
-                    value={formData.address.country}
-                    onChange={handleInputChange('country')}
-                  />
+                  <Input type="text" value="United States" />
                 </div>
 
                 <div>
-                  <Label>City</Label>
-                  <Input 
-                    type="text" 
-                    value={formData.address.city}
-                    onChange={handleInputChange('city')}
-                  />
-                </div>
-
-                <div>
-                  <Label>State</Label>
-                  <Input 
-                    type="text" 
-                    value={formData.address.state}
-                    onChange={handleInputChange('state')}
-                  />
+                  <Label>City/State</Label>
+                  <Input type="text" value="Arizona, United States." />
                 </div>
 
                 <div>
                   <Label>Postal Code</Label>
-                  <Input 
-                    type="text" 
-                    value={formData.address.zipCode}
-                    onChange={handleInputChange('zipCode')}
-                  />
+                  <Input type="text" value="ERT 2489" />
                 </div>
 
-                <div className="lg:col-span-2">
-                  <Label>Street Address</Label>
-                  <Input 
-                    type="text" 
-                    value={formData.address.street}
-                    onChange={handleInputChange('street')}
-                  />
+                <div>
+                  <Label>TAX ID</Label>
+                  <Input type="text" value="AS4568384" />
                 </div>
               </div>
             </div>
-
-            <div className="mt-4 flex justify-end space-x-2">
-              <Button onClick={closeModal} variant="outline">
-                Cancel
+            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+              <Button size="sm" variant="outline" onClick={closeModal}>
+                Close
               </Button>
-              <Button onClick={handleSave} variant="primary">
+              <Button size="sm" onClick={handleSave}>
                 Save Changes
               </Button>
             </div>
           </form>
         </div>
       </Modal>
-
-      {saveResult && (
-        <div className="mt-4 p-4 rounded-lg bg-red-100 dark:bg-red-900">
-          <p className="text-red-700 dark:text-red-300">{saveResult}</p>
-        </div>
-      )}
     </>
   );
-};
+}
 
-export default UserAddressCard;
+
+
