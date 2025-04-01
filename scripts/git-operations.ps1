@@ -13,6 +13,7 @@ function Show-GitMenu {
     Write-Host "10: View commit history"
     Write-Host "11: Overwrite main with backup branch"
     Write-Host "12: Switch Environment (Dev/Prod)"
+    Write-Host "13: Overwrite specified branch"
     Write-Host "Q: Quit"
     Write-Host "=================================================="
 }
@@ -229,6 +230,57 @@ function Switch-Environment {
     }
 }
 
+function Overwrite-Branch {
+    $targetBranch = Read-Host "Enter the branch you want to overwrite"
+    $sourceBranch = Read-Host "Enter the branch you want to copy from"
+    
+    Write-Host "`nThis will completely overwrite $targetBranch with $sourceBranch"
+    Write-Host "WARNING: This operation cannot be undone!"
+    $confirm = Read-Host "Are you sure you want to continue? (y/n)"
+    
+    if ($confirm -eq 'y') {
+        # First check if there are uncommitted changes
+        $status = git status --porcelain
+        if ($status) {
+            Write-Host "You have uncommitted changes. Please commit or stash them first."
+            Write-Host "Would you like to:"
+            Write-Host "1: Stash changes"
+            Write-Host "2: Force reset (lose changes)"
+            Write-Host "3: Cancel"
+            $choice = Read-Host "Choose option"
+            
+            switch ($choice) {
+                '1' {
+                    git stash
+                }
+                '2' {
+                    git reset --hard HEAD
+                    git clean -fd
+                }
+                default {
+                    Write-Host "Operation cancelled"
+                    return
+                }
+            }
+        }
+        
+        # Perform the branch overwrite
+        git checkout $targetBranch
+        git reset --hard $sourceBranch
+        
+        $pushConfirm = Read-Host "Do you want to force push these changes to remote? (y/n)"
+        if ($pushConfirm -eq 'y') {
+            git push --force origin $targetBranch
+            Write-Host "`n$targetBranch has been successfully overwritten with $sourceBranch and pushed to remote"
+        } else {
+            Write-Host "`n$targetBranch has been successfully overwritten with $sourceBranch locally"
+            Write-Host "Remember to force push if you want to update the remote branch"
+        }
+    } else {
+        Write-Host "Operation cancelled"
+    }
+}
+
 # Main loop
 do {
     Show-GitMenu
@@ -274,6 +326,7 @@ do {
         }
         '11' { Reset-ToBackupBranch }
         '12' { Switch-Environment }
+        '13' { Overwrite-Branch }
     }
     if ($selection -ne 'q') {
         Write-Host "`nPress any key to continue..."
