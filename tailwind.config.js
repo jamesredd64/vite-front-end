@@ -23,11 +23,11 @@ export default {
       },
       colors: {
         brand: {
-          50: '#ecf3ff',
-          100: '#e0ebff',
-          400: '#6B7FFF',
-          500: '#465fff',
-          600: '#3641f5',
+          50: '#e6ebff',   // Lightest shade
+          100: '#ccd6ff',  // Lighter shade
+          400: '#4d66ff',  // Light shade
+          500: '#1333ff',  // Main blue
+          600: '#0f29cc',  // Darker shade
         },
         success: {
           50: '#ecfdf5',

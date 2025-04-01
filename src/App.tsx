@@ -160,7 +160,7 @@ function App() {
            <Route path="/signed-out" element={<SignedOut />} />
             {isAuthenticated ? (
               <Route element={<AppLayout />}>
-                <Route index path="/" element={<Navigate to="/marketing" replace />} />              
+                <Route index path="/" element={<Navigate to="/marketing-overview" replace />} />              
                 <Route path="/dashboard" element={<DashboardHome />} />
                 <Route path="/profile" element={<UserProfile/>} />                
                 <Route path="/calendar" element={<Calendar />} />

@@ -1,12 +1,13 @@
 {
-  "name": "vite-frontend",
+  "name": "stockholme.app",
   "private": true,
   "version": "2.0.7",
   "scripts": {
     "prebuild": "node src/config/update-version.js",
     "build": "vite build",
     "start": "vite",
-    "vercel-build": "node src/config/update-version.js && vite build"
+    "vercel-build": "node src/config/update-version.js && vite build",
+    "git": "scripts\\git-operations.cmd"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
@@ -23,6 +24,7 @@
     "@reduxjs/toolkit": "^1.9.7",
     "@supabase/supabase-js": "^2.49.1",
     "@tailwindcss/forms": "^0.5.10",
+    "@tippyjs/react": "^4.2.6",
     "apexcharts": "^4.1.0",
     "axios": "^1.8.4",
     "classnames": "^2.5.1",

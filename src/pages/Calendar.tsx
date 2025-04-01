@@ -15,7 +15,9 @@ import Toast from "../components/ui/Toast";
 import { useLocation } from 'react-router-dom';
 import { useCalendar } from "../context/CalendarContext";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
-
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
+import '../styles/calendar.css';
 
 interface CalendarEvent extends EventInput {
   extendedProps: {
@@ -25,7 +27,7 @@ interface CalendarEvent extends EventInput {
 
 const Calendar: React.FC = () => {
   const { user } = useAuth0();
-  const { fetchCalendarEvents, createCalendarEvent, updateCalendarEvent } = useMongoDbClient();
+  const { fetchCalendarEvents, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } = useMongoDbClient();
   const { events, setEvents } = useCalendar();
   const [error, setError] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
@@ -36,6 +38,7 @@ const Calendar: React.FC = () => {
   const [eventEndDate, setEventEndDate] = useState("");
   const [eventLevel, setEventLevel] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
   const { isOpen, openModal, closeModal } = useModal();
   const location = useLocation();
@@ -287,6 +290,30 @@ const Calendar: React.FC = () => {
     }
   };
 
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent?.id) {
+      setError('No event selected for deletion');
+      return;
+    }
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      if (!selectedEvent?.id) {
+        throw new Error('Cannot delete event: missing event ID');
+      }
+      await deleteCalendarEvent(selectedEvent.id);
+      setEvents(prevEvents => prevEvents.filter(event => event.id !== selectedEvent.id));
+      setShowDeleteConfirmation(false);
+      closeModal();
+      resetModalFields();
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+      setError(error instanceof Error ? error.message : 'Failed to delete event');
+    }
+  };
+
   const resetModalFields = () => {
     setEventTitle("");
     setEventStartDate("");
@@ -484,6 +511,15 @@ const Calendar: React.FC = () => {
               </div>
             </div>
             <div className="mt-8 flex justify-end gap-4">
+              {selectedEvent && (
+                <button
+                  onClick={handleDeleteEvent}
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-100 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                >
+                  Delete Event
+                </button>
+              )}
               <button
                 onClick={closeModal}
                 type="button"
@@ -501,23 +537,104 @@ const Calendar: React.FC = () => {
             </div>
           </div>
         </Modal>
+        <Modal
+          isOpen={showDeleteConfirmation}
+          onClose={() => setShowDeleteConfirmation(false)}
+          className="max-w-[400px] p-6"
+        >
+          <div className="flex flex-col">
+            <h5 className="mb-2 font-semibold text-gray-800 dark:text-white/90 text-lg">
+              Confirm Deletion
+            </h5>
+            <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+              Are you sure you want to delete this event? This action cannot be undone.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirmation(false)}
+                type="button"
+                className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                type="button"
+                className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-100 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+              >
+                Delete Event
+              </button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </>
   );
 };
 
 
+const formatEventDate = (date: Date | null): string => {
+  if (!date) return '';
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(date);
+};
+
 const renderEventContent = (eventInfo: EventContentArg): JSX.Element => {
   const colorClass = `fc-bg-${eventInfo.event.extendedProps.calendar.toLowerCase()}`;
-  return (
-    <div
-      className={`event-fc-color flex fc-event-main ${colorClass} p-1 rounded-sm`}
-      id={`event-${eventInfo.event.id}`} // Add an ID to make finding the event easier
-    >
-      <div className="fc-daygrid-event-dot"></div>
-      <div className="fc-event-time">{eventInfo.timeText}</div>
-      <div className="fc-event-title">{eventInfo.event.title}</div>
+  
+  // Define color mapping for the dot
+  const dotColorMap = {
+    primary: "bg-brand-500",
+    success: "bg-success-500",
+    danger: "bg-error-500",
+    warning: "bg-orange-500"
+  };
+
+  const dotColorClass = dotColorMap[eventInfo.event.extendedProps.calendar.toLowerCase() as keyof typeof dotColorMap];
+  
+  const tooltipContent = (
+    <div className="p-2.5">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${dotColorClass}`}></span>
+          <h6 className="font-medium text-gray-800 dark:text-gray-200">
+            {eventInfo.event.title}
+          </h6>
+        </div>
+        <div className="space-y-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="font-medium">Start:</span> {formatEventDate(eventInfo.event.start)}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="font-medium">End:</span> {formatEventDate(eventInfo.event.end)}
+          </p>
+        </div>
+      </div>
     </div>
+  );
+
+  return (
+    <Tippy
+      content={tooltipContent}
+      animation="shift-away"
+      placement="top"
+      className="!bg-white !text-gray-800 !border !border-gray-200 !shadow-lg !rounded-lg dark:!bg-gray-800 dark:!text-gray-200 dark:!border-gray-700"
+      arrow={false}
+      delay={[100, 0]}
+    >
+      <div
+        className={`event-fc-color flex fc-event-main ${colorClass} p-1 rounded-sm`}
+        id={`event-${eventInfo.event.id}`}
+      >
+        <div className="fc-daygrid-event-dot"></div>
+        <div className="fc-event-time">{eventInfo.timeText}</div>
+        <div className="fc-event-title">{eventInfo.event.title}</div>
+      </div>
+    </Tippy>
   );
 };
 

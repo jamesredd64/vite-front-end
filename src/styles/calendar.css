@@ -16,7 +16,30 @@
   /* [role="rowgroup"] {
     /* styles for header cells */
     /* @apply  bg-white dark:bg-gray-900 !important; */
-  
+    .event-fc-color.fc-bg-success {
+      @apply border-success-50 bg-success-50;
+    }
+    .event-fc-color.fc-bg-danger {
+      @apply border-error-50 bg-error-50;
+    }
+    .event-fc-color.fc-bg-primary {
+      @apply border-brand-50 bg-brand-50;
+    }
+    .event-fc-color.fc-bg-warning {
+      @apply border-orange-50 bg-orange-50;
+    }
+    .event-fc-color.fc-bg-success .fc-daygrid-event-dot {
+      @apply bg-success-500;
+    }
+    .event-fc-color.fc-bg-danger .fc-daygrid-event-dot {
+      @apply bg-error-500;
+    }
+    .event-fc-color.fc-bg-primary .fc-daygrid-event-dot {
+      @apply bg-brand-500;
+    }
+    .event-fc-color.fc-bg-warning .fc-daygrid-event-dot {
+      @apply bg-orange-500;
+    }
 
   .calendar-event-primary {
     @apply bg-brand-500 border-brand-600;
@@ -582,8 +605,8 @@ img[alt="Logo"] {
 }
 
 .fc-addEventButton-button {
-  @apply rounded-[11px] bg-[#465fff] text-white border-0
-  hover:bg-[#465fff]/90
+  @apply rounded-[11px] bg-[#1333ff] text-white border-0
+  hover:bg-[#1333ff]/90
   dark:bg-gray-900 dark:text-gray-400 dark:border-gray-800 
   dark:hover:bg-gray-800 !important;
 }

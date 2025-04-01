@@ -341,6 +341,24 @@ export const useMongoDbClient = () => {
     }
   }, []);
 
+  const deleteCalendarEvent = useCallback(async (eventId: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/calendar/${eventId}`,
+        {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('Failed to delete event');
+    }
+  }, []);
+
   return { 
     fetchUserData, 
     error, 
@@ -351,7 +369,8 @@ export const useMongoDbClient = () => {
     saveUserData,
     fetchCalendarEvents,
     createCalendarEvent,
-    updateCalendarEvent
+    updateCalendarEvent,
+    deleteCalendarEvent
   };
 }; 
   

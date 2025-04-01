@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-// import { UserInfoCard } from "../components/UserProfile/UserInfoCard";
 import { UserMetaCard } from "../components/UserProfile/UserMetaCard";
 import { UserAddressCard } from "../components/UserProfile/UserAddressCard";
 import { UserMarketingCard } from "../components/UserProfile/UserMarketingCard";
-import  UserMetadata  from "../types/user";
+import UserMetadata from "../types/user";
 import { useMongoDbClient } from "../services/mongoDbClient";
 import PageMeta from "../components/common/PageMeta";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
-// import { useGlobalStorage } from '../hooks/useGlobalStorage';
+import { UnsavedChangesModal } from "../components/UnsavedChangesModal";
+import { useNavigate } from "react-router-dom";
 
 interface UserData {
   auth0Id: string;
@@ -47,9 +47,14 @@ interface UserData {
 
 
 const UserProfile = () => {
+  const navigate = useNavigate();
   const { user, isAuthenticated, isLoading: auth0Loading } = useAuth0();
   const { getUserById, saveUserData } = useMongoDbClient();
   
+  // Add state for modal
+  const [isBlockingModalOpen, setIsBlockingModalOpen] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+
   // Define default marketing budget
   const defaultMarketingBudget = {
     adBudget: 0,
@@ -106,6 +111,62 @@ const UserProfile = () => {
   const [initialUserData, setInitialUserData] = useState<UserData | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
+  // Add navigation handler
+  const handleNavigation = (path: string) => {
+    console.log('handleNavigation called', {
+      path,
+      hasUnsavedChanges,
+      isBlockingModalOpen,
+      pendingNavigation
+    });
+
+    if (hasUnsavedChanges) {
+      console.log('Should show modal - hasUnsavedChanges is true');
+      setPendingNavigation(path);
+      setIsBlockingModalOpen(true);
+      console.log('Modal state after setting:', { isBlockingModalOpen: true, path });
+    } else {
+      console.log('No unsaved changes, navigating directly');
+      navigate(path);
+    }
+  };
+
+  // Add handlers for modal actions
+  const handleConfirmSave = async () => {
+    try {
+      await handleSubmit({ preventDefault: () => {} });
+      setIsBlockingModalOpen(false);
+      if (pendingNavigation) {
+        navigate(pendingNavigation);
+      }
+    } catch (error) {
+      console.error('Error saving changes:', error);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setHasUnsavedChanges(false);
+    setIsBlockingModalOpen(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
+    }
+  };
+
+  // Add beforeunload event listener
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
+
   // Add this useEffect to track changes
   useEffect(() => {
     if (isInitialLoad) {
@@ -113,13 +174,29 @@ const UserProfile = () => {
       return;
     }
 
-    const hasChanges = JSON.stringify(initialUserData) !== JSON.stringify(userData);
-    console.log('Checking for changes:', {
-      isInitialLoad,
-      initialData: initialUserData,
-      currentData: userData,
-      hasChanges
+    if (!initialUserData || !userData) {
+      console.log('Missing data for change detection');
+      return;
+    }
+
+    // Create clean copies of the objects for comparison
+    const cleanInitial = JSON.parse(JSON.stringify(initialUserData));
+    const cleanCurrent = JSON.parse(JSON.stringify(userData));
+
+    // Remove fields that shouldn't trigger the unsaved changes state
+    delete cleanInitial._id;
+    delete cleanInitial.__v;
+    delete cleanCurrent._id;
+    delete cleanCurrent.__v;
+
+    const hasChanges = JSON.stringify(cleanInitial) !== JSON.stringify(cleanCurrent);
+    
+    console.log('Change detection:', {
+      hasChanges,
+      current: cleanCurrent,
+      initial: cleanInitial
     });
+
     setHasUnsavedChanges(hasChanges);
   }, [userData, initialUserData, isInitialLoad]);
 
@@ -280,7 +357,13 @@ const UserProfile = () => {
         title="React.js Profile Dashboard | TailAdmin - Next.js Admin Dashboard Template"
         description="This is React.js Profile Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
       />
-      <PageBreadcrumb pageTitle="Profile" />
+      <PageBreadcrumb 
+        pageTitle="Profile" 
+        onNavigate={(path) => {
+          console.log('PageBreadcrumb navigation triggered', { path });
+          handleNavigation(path);
+        }}
+      />
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800/50 lg:p-6">
         <div className="flex flex-col gap-5">
           {/* Centered Save All button with logging */}
@@ -371,12 +454,24 @@ const UserProfile = () => {
           />
         </div>
       </div>
+
+      <UnsavedChangesModal
+        isOpen={isBlockingModalOpen}
+        onConfirm={async () => {
+          console.log('Modal confirm clicked');
+          await handleConfirmSave();
+        }}
+        onDiscard={() => {
+          console.log('Modal discard clicked');
+          handleDiscardChanges();
+        }}
+        onClose={() => {
+          console.log('Modal close clicked');
+          setIsBlockingModalOpen(false);
+        }}
+      />
     </>
   );
 };
 
 export default UserProfile;
-
-
-
-
