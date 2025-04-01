@@ -6,7 +6,8 @@
     "prebuild": "node src/config/update-version.js",
     "build": "vite build",
     "start": "vite",
-    "vercel-build": "node src/config/update-version.js && vite build"
+    "vercel-build": "node src/config/update-version.js && vite build",
+    "git": "scripts\\git-operations.cmd"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
