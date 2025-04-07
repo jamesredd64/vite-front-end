@@ -128,17 +128,6 @@ const Calendar: React.FC = () => {
     loadEvents();
   }, [user?.sub, fetchCalendarEvents, setEvents]);
 
-  // Add this handler function near your other handlers
-const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    handleSearch(searchQuery);
-    if (searchResults.length > 0) {
-      handleResultClick(searchResults[0].id);
-    }
-  }
-};
-
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     // Prevent any default touch/click behavior
     if (selectInfo.jsEvent) {
@@ -356,7 +345,7 @@ const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         position="center" // This will center the toast both vertically and horizontally
       />
       {error && (
-        <div className="p-2 mb-4 rounded-lg bg-error-50 p-4 text-error-500">
+        <div className="p-2 mb-4 rounded-lg bg-error-50 text-error-500">
           <p>{error}</p>
         </div>
       )}
@@ -671,23 +660,6 @@ const renderEventContent = (eventInfo: EventContentArg): JSX.Element => {
 };
 
 export default Calendar;
-// const renderEventContent = (eventInfo: EventContentArg) => {
-//   const colorMap = {
-//     success: "bg-success-500",
-//     danger: "bg-error-500",
-//     primary: "bg-brand-500",
-//     warning: "bg-orange-500"
-//   };
-
-//   const colorClass = colorMap[eventInfo.event.extendedProps.calendar.toLowerCase() as keyof typeof colorMap];
-
-//   return (
-//     <div className={`flex items-center w-full gap-2 px-2 py-1 rounded ${colorClass} text-white`}>
-//       <div className="fc-event-title">{eventInfo.event.title}</div>
-//       {eventInfo.timeText && <div className="fc-event-time">{eventInfo.timeText}</div>}
-//     </div>
-//   );
-// };
 
 
 
