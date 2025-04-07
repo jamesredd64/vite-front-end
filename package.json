@@ -1,7 +1,7 @@
 {
   "name": "stockholme.application",
   "private": true,
-  "version": "2.0.7",
+  "version": "2.0.8",
   "scripts": {
     "prebuild": "node src/config/update-version.js",
     "build": "vite build",
