@@ -53,6 +53,15 @@ import HorizontaLDots from "./horizontal-dots.svg?react";
 import ChatIcon from "./chat.svg?react";
 import ChevronUpIcon from "./chevron-up.svg?react";
 
+import { type SVGProps } from 'react';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface IconProps extends SVGProps<SVGSVGElement> {
+  className?: string;
+}
+
+import { ShieldIcon, BellIcon } from './custom-icons';
+
 export {
   AlertHexaIcon,
   ErrorHexaIcon,
@@ -108,4 +117,6 @@ export {
   HorizontaLDots,
   ChevronUpIcon,
   ChatIcon,
+  ShieldIcon,
+  BellIcon,
 };

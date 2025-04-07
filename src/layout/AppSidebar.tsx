@@ -9,6 +9,8 @@ import {
   GridIcon,
   HorizontaLDots, 
   UserCircleIcon,
+  ShieldIcon,
+  BellIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -34,8 +36,19 @@ const navItems: NavItem[] = [
       { name: "Ecommerce", path: "/dashboard", pro: false },
       { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview /> },      
       { name: "User Profile", path: "/profile", pro: false, icon: <UserCircleIcon /> },
-
-      
+    ],
+  },
+  {
+    icon: <ShieldIcon />,
+    name: "Admin",
+    subItems: [
+      { 
+        name: "Create Notification", 
+        path: "/admin/notifications/create", 
+        pro: false,
+        icon: <BellIcon />
+      },
+      // Add more admin routes as needed
     ],
   },
   // {

@@ -1,0 +1,50 @@
+{
+  "notifications": [
+    {
+      "title": "Welcome to the Platform",
+      "message": "Thank you for joining! Here's what you need to know to get started...",
+      "type": "all",
+      "recipients": [],
+      "read": [
+        {
+          "userId": "auth0|67bb70c5eedb5c4b0ea1ec93",
+          "readAt": "2024-03-20T15:30:00.000Z"
+        }
+      ],
+      "createdBy": "auth0|system",
+      "createdAt": "2024-03-20T14:00:00.000Z",
+      "updatedAt": "2024-03-20T15:30:00.000Z"
+    },
+    {
+      "title": "Your Campaign Results",
+      "message": "Your recent marketing campaign has achieved 150% ROI...",
+      "type": "selected",
+      "recipients": ["auth0|67bb70c5eedb5c4b0ea1ec93"],
+      "read": [],
+      "createdBy": "auth0|admin",
+      "createdAt": "2024-03-21T09:00:00.000Z",
+      "updatedAt": "2024-03-21T09:00:00.000Z"
+    }
+  ],
+  "notification_preferences": [
+    {
+      "userId": "auth0|67bb70c5eedb5c4b0ea1ec93",
+      "email": true,
+      "push": true,
+      "sms": false,
+      "categories": {
+        "marketing": true,
+        "system": true,
+        "updates": true
+      },
+      "frequency": "immediate",
+      "quietHours": {
+        "enabled": true,
+        "start": "22:00",
+        "end": "07:00"
+      },
+      "createdAt": "2024-03-20T14:00:00.000Z",
+      "updatedAt": "2024-03-20T14:00:00.000Z"
+    }
+  ]
+}

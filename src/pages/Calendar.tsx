@@ -297,10 +297,12 @@ const Calendar: React.FC = () => {
 
   return (
     <>
+      {/* <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800/50 lg:p-6"> */}
       <PageMeta
-        title="React.js Calendar Dashboard | TailAdmin - Next.js Admin Dashboard Template"
-        description="This is React.js Calendar Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
-      />
+        title="Calendar Dashboard "
+        description="This is React.js Calendar"
+        />
+        {/* </div> */}
       <PageBreadcrumb pageTitle="Calendar" />
       <Toast 
         message="Please click on a date to add an event!" 

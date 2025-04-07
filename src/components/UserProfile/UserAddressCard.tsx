@@ -4,7 +4,7 @@ import { useModal } from '../../hooks/useModal';
 import { useUserProfileStore } from '../../stores/userProfileStore';
 
 interface UserAddressCardProps {
-  onUpdate: (data: any) => void;
+  onUpdate: (data: unknown) => void;
   initialData: {
     address?: {
       street?: string;

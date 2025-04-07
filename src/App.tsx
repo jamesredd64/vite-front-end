@@ -14,6 +14,7 @@ import Loader from './components/common/Loader';
 import { useMongoDbClient } from './services/mongoDbClient';
 import Marketing from "./pages/Dashboard/Marketing";
 import MarketingOverview from "./pages/MarketingOverview";
+import CreateNotification from "./pages/admin/CreateNotification";
 
 // import Mypage from "./pages/test";
 
@@ -66,6 +67,11 @@ function App() {
   const [userMetadata, setUserMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const { updateUser } = useMongoDbClient();
   const initializationAttempted = useRef(false);
+
+  // Add this function to check if user is admin
+  const isAdmin = () => {
+    return user && user['https://your-namespace/roles']?.includes('admin');
+  };
 
   // Update profile picture only when user data changes
   useEffect(() => {
@@ -157,7 +163,7 @@ function App() {
       <div className="flex h-screen overflow-hidden">
         <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           <Routes>        
-           <Route path="/signed-out" element={<SignedOut />} />
+            <Route path="/signed-out" element={<SignedOut />} />
             {isAuthenticated ? (
               <Route element={<AppLayout />}>
                 <Route index path="/" element={<Navigate to="/marketing" replace />} />              
@@ -166,7 +172,19 @@ function App() {
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/marketing" element={<Marketing />} />
                 <Route path="/marketing-overview" element={<MarketingOverview />} />
-                {/* <Route path="/mypage" element={<Mypage />} /> */}
+                
+                {/* Admin Routes */}
+                <Route path="/admin/*" element={
+                  isAdmin() ? (
+                    <Routes>
+                      <Route path="notifications/create" element={<CreateNotification />} />
+                      {/* Add more admin routes here */}
+                    </Routes>
+                  ) : (
+                    <Navigate to="/dashboard" replace />
+                  )
+                } />
+
                 <Route path="*" element={<NotFound />} />
               </Route>
             ) : (

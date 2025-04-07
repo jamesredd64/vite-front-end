@@ -345,7 +345,7 @@ const UserProfile = () => {
           />
 
           <UserAddressCard
-            onUpdate={handleUpdate}
+            onUpdate={(data: unknown) => handleUpdate(data as Partial<UserMetadata>)}
             initialData={{
               address: userData?.address || {},
             }}
