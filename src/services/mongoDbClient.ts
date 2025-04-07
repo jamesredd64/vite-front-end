@@ -16,6 +16,13 @@ interface ApiError {
 
 // const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const normalizeAuthId = (auth0Id: string): string => {
+  // Convert google-oauth2| to auth0| for database lookup
+  return auth0Id.startsWith('google-oauth2|') 
+    ? `auth0|${auth0Id.split('|')[1]}`
+    : auth0Id;
+};
+
 export const useMongoDbClient = () => {
   const { getAccessTokenSilently } = useAuth0();
   const [error, setError] = useState<ApiError | null>(null);
@@ -43,9 +50,12 @@ export const useMongoDbClient = () => {
     console.group('getUserById Operation');
     try {
       const headers = await getAuthHeaders();
-      const encodedAuth0Id = encodeURIComponent(auth0Id);
+      const normalizedId = normalizeAuthId(auth0Id);
+      const encodedAuth0Id = encodeURIComponent(normalizedId);
       const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_BY_ID(encodedAuth0Id)}`;
       
+      console.log('Original auth0Id:', auth0Id);
+      console.log('Normalized auth0Id:', normalizedId);
       console.log('Fetching from URL:', url);
       console.log('Headers:', headers);
   
@@ -88,8 +98,10 @@ export const useMongoDbClient = () => {
   }) => {
     console.group('checkAndInsertUser Operation');
     try {
+      const normalizedId = normalizeAuthId(auth0Id);
       console.log('Input Parameters:', {
-        auth0Id,
+        originalAuth0Id: auth0Id,
+        normalizedAuth0Id: normalizedId,
         userData: JSON.stringify(userData, null, 2)
       });
 
@@ -101,7 +113,7 @@ export const useMongoDbClient = () => {
       
       const newUserData = {
         ...userData,
-        auth0Id,
+        auth0Id: normalizedId,
         createdAt: new Date().toISOString()
       };
       console.log('New user payload:', JSON.stringify(newUserData, null, 2));
@@ -253,22 +265,18 @@ export const useMongoDbClient = () => {
   }, [getAccessTokenSilently]);
 
   const fetchCalendarEvents = useCallback(async (userId: string): Promise<CalendarEvent[]> => {
-    // Convert google-oauth2| to auth0| for database lookup
-    const dbUserId = userId.startsWith('google-oauth2|') 
-      ? `auth0|${userId.split('|')[1]}`
-      : userId;
-      
+    const normalizedId = normalizeAuthId(userId);
+    
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_CALENDAR_EVENTS(dbUserId)}`);
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_CALENDAR_EVENTS(normalizedId)}`);
       if (!response.ok) {
         throw new Error('Failed to fetch events');
       }
       const data = await response.json();
-      // Ensure we return an array
       return Array.isArray(data) ? data : data?.events || [];
     } catch (error) {
       console.error('Error fetching calendar events:', error);
-      return []; // Return empty array on error
+      return [];
     }
   }, [getAuthHeaders]);
 

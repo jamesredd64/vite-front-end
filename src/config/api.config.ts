@@ -21,10 +21,10 @@ export const API_CONFIG = {
   BASE_URL: getApiUrl(),
   ENDPOINTS: {
     USERS: '/users',
-    USER_BY_ID: (id: string) => `/users/${encodeURIComponent(id)}`,
+    USER_BY_ID: (id: string) => `/users/${encodeURIComponent(id.replace('google-oauth2|', 'auth0|'))}`,
     USER_BY_EMAIL: (email: string) => `/users/email/${encodeURIComponent(email)}`,
-    SAVE_USER_DATA: (id: string) => `/users/${encodeURIComponent(id)}`,
-    USER_CALENDAR_EVENTS: (id: string) => `/calendar/${encodeURIComponent(id)}`
+    SAVE_USER_DATA: (id: string) => `/users/${encodeURIComponent(id.replace('google-oauth2|', 'auth0|'))}`,
+    USER_CALENDAR_EVENTS: (id: string) => `/calendar/${encodeURIComponent(id.replace('google-oauth2|', 'auth0|'))}`
   }
 } as const;
 
