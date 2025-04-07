@@ -380,8 +380,14 @@ img[alt="Logo"] {
 }
 
 /* Calendar header/toolbar container */
-.fc-header-toolbar {
-  @apply z-[100] relative;
+.fc .fc-toolbar.fc-header-toolbar {
+  @apply flex-row items-center justify-between px-6 pt-6 !important;
+}
+
+/* Keep button groups aligned */
+.fc .fc-toolbar .fc-button-group,
+.fc .fc-toolbar-chunk {
+  @apply flex items-center gap-2 !important;
 }
 
 /* Force calendar buttons to a lower z-index */
@@ -604,11 +610,33 @@ img[alt="Logo"] {
   dark:hover:bg-gray-800 !important;
 }
 
-.fc-addEventButton-button {
-  @apply rounded-[11px] bg-[#1333ff] text-white border-0
-  hover:bg-[#1333ff]/90
+/* Navigation buttons styling including Add Event button */
+.fc .fc-toolbar .fc-addEventButton-button,
+.fc .fc-toolbar .fc-addEventButton-button.fc-button-primary {
+  @apply flex h-10 items-center justify-center rounded-lg
+  border border-gray-300 dark:border-gray-600
+  bg-gray-50 text-gray-900
+  hover:bg-gray-100
+  dark:bg-gray-900 dark:text-gray-100
+  dark:hover:bg-gray-800 !important;
+}
+
+/* Specific padding for Add Event button */
+.fc .fc-toolbar .fc-addEventButton-button {
+  @apply px-4 !important;
+}
+
+/* Ensure the button styling is consistent with other view buttons */
+.fc-addEventButton-button.fc-button.fc-button-primary {
+  @apply bg-gray-50 text-gray-900 border border-gray-200 
+  hover:bg-gray-100
   dark:bg-gray-900 dark:text-gray-400 dark:border-gray-800 
   dark:hover:bg-gray-800 !important;
+}
+
+/* Match the height and padding of other buttons */
+.fc .fc-addEventButton-button {
+  @apply h-10 px-4 py-2 !important;
 }
 
 .fc-theme-standard th {

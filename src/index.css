@@ -226,9 +226,9 @@
     @apply px-4 py-3;
   }
 
-  .fc-addEventButton-button {
+  /* .fc-addEventButton-button {
     @apply bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-800 dark:hover:bg-gray-800;
-  }
+  } */
 
   /* Update the calendar event styles */
   .fc-h-event {

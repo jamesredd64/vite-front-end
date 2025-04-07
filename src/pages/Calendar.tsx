@@ -396,9 +396,22 @@ const Calendar: React.FC = () => {
               },
               addEventButton: {
                 text: "Add Event +",
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                click: function(ev: MouseEvent, element: HTMLElement) {
-                  setShowToast(true);
+                click: function() {
+                  // Set start date to today
+                  const today = new Date();
+                  const tomorrow = new Date();
+                  tomorrow.setDate(today.getDate() + 1);
+                  
+                  // Format dates as YYYY-MM-DD
+                  const startDate = today.toISOString().split('T')[0];
+                  const endDate = tomorrow.toISOString().split('T')[0];
+                  
+                  console.log('Setting default dates for new event:', { startDate, endDate });
+                  
+                  // Set the dates and open modal
+                  setEventStartDate(startDate);
+                  setEventEndDate(endDate);
+                  openModal();
                 }
               }
             }}
@@ -427,7 +440,7 @@ const Calendar: React.FC = () => {
         <Modal
           isOpen={isOpen}
           onClose={closeModal}
-          className="max-w-[700px] p-6 lg:p-10"
+          className="max-w-[700px] p-6 lg:p-10 border border-gray-200 dark:border-gray-700"
         >
           <div className="flex flex-col px-2 overflow-y-auto custom-scrollbar">
             <div>
@@ -458,11 +471,11 @@ const Calendar: React.FC = () => {
                 <label className="block mb-4 text-sm font-medium text-gray-700 dark:text-gray-400">
                   Event Color
                 </label>
-                <div className="flex flex-wrap items-center gap-4 sm:gap-5">
+                <div className="flex flex-wrap items-center gap-4 sm:gap-5 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
                   {Object.entries(calendarsEvents).map(([key, value]) => (
                     <label
                       key={key}
-                      className="flex items-center cursor-pointer"
+                      className="flex items-center gap-3 cursor-pointer p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md"
                     >
                       <input
                         type="radio"
@@ -473,7 +486,7 @@ const Calendar: React.FC = () => {
                         className="hidden"
                       />
                       <div className={`
-                        w-12 h-6 rounded-full flex items-center justify-center
+                        w-14 h-8 rounded-full flex items-center justify-center px-10
                         ${eventLevel === value ? 'ring-2 ring-offset-2 ring-brand-500' : ''}
                         ${value === 'primary' && 'bg-brand-500'}
                         ${value === 'success' && 'bg-success-500'}
