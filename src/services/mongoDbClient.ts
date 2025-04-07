@@ -8,13 +8,6 @@ import { CalendarEvent, CalendarApiResponse } from '../types/calendar.types';
 // const RETRY_DELAY = 1000;
 const TIMEOUT = 5000; // 5 seconds timeout
 
-// const API_CONFIG = {
-//   BASE_URL: 'https://admin-backend-eta.vercel.app/api',
-//   ENDPOINTS: {
-//     USERS: '/users',
-//     USER_BY_ID: (id: string) => `/users/${id}`
-//   }
-// };
 
 interface ApiError {
   message: string;
