@@ -260,45 +260,41 @@ export const useMongoDbClient = () => {
   }, [getAccessTokenSilently]);
 
   const fetchCalendarEvents = useCallback(async (userId: string): Promise<CalendarEvent[]> => {
+    // Convert google-oauth2| to auth0| for database lookup
+    const dbUserId = userId.startsWith('google-oauth2|') 
+      ? `auth0|${userId.split('|')[1]}`
+      : userId;
+      
     try {
-      const auth0Id = userId.startsWith('auth0|') ? userId : `auth0|${userId}`;
-      const headers = await getAuthHeaders(); // Use the existing getAuthHeaders function
-
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_CALENDAR_EVENTS(auth0Id)}`,
-        {
-          method: 'GET',
-          headers: {
-            ...headers,
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        }
-      );
-
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_CALENDAR_EVENTS(dbUserId)}`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Failed to fetch events');
       }
-
       const data = await response.json();
-      return Array.isArray(data) ? data : Array.isArray(data.events) ? data.events : [];
+      // Ensure we return an array
+      return Array.isArray(data) ? data : data?.events || [];
     } catch (error) {
-      console.error('Error fetching events:', error);
-      if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        console.error('Network error - check if the API is accessible and CORS is configured correctly');
-      }
+      console.error('Error fetching calendar events:', error);
       return []; // Return empty array on error
     }
   }, [getAuthHeaders]);
 
   const createCalendarEvent = useCallback(async (eventData: Omit<CalendarEvent, 'id'>): Promise<CalendarEvent> => {
+    // Convert google-oauth2| to auth0| for database storage
+    const dbEventData = {
+      ...eventData,
+      auth0Id: eventData.auth0Id.startsWith('google-oauth2|')
+        ? `auth0|${eventData.auth0Id.split('|')[1]}`
+        : eventData.auth0Id
+    };
+
     try {
       const response = await fetch(
         `${API_CONFIG.BASE_URL}/calendar`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventData)
+          body: JSON.stringify(dbEventData)
         }
       );
 

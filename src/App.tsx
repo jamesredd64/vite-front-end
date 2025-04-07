@@ -151,7 +151,11 @@ function App() {
       initializationAttempted.current = true;
 
       try {
-        const userData = await updateUser(user.sub, {
+        const normalizedAuthId = user.sub.startsWith('google-oauth2|') 
+          ? `auth0|${user.sub.split('|')[1]}`
+          : user.sub;
+        
+        const userData = await updateUser(normalizedAuthId, {
           email: user?.email || '',
           name: user?.name || '',          
           // firstName: user?.given_name || '',
@@ -188,7 +192,7 @@ function App() {
           setUserMetadata(userData);
         }
       } catch (error) {
-        console.error('Error initializing user data:', error);
+        console.error('Error updating user:', error);
       }
     };
 

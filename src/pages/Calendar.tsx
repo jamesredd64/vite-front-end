@@ -107,9 +107,12 @@ const Calendar: React.FC = () => {
       try {
         console.log('Fetching calendar events...');
         const fetchedEvents = await fetchCalendarEvents(user.sub);
-        console.log('Successfully fetched events:', fetchedEvents.length);
-        console.log('Event data:', fetchedEvents);
-        setEvents(fetchedEvents.map(event => ({
+        console.log('Successfully fetched events:', fetchedEvents);
+        
+        // Ensure we're working with an array
+        const eventsArray = Array.isArray(fetchedEvents) ? fetchedEvents : [];
+        
+        setEvents(eventsArray.map(event => ({
           ...event,
           id: event.id || '', // Ensure id is always a string, never undefined
           extendedProps: {
