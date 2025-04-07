@@ -1,32 +1,47 @@
-interface PageBreadcrumbProps {
+import { Link } from "react-router-dom";
+
+interface BreadcrumbProps {
   pageTitle: string;
-  onNavigate: (path: string) => void;
 }
 
-const PageBreadcrumb: React.FC<PageBreadcrumbProps> = ({ pageTitle, onNavigate }) => {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
-    e.preventDefault(); // Prevent default navigation
-    console.log('PageBreadcrumb click handler', { path });
-    onNavigate(path);
-  };
-
+const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+    <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <h2
+        className="text-xl font-semibold text-gray-800 dark:text-white/90"
+        x-text="pageName"
+      >
         {pageTitle}
       </h2>
       <nav>
-        <ol className="flex items-center gap-2">
+        <ol className="flex items-center gap-1.5">
           <li>
-            <a
-              href="/dashboard"
-              onClick={(e) => handleClick(e, '/dashboard')}
-              className="font-medium"
+            <Link
+              className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400"
+              to="/"
             >
-              Dashboard
-            </a>
+              Home
+              <svg
+                className="stroke-current"
+                width="17"
+                height="16"
+                viewBox="0 0 17 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6.0765 12.667L10.2432 8.50033L6.0765 4.33366"
+                  stroke=""
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
           </li>
-          {/* Add other navigation items as needed */}
+          <li className="text-sm text-gray-800 dark:text-white/90">
+            {pageTitle}
+          </li>
         </ol>
       </nav>
     </div>
