@@ -14,6 +14,7 @@ function Show-GitMenu {
     Write-Host "11: Overwrite main with backup branch"
     Write-Host "12: Switch Environment (Dev/Prod)"
     Write-Host "13: Overwrite specified branch"
+    Write-Host "14: Compare branches (diff)"
     Write-Host "Q: Quit"
     Write-Host "=================================================="
 }
@@ -281,6 +282,27 @@ function Overwrite-Branch {
     }
 }
 
+function Compare-Branches {
+    Get-BranchList
+    $sourceBranch = Read-Host "`nEnter first branch name"
+    $targetBranch = Read-Host "Enter second branch name"
+    
+    Write-Host "`nShowing diff between ${sourceBranch} and ${targetBranch}:"
+    Write-Host "------------------------------------------------`n"
+    
+    # Show files changed between branches
+    Write-Host "Files changed:"
+    git diff --name-status $sourceBranch..$targetBranch
+    
+    Write-Host "`nWould you like to see the detailed diff? (y/n)"
+    $showDetail = Read-Host
+    
+    if ($showDetail -eq 'y') {
+        # Show detailed diff
+        git diff $sourceBranch..$targetBranch
+    }
+}
+
 # Main loop
 do {
     Show-GitMenu
@@ -327,6 +349,7 @@ do {
         '11' { Reset-ToBackupBranch }
         '12' { Switch-Environment }
         '13' { Overwrite-Branch }
+        '14' { Compare-Branches }
     }
     if ($selection -ne 'q') {
         Write-Host "`nPress any key to continue..."
