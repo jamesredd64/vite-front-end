@@ -110,9 +110,11 @@ const AppHeader: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (searchQuery.trim() && searchResults.length > 0) {
-      // Navigate to the first matching result
-      handleResultClick(searchResults[0].id);
+    if (searchQuery.trim()) {
+      handleSearch(searchQuery);
+      if (searchResults.length > 0) {
+        handleResultClick(searchResults[0].id);
+      }
     }
   };
 
@@ -241,14 +243,12 @@ const AppHeader: React.FC = () => {
                   onChange={(e) => {
                     const query = e.target.value;
                     setSearchQuery(query);
-                    // Removed handleSearch(query) from here
                   }}
                   className="w-[600px] pl-12 pr-24 py-3 bg-transparent border border-gray-200 rounded-lg outline-none focus:border-primary dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
                 />
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
                   <button
-                    type="button"
-                    onClick={handleSearchClick}
+                    type="submit"
                     className="inline-flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                     aria-label="Search"
                   >

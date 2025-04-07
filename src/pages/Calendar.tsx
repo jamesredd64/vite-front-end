@@ -128,6 +128,17 @@ const Calendar: React.FC = () => {
     loadEvents();
   }, [user?.sub, fetchCalendarEvents, setEvents]);
 
+  // Add this handler function near your other handlers
+const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    handleSearch(searchQuery);
+    if (searchResults.length > 0) {
+      handleResultClick(searchResults[0].id);
+    }
+  }
+};
+
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     // Prevent any default touch/click behavior
     if (selectInfo.jsEvent) {
