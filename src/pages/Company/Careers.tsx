@@ -4,7 +4,7 @@ import PageMeta from '../../components/common/PageMeta';
 const Careers: React.FC = () => {
   return (
     <>
-      <PageMeta title="Careers" />
+      <PageMeta title="Careers" description="Join our team and explore exciting career opportunities across various departments" />
       <div className="p-4 md:p-6 2xl:p-10">
         <div className="mx-auto max-w-5xl">
           <h1 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white">Careers</h1>
@@ -16,7 +16,7 @@ const Careers: React.FC = () => {
             <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 mb-6">
               <li>Software Development</li>
               <li>Product Design</li>
-              <li>Customer Success</li>
+              <li>Attendee Success</li>
               <li>Sales & Marketing</li>
             </ul>
           </div>

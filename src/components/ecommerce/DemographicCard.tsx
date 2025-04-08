@@ -327,7 +327,7 @@ export default function DemographicCard() {
 
           {/* Customer Lifetime */}
           <div>
-            <h4 className="mb-3 font-medium text-gray-800 dark:text-white/90">Customer Lifetime</h4>
+            <h4 className="mb-3 font-medium text-gray-800 dark:text-white/90">Attendee Lifetime</h4>
             <div className="space-y-3">
               {stats.customerLifetime.map((lifetime, index) => (
                 <div key={index} className="relative">
