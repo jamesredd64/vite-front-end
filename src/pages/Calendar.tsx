@@ -18,6 +18,8 @@ import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 import '../styles/calendar.css';
+import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/themes/light.css";
 // import { useNavigate } from 'react-router-dom';
 
 interface CalendarEvent extends EventInput {
@@ -30,6 +32,7 @@ const Calendar: React.FC = () => {
   const { user } = useAuth0();
   const { fetchCalendarEvents, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } = useMongoDbClient();
   const { events, setEvents } = useCalendar();
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
@@ -45,6 +48,20 @@ const Calendar: React.FC = () => {
   const location = useLocation();
   // const navigate = useNavigate();
   
+  const datePickerOptions = {
+    dateFormat: "Y-m-d",
+    enableTime: false,
+    altInput: true,
+    altFormat: "F j, Y",
+    animate: true,
+    static: true,
+    theme: "light",
+    onChange: (selectedDates: Date[], dateStr: string, instance: unknown) => {
+      // This prevents any unwanted side effects
+      (instance as { element: HTMLElement }).element.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  };
+
   // Add this useEffect to handle navigation to specific events
   useEffect(() => {
     const state = location.state as { selectedEventId?: string; scrollToEvent?: boolean };
@@ -97,36 +114,41 @@ const Calendar: React.FC = () => {
 
   useEffect(() => {
     const loadEvents = async () => {
-      console.log('Starting loadEvents function');
       if (!user?.sub) {
         console.log('No user ID available');
+        setIsLoading(false);
         return;
       }
-      console.log('Loading events for user:', user.sub);
 
       try {
-        console.log('Fetching calendar events...');
+        console.log('Loading events for user:', user.sub);
         const fetchedEvents = await fetchCalendarEvents(user.sub);
         console.log('Successfully fetched events:', fetchedEvents);
         
-        // Ensure we're working with an array
         const eventsArray = Array.isArray(fetchedEvents) ? fetchedEvents : [];
         
         setEvents(eventsArray.map(event => ({
           ...event,
-          id: event.id || '', // Ensure id is always a string, never undefined
+          id: event.id || '',
           extendedProps: {
-            calendar: event.extendedProps?.calendar || 'primary' // Provide default value
+            calendar: event.extendedProps?.calendar || 'primary'
           }
         })));
       } catch (err) {
         console.error('Failed to fetch calendar events:', err);
         setError(err instanceof Error ? err.message : 'Failed to load events');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadEvents();
-  }, [user?.sub, fetchCalendarEvents, setEvents]);
+  }, [user?.sub, setEvents]);
+
+  // Show loading state
+  if (isLoading) {
+    return <div>Loading calendar...</div>;
+  }
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     // Prevent any default touch/click behavior
@@ -506,11 +528,17 @@ const Calendar: React.FC = () => {
                   Enter Start Date
                 </label>
                 <div className="relative">
-                  <input
-                    id="event-start-date"
-                    type="date"
+                  <Flatpickr
                     value={eventStartDate}
-                    onChange={(e) => setEventStartDate(e.target.value)}
+                    onChange={([date]) => {
+                      if (date) {
+                        setEventStartDate(date.toISOString().split('T')[0]);
+                      }
+                    }}
+                    options={{
+                      ...datePickerOptions,
+                      minDate: "today",
+                    }}
                     className="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>
@@ -521,11 +549,17 @@ const Calendar: React.FC = () => {
                   Enter End Date
                 </label>
                 <div className="relative">
-                  <input
-                    id="event-end-date"
-                    type="date"
+                  <Flatpickr
                     value={eventEndDate}
-                    onChange={(e) => setEventEndDate(e.target.value)}
+                    onChange={([date]) => {
+                      if (date) {
+                        setEventEndDate(date.toISOString().split('T')[0]);
+                      }
+                    }}
+                    options={{
+                      ...datePickerOptions,
+                      minDate: eventStartDate || "today",
+                    }}
                     className="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>

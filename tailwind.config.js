@@ -28,6 +28,7 @@ export default {
           400: '#4d66ff',  // Light shade
           500: '#1333ff',  // Main blue
           600: '#0f29cc',  // Darker shade
+          700: '#0c1f99',  // Added darker shade
         },
         success: {
           50: '#ecfdf5',
@@ -66,11 +67,11 @@ export default {
     'border-danger',
     'border-warning',
     {
-      pattern: /bg-(brand|success|error|warning)-(400|500)/,
+      pattern: /bg-(brand|success|error|warning)-(400|500|600|700)/,
       variants: ['dark', 'hover'],
     },
     {
-      pattern: /bg-(brand|success|error|warning)-(400|500)\/10/,
+      pattern: /bg-(brand|success|error|warning)-(400|500|600|700)\/10/,
       variants: ['dark', 'hover'],
     },
   ],

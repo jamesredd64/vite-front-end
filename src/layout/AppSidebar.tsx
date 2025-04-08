@@ -33,10 +33,9 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Calendar", path: "/calendar", pro: false, icon: <CalenderIcon /> },
       { name: "Ecommerce", path: "/dashboard", pro: false },
-      { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview /> },      
+      { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview /> },
       { name: "User Profile", path: "/profile", pro: false, icon: <UserCircleIcon /> },
-
-      
+      { name: "Customer Demographics", path: "/customer-demographics", pro: false },
     ],
   },
   // {

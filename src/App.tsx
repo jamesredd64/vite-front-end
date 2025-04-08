@@ -15,6 +15,7 @@ import { useMongoDbClient } from './services/mongoDbClient';
 import Marketing from "./pages/Dashboard/Marketing";
 import MarketingOverview from "./pages/MarketingOverview";
 import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
+import CustomerDemographics from "./pages/Dashboard/CustomerDemographics";
 
 // import Mypage from "./pages/test";
 
@@ -228,6 +229,7 @@ function App() {
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/marketing" element={<Marketing />} />
                   <Route path="/marketing-overview" element={<MarketingOverview />} />
+                  <Route path="/customer-demographics" element={<CustomerDemographics />} />
                   {/* <Route path="/mypage" element={<Mypage />} /> */}
                   <Route path="*" element={<NotFound />} />
                 </Route>
