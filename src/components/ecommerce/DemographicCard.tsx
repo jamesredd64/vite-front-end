@@ -161,7 +161,7 @@ export default function DemographicCard() {
           {/* Age Distribution Chart */}
           <div className="h-80">
             <h4 className="mb-3 font-medium text-gray-800 dark:text-white/90">
-              Age Distribution
+              Attendee Distribution
             </h4>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -279,7 +279,7 @@ export default function DemographicCard() {
         <div className="space-y-6">
           {/* Customer Segments */}
           <div>
-            <h4 className="mb-3 font-medium text-gray-800 dark:text-white/90">Customer Segments</h4>
+            <h4 className="mb-3 font-medium text-gray-800 dark:text-white/90">Attendee Segments</h4>
             <div className="space-y-3">
               {stats.customerSegments.map((segment, index) => (
                 <div key={index} className="relative">
