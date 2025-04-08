@@ -6,6 +6,7 @@
     "dev": "vite",
     "prebuild": "node scripts/update-version.js",
     "build": "tsc && vite build",
+    "vercel-build": "vite build",
     "build:prod": "npm run prebuild && npm run build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
