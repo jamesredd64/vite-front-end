@@ -185,7 +185,7 @@ export default function DemographicCard() {
 
           {/* Device Preference */}
           <div>
-            <h4 className="mb-3 font-medium text-gray-800 dark:text-white/90">Device Preference</h4>
+            <h4 className="mb-3 mt-12 font-medium text-gray-800 dark:text-white/90">Device Preference</h4>
             <div className="space-y-3">
               {stats.devicePreference.map((device, index) => (
                 <div key={index} className="relative">
