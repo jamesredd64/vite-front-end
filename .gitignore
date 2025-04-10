@@ -22,7 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-fe-saved
+
+# Development and backup directories
+_Dev/
+fe-saved/
+**/fe-saved/
+repo-backup/
+repo-backup*/
+.saved/
+**/.saved/
+
 # Security and Environment
 .env
 .env.local
@@ -89,3 +98,8 @@ build/
 # If these files are already tracked, run:
 # git rm -r --cached _Dev/
 # git rm -r --cached fe-saved/
+src/pages/DemoApp.tsx
+src/pages/UserProfiles-old.tsx
+src/pages/UserProfiles-old-new.tsx
+src/pages/TestPage.tsx
+src/pages/test.css

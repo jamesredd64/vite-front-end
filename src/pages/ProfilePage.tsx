@@ -126,6 +126,7 @@ const UserProfile = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Navigation handler
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onNavigate = async (path: string) => {
     if (hasUnsavedChanges) {
       // Let the user continue navigation, the notification will handle saving
@@ -343,7 +344,7 @@ const UserProfile = () => {
       />
       <PageBreadcrumb 
         pageTitle="Profile" 
-        onNavigate={onNavigate}
+        // onNavigate={onNavigate}
       />
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800/50 lg:p-6">
         <div className="flex flex-col gap-5">

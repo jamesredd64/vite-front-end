@@ -191,7 +191,7 @@
   /* ... other ApexCharts styles ... */
 
   .flatpickr-calendar {
-    @apply mt-2 bg-white rounded-xl p-5 border border-gray-200 text-gray-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-400 dark:shadow-theme-xl;
+    @apply mt-2 bg-white rounded-xl p-5 border border-gray-200 text-gray-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-400 shadow-theme-xl dark:shadow-theme-xl;
   }
 
   .flatpickr-day {

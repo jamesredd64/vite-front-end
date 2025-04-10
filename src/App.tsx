@@ -16,6 +16,7 @@ import Marketing from "./pages/Dashboard/Marketing";
 import MarketingOverview from "./pages/MarketingOverview";
 import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 import CustomerDemographics from "./pages/Dashboard/CustomerDemographics";
+import DemoApp from "./pages/DemoApp";
 
 // import Mypage from "./pages/test";
 
@@ -230,7 +231,7 @@ function App() {
                   <Route path="/marketing" element={<Marketing />} />
                   <Route path="/marketing-overview" element={<MarketingOverview />} />
                   <Route path="/customer-demographics" element={<CustomerDemographics />} />
-                  {/* <Route path="/mypage" element={<Mypage />} /> */}
+                  <Route path="/demo" element={<DemoApp />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               ) : (
