@@ -1,22 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useUserProfileStore } from '../../stores/userProfileStore';
+import { useUserProfileStore } from "../../stores/userProfileStore";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
-import  UserMetadata  from "../../types/user.js";
+import UserMetadata from "../../types/user.js";
 import Button from "../ui/button/Button";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {
+  MarketingChannels,
+  MarketingPlatforms,  
+} from "../../types/marketing";
 
+const NotificationChannels = [
+  "Email",
+  "Phone",
+  "Push",
+  "SMS",
+  "Text",
+  "Web",
+] as const;
 
 interface MarketingBudget {
   frequency: "daily" | "monthly" | "quarterly" | "yearly";
   adBudget: number;
   costPerAcquisition: number;
   dailySpendingLimit: number;
-  marketingChannels: string;
+  marketingChannels: string; // Keep as string for backward compatibility
   monthlyBudget: number;
-  preferredPlatforms: string;
+  preferredPlatforms: string; // Keep as string for backward compatibility
   notificationPreferences: string[];
   roiTarget: number;
 }
@@ -28,26 +41,142 @@ interface UserMarketingCardProps {
   };
 }
 
-export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, initialData }) => {
+const MultiSelect: React.FC<{
+  options: readonly string[];
+  value: string[];
+  onChange: (selected: string[]) => void;
+  placeholder: string;
+}> = ({ options, value, onChange, placeholder }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownListRef = useRef<HTMLDivElement>(null);
+  const sortedOptions = [...options].sort((a, b) => a.localeCompare(b));
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Scroll dropdown list into view when it opens
+    if (isOpen && dropdownListRef.current) {
+      setTimeout(() => {
+        dropdownListRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "nearest"
+        });
+      }, 100); // Small delay to ensure dropdown is rendered
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const toggleOption = (option: string) => {
+    const newValue = value.includes(option)
+      ? value.filter((v) => v !== option)
+      : [...value, option];
+    onChange(newValue);
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* Selected items display */}
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        className="min-h-[40px] w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-brand-300 focus:outline-none focus:ring-1 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+      >
+        {value.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {value.map((item) => (
+              <span
+                key={item}
+                className="inline-flex items-center rounded-full bg-brand-50 px-2 py-1 text-xs text-brand-600 dark:bg-brand-500/15 dark:text-brand-400"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="text-gray-400 dark:text-gray-500">
+            {placeholder}
+          </span>
+        )}
+      </div>
+
+      {/* Dropdown menu */}
+      {isOpen && (
+        <div 
+          ref={dropdownListRef}
+          className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+        >
+          {sortedOptions.map((option) => (
+            <div
+              key={option}
+              className="flex cursor-pointer items-center px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+              onClick={() => toggleOption(option)}
+            >
+              <div className="relative mr-3 flex h-5 w-5 items-center justify-center rounded border border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-700">
+                {value.includes(option) && (
+                  <svg
+                    className="h-3.5 w-3.5 text-brand-500 dark:text-brand-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
+              </div>
+              <span className="text-sm text-gray-700 dark:text-gray-200">
+                {option}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({
+  onUpdate,
+  initialData,
+}) => {
   const { isOpen, openModal, closeModal } = useModal();
   const { user } = useAuth0();
   const userProfile = useUserProfileStore();
   const [saveResult, setSaveResult] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState({
     marketingBudget: {
       frequency: initialData.marketingBudget.frequency || "monthly",
       adBudget: Number(initialData.marketingBudget.adBudget) || 0,
-      costPerAcquisition: Number(initialData.marketingBudget.costPerAcquisition) || 0,
-      dailySpendingLimit: Number(initialData.marketingBudget.dailySpendingLimit) || 0,
+      costPerAcquisition:
+        Number(initialData.marketingBudget.costPerAcquisition) || 0,
+      dailySpendingLimit:
+        Number(initialData.marketingBudget.dailySpendingLimit) || 0,
       marketingChannels: initialData.marketingBudget.marketingChannels || "",
       monthlyBudget: Number(initialData.marketingBudget.monthlyBudget) || 0,
       preferredPlatforms: initialData.marketingBudget.preferredPlatforms || "",
-      notificationPreferences: Array.isArray(initialData.marketingBudget.notificationPreferences) 
-        ? initialData.marketingBudget.notificationPreferences 
+      notificationPreferences: Array.isArray(
+        initialData.marketingBudget.notificationPreferences
+      )
+        ? initialData.marketingBudget.notificationPreferences
         : [],
-      roiTarget: Number(initialData.marketingBudget.roiTarget) || 0
-    }
+      roiTarget: Number(initialData.marketingBudget.roiTarget) || 0,
+    },
   });
 
   // Update formData when initialData changes
@@ -56,45 +185,78 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
       marketingBudget: {
         frequency: initialData.marketingBudget.frequency || "monthly",
         adBudget: Number(initialData.marketingBudget.adBudget) || 0,
-        costPerAcquisition: Number(initialData.marketingBudget.costPerAcquisition) || 0,
-        dailySpendingLimit: Number(initialData.marketingBudget.dailySpendingLimit) || 0,
+        costPerAcquisition:
+          Number(initialData.marketingBudget.costPerAcquisition) || 0,
+        dailySpendingLimit:
+          Number(initialData.marketingBudget.dailySpendingLimit) || 0,
         marketingChannels: initialData.marketingBudget.marketingChannels || "",
         monthlyBudget: Number(initialData.marketingBudget.monthlyBudget) || 0,
-        preferredPlatforms: initialData.marketingBudget.preferredPlatforms || "",
-        notificationPreferences: Array.isArray(initialData.marketingBudget.notificationPreferences)
+        preferredPlatforms:
+          initialData.marketingBudget.preferredPlatforms || "",
+        notificationPreferences: Array.isArray(
+          initialData.marketingBudget.notificationPreferences
+        )
           ? initialData.marketingBudget.notificationPreferences
           : [],
-        roiTarget: Number(initialData.marketingBudget.roiTarget) || 0
-      }
+        roiTarget: Number(initialData.marketingBudget.roiTarget) || 0,
+      },
     };
 
     if (JSON.stringify(formData) !== JSON.stringify(newFormData)) {
       setFormData(newFormData);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData]);
 
-  const handleInputChange = (field: keyof MarketingBudget) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const value = e.target.value;
-    setFormData(prev => ({
+  const handleInputChange =
+    (field: keyof MarketingBudget) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const value = e.target.value;
+      setFormData((prev) => ({
+        marketingBudget: {
+          ...prev.marketingBudget,
+          [field]:
+            field === "notificationPreferences"
+              ? typeof value === "string"
+                ? value
+                    .split(",")
+                    .map((v) => v.trim())
+                    .filter(Boolean)
+                : []
+              : field === "marketingChannels" || field === "preferredPlatforms"
+              ? value
+              : field === "frequency"
+              ? value
+              : field === "adBudget" ||
+                field === "costPerAcquisition" ||
+                field === "dailySpendingLimit" ||
+                field === "monthlyBudget" ||
+                field === "roiTarget"
+              ? Number(value) || 0
+              : value,
+        },
+      }));
+      userProfile.setHasUnsavedChanges(true);
+    };
+
+  const handleMarketingChannelsChange = (selected: string[]) => {
+    const channelsString = selected.join(", ");
+    setFormData((prev) => ({
       marketingBudget: {
         ...prev.marketingBudget,
-        [field]: 
-          field === 'notificationPreferences' ? 
-            (typeof value === 'string' ? value.split(',').map(v => v.trim()).filter(Boolean) : []) :
-          field === 'marketingChannels' || field === 'preferredPlatforms' ? 
-            value :
-          field === 'frequency' ? 
-            value :
-          field === 'adBudget' || 
-          field === 'costPerAcquisition' || 
-          field === 'dailySpendingLimit' || 
-          field === 'monthlyBudget' || 
-          field === 'roiTarget' ? 
-            Number(value) || 0 :
-          value
-      }
+        marketingChannels: channelsString,
+      },
+    }));
+    userProfile.setHasUnsavedChanges(true);
+  };
+
+  const handlePlatformsChange = (selected: string[]) => {
+    const platformsString = selected.join(", ");
+    setFormData((prev) => ({
+      marketingBudget: {
+        ...prev.marketingBudget,
+        preferredPlatforms: platformsString,
+      },
     }));
     userProfile.setHasUnsavedChanges(true);
   };
@@ -104,13 +266,13 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
       if (!user?.sub) return;
       onUpdate({
         marketingBudget: {
-          ...formData.marketingBudget
-        }
+          ...formData.marketingBudget,
+        },
       });
       closeModal();
     } catch (error) {
-      console.error('Error saving marketing info:', error);
-      setSaveResult('Error saving marketing information');
+      console.error("Error saving marketing info:", error);
+      setSaveResult("Error saving marketing information");
     }
   };
 
@@ -124,30 +286,36 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
             </h4>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-7 2xl:gap-x-32">
-              <div>
+              {/* <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                   Ad Budget
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(formData.marketingBudget.adBudget)}
                 </p>
-              </div>
+              </div> */}
 
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                   Cost Per Acquisition
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(formData.marketingBudget.costPerAcquisition)}
+                  {new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  }).format(formData.marketingBudget.costPerAcquisition)}
                 </p>
               </div>
 
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                  Monthly Budget
+                  Budget
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(formData.marketingBudget.monthlyBudget)}
+                  {new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  }).format(formData.marketingBudget.monthlyBudget)}
                 </p>
               </div>
 
@@ -155,40 +323,57 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                   Marketing Channels
                 </p>
+
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {formData.marketingBudget.marketingChannels || 'Not set'}
+                  {formData.marketingBudget.marketingChannels
+                    ? formData.marketingBudget.marketingChannels
+                        .split(",")
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                        .join(", ")
+                    : "Not set"}
                 </p>
               </div>
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                PreferredPlatforms
+                  PreferredPlatforms
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {formData.marketingBudget.preferredPlatforms || 'Not set'}
+                  {formData.marketingBudget.preferredPlatforms ||
+                    "Not set".toUpperCase()}
                 </p>
               </div>
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Return On Interest
+                  Return On Interest
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {formData.marketingBudget.roiTarget || 'Not set'}
+                  {formData.marketingBudget.roiTarget || "Not set"}
                 </p>
               </div>
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Frequency
+                  Frequency
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {formData.marketingBudget.frequency || 'Not set'}
+                  {(formData.marketingBudget.frequency || "Not set")
+                    .charAt(0)
+                    .toUpperCase() +
+                    (formData.marketingBudget.frequency || "Not set")
+                      .slice(1)
+                      .toLowerCase()}
                 </p>
               </div>
               <div>
                 <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Return On Interest
+                  Notification Preferences
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {formData.marketingBudget.notificationPreferences || 'Not set'}
+                  {formData.marketingBudget.notificationPreferences.length > 0
+                    ? formData.marketingBudget.notificationPreferences.join(
+                        ", "
+                      )
+                    : "Not set"}
                 </p>
               </div>
             </div>
@@ -230,11 +415,11 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
           <form className="flex flex-col">
             <div className="px-2 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div>
+                {/* <div>
                   <Label>Ad Budget</Label>
                   <Input
                     type="number"
-                    value={formData.marketingBudget.adBudget}
+                    value={formData.marketingBudget.adBudget.toLocaleString()}
                     onChange={handleInputChange('adBudget')}
                     step={0.01}
                     min="0"
@@ -242,14 +427,14 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
                     prefix="$"
                     isCurrency={true}
                   />
-                </div>
+                </div> */}
 
                 <div>
                   <Label>Cost Per Acquisition</Label>
                   <Input
                     type="number"
-                    value={formData.marketingBudget.costPerAcquisition}
-                    onChange={handleInputChange('costPerAcquisition')}
+                    value={formData.marketingBudget.costPerAcquisition.toLocaleString()}
+                    onChange={handleInputChange("costPerAcquisition")}
                     step={0.01}
                     min="0"
                     placeholder="0.00"
@@ -259,11 +444,11 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
                 </div>
 
                 <div>
-                  <Label>Monthly Budget</Label>
+                  <Label>Budget</Label>
                   <Input
                     type="number"
-                    value={formData.marketingBudget.monthlyBudget}
-                    onChange={handleInputChange('monthlyBudget')}
+                    value={formData.marketingBudget.monthlyBudget.toLocaleString()}
+                    onChange={handleInputChange("monthlyBudget")}
                     step={0.01}
                     min="0"
                     placeholder="0.00"
@@ -273,11 +458,11 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
                 </div>
 
                 <div>
-                  <Label>Daily Spending Limit</Label>
+                  <Label>Spending Limit</Label>
                   <Input
                     type="number"
-                    value={formData.marketingBudget.dailySpendingLimit}
-                    onChange={handleInputChange('dailySpendingLimit')}
+                    value={formData.marketingBudget.dailySpendingLimit.toLocaleString()}
+                    onChange={handleInputChange("dailySpendingLimit")}
                     step={0.01}
                     min="0"
                     placeholder="0.00"
@@ -285,46 +470,12 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
                     isCurrency={true}
                   />
                 </div>
-
-                <div>
-                  <Label>Marketing Channels</Label>
-                  <Input
-                    type="text"
-                    value={formData.marketingBudget.marketingChannels}
-                    onChange={handleInputChange('marketingChannels')}
-                    placeholder="Enter marketing channels"
-                  />
-                </div>
-
-                <div>
-                  <Label>Preferred Platforms</Label>
-                  <Input
-                    type="text"
-                    value={formData.marketingBudget.preferredPlatforms}
-                    onChange={handleInputChange('preferredPlatforms')}
-                    placeholder="Enter preferred platforms"
-                  />
-                </div>
-
-                <div>
-                  <Label>ROI Target (%)</Label>
-                  <Input
-                    type="number"
-                    value={formData.marketingBudget.roiTarget}
-                    onChange={handleInputChange('roiTarget')}
-                    step={1}
-                    min="0"
-                    max="100"
-                    placeholder="0"
-                  />
-                </div>
-
                 <div>
                   <Label>Frequency</Label>
                   <select
                     className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
                     value={formData.marketingBudget.frequency}
-                    onChange={handleInputChange('frequency')}
+                    onChange={handleInputChange("frequency")}
                   >
                     <option value="daily">Daily</option>
                     <option value="monthly">Monthly</option>
@@ -332,14 +483,76 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({ onUpdate, 
                     <option value="yearly">Yearly</option>
                   </select>
                 </div>
+                <div>
+                  <Label>Marketing Channels</Label>
+                  <Label className="mb-2 text-xsm font-semibold text-gray-800 dark:text-white/90">
+                    Hold [cntrl] to select multiples
+                  </Label>
+                  <MultiSelect
+                    options={MarketingChannels}
+                    value={formData.marketingBudget.marketingChannels
+                      .split(",")
+                      .map((s) => s.trim())
+                      .filter(Boolean)}
+                    onChange={handleMarketingChannelsChange}
+                    placeholder="Select marketing channels"
+                  />
+                </div>
+
+                <div>
+                  <Label>Preferred Platforms</Label>
+                  <Label className="mb-2 text-xsm font-semibold text-gray-800 dark:text-white/90">
+                    Hold [cntrl] to select multiples
+                  </Label>
+                  <MultiSelect
+                    options={MarketingPlatforms}
+                    value={formData.marketingBudget.preferredPlatforms
+                      .split(",")
+                      .map((s) => s.trim())
+                      .filter(Boolean)}
+                    onChange={handlePlatformsChange}
+                    placeholder="Select preferred platforms"
+                  />
+                </div>
 
                 <div className="lg:col-span-2">
                   <Label>Notification Preferences</Label>
+                  <MultiSelect
+                    options={NotificationChannels}
+                    value={
+                      typeof formData.marketingBudget
+                        .notificationPreferences === "string"
+                        ? (
+                            formData.marketingBudget
+                              .notificationPreferences as string
+                          )
+                            .split(",")
+                            .map((s: string) => s.trim())
+                            .filter(Boolean)
+                        : formData.marketingBudget.notificationPreferences || []
+                    }
+                    onChange={(selected) => {
+                      setFormData((prev) => ({
+                        marketingBudget: {
+                          ...prev.marketingBudget,
+                          notificationPreferences: selected,
+                        },
+                      }));
+                      userProfile.setHasUnsavedChanges(true);
+                    }}
+                    placeholder="Select notification preferences"
+                  />
+                </div>
+                <div>
+                  <Label>ROI Target (%)</Label>
                   <Input
-                    type="text"
-                    value={formData.marketingBudget.notificationPreferences.join(', ')}
-                    onChange={handleInputChange('notificationPreferences')}
-                    placeholder="Enter notification preferences (comma-separated)"
+                    type="number"
+                    value={formData.marketingBudget.roiTarget}
+                    onChange={handleInputChange("roiTarget")}
+                    step={1}
+                    min="0"
+                    max="100"
+                    placeholder="0"
                   />
                 </div>
               </div>
