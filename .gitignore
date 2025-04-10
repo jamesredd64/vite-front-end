@@ -31,6 +31,8 @@ repo-backup/
 repo-backup*/
 .saved/
 **/.saved/
+user cards*/
+user cards/
 
 # Security and Environment
 .env

@@ -8,6 +8,8 @@ fe-saved/
 **/fe-saved/
 repo-backup/
 repo-backup*/
+user cards*/
+user cards/
 
 # Test files
 *.test.tsx
