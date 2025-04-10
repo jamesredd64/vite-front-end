@@ -1,5 +1,5 @@
 {
-  "name": "vite.stockholme.application",
+  "name": "stockholme.application",
   "private": true,
   "version": "2.0.18",
   "scripts": {

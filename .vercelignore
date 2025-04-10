@@ -18,11 +18,9 @@ TestMongoDB.tsx
 insertTestCalendarEvents.js
 testFetchUser.jsx
 
-# Scripts directory
-scripts/
-
-# Keep version update script
-!update-version.js
+# Scripts directory - but keep necessary build scripts
+scripts/*
+!scripts/update-version.js
 
 # Debug logs
 npm-debug.log*
