@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 
 import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth0 } from '@auth0/auth0-react';
@@ -16,9 +17,6 @@ import Marketing from "./pages/Dashboard/Marketing";
 import MarketingOverview from "./pages/MarketingOverview";
 import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 import CustomerDemographics from "./pages/Dashboard/CustomerDemographics";
-import DemoApp from "./pages/DemoApp";
-
-// import Mypage from "./pages/test";
 
 // import Marketing2 from './pages/Dashboard/Main/Marketing';
 // import Marketing from "./pages/Dashboard/Main/Marketing";
@@ -230,8 +228,7 @@ function App() {
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/marketing" element={<Marketing />} />
                   <Route path="/marketing-overview" element={<MarketingOverview />} />
-                  <Route path="/customer-demographics" element={<CustomerDemographics />} />
-                  <Route path="/demo" element={<DemoApp />} />
+                  <Route path="/customer-demographics" element={<CustomerDemographics />} />                  
                   <Route path="*" element={<NotFound />} />
                 </Route>
               ) : (
