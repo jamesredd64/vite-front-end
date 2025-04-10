@@ -1,12 +1,12 @@
 {
   "name": "stockholme.application",
   "private": true,
-  "version": "2.0.17",
+  "version": "2.0.18",
   "scripts": {
     "dev": "vite",
     "prebuild": "node scripts/update-version.js",
     "build": "vite build && cp CHANGELOG.md dist/",
-    "vercel-build": "vite build",
+    "vercel-build": "node scripts/update-version.js && vite build",
     "build:prod": "npm run prebuild && npm run build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
@@ -19,7 +19,7 @@
     "update-svg": "scripts\\update-svg-imports.cmd",
     "find-images": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\find-image-refs.ps1",
     "kill-port": "scripts\\kill-port.cmd",
-    "release": "standard-version",
+    "release": "standard-version && node scripts/update-version.js",
     "prepare-release": "npm run update-version && standard-version --prerelease",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
