@@ -1,11 +1,11 @@
 {
   "name": "stockholme.application",
   "private": true,
-  "version": "2.0.13",
+  "version": "2.0.17",
   "scripts": {
     "dev": "vite",
     "prebuild": "node scripts/update-version.js",
-    "build": "tsc && vite build",
+    "build": "vite build && cp CHANGELOG.md dist/",
     "vercel-build": "vite build",
     "build:prod": "npm run prebuild && npm run build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -18,7 +18,10 @@
     "move-server-frontend": "scripts\\move-server-frontend-files.cmd",
     "update-svg": "scripts\\update-svg-imports.cmd",
     "find-images": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\find-image-refs.ps1",
-    "kill-port": "scripts\\kill-port.cmd"
+    "kill-port": "scripts\\kill-port.cmd",
+    "release": "standard-version",
+    "prepare-release": "npm run update-version && standard-version --prerelease",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
@@ -42,10 +45,12 @@
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
     "d3-scale": "^4.0.2",
+    "dompurify": "^3.2.5",
     "dotenv": "^16.4.7",
     "fast-deep-equal": "^3.1.3",
     "flatpickr": "^4.6.13",
     "jquery": "^3.6.0",
+    "marked": "^15.0.8",
     "mongodb": "^6.14.2",
     "mongoose": "^8.12.1",
     "mongosh": "^2.4.2",
@@ -71,9 +76,13 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
     "@eslint/js": "^9.19.0",
     "@types/cors": "^2.8.17",
     "@types/d3-scale": "^3.3.2",
+    "@types/dompurify": "^3.0.5",
+    "@types/marked": "^5.0.2",
     "@types/node": "^22.13.10",
     "@types/react": "^18.3.20",
     "@types/react-dom": "^18.0.11",
@@ -89,6 +98,7 @@
     "eslint-plugin-react-refresh": "^0.4.18",
     "globals": "^15.14.0",
     "postcss": "^8.4.31",
+    "standard-version": "^9.5.0",
     "supabase": "^2.19.7",
     "tailwindcss": "^3.3.3",
     "ts-node": "^10.9.2",
