@@ -249,6 +249,12 @@ const Calendar: React.FC = () => {
   }
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
+    // Check if this is a drag-drop operation by looking for a specific class
+    const isDragDrop = document.querySelector('.fc-event-is-dragging');
+    if (isDragDrop) {
+      return; // Exit early if we're in a drag-drop operation
+    }
+
     // Prevent any default touch/click behavior
     if (selectInfo.jsEvent) {
       selectInfo.jsEvent.preventDefault();
@@ -704,7 +710,7 @@ else {
             dragRevertDuration={0}
             dragScroll={true}
             snapDuration={"00:15:00"} // Snap to 15-minute intervals
-            eventOverlap={false} // Prevent events from overlapping
+            eventOverlap={true} // Prevent events from overlapping
             // eventOpacity={0.75}
 
             // Event constraints
