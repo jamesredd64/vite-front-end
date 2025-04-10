@@ -7,6 +7,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Important files that should NOT be ignored
+!CHANGELOG.md
+
 node_modules
 dist
 dist-ssr
@@ -41,11 +44,6 @@ user cards/
 .env.development
 .env.test
 .env.production
-
-# Debug logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Build directories
 /dist
@@ -106,4 +104,4 @@ src/pages/UserProfiles-old.tsx
 src/pages/UserProfiles-old-new.tsx
 src/pages/TestPage.tsx
 src/pages/test.css
-CHANGELOG.md
+# CHANGELOG.md
