@@ -4,8 +4,9 @@
   "version": "2.0.11",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/update-version.js",
+    "prebuild": "node scripts/update-version.js && npm run update-changelog",
     "build": "tsc && vite build",
+    "git": "scripts\\git-operations.cmd",
     "vercel-build": "vite build",
     "build:prod": "npm run prebuild && npm run build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -18,7 +19,9 @@
     "move-server-frontend": "scripts\\move-server-frontend-files.cmd",
     "update-svg": "scripts\\update-svg-imports.cmd",
     "find-images": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\find-image-refs.ps1",
-    "kill-port": "scripts\\kill-port.cmd"
+    "kill-port": "scripts\\kill-port.cmd",
+    "update-changelog": "auto-changelog --template keepachangelog",
+    "version": "npm run update-changelog && git add CHANGELOG.md"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
@@ -81,8 +84,10 @@
     "@types/react-redux": "^7.1.25",
     "@types/react-simple-maps": "^1.0.8",
     "@vitejs/plugin-react": "^4.0.0",
+    "auto-changelog": "^2.5.0",
     "autoprefixer": "^10.4.15",
     "concurrently": "^8.2.2",
+    "conventional-changelog-cli": "^5.0.0",
     "cross-env": "^7.0.3",
     "eslint": "^9.19.0",
     "eslint-plugin-react-hooks": "^5.0.0",
@@ -96,5 +101,16 @@
     "typescript-eslint": "^8.22.0",
     "vite": "^6.2.5",
     "vite-plugin-svgr": "^4.3.0"
+  },
+  "auto-changelog": {
+    "template": "keepachangelog",
+    "unreleased": true,
+    "commitLimit": false,
+    "breakingPattern": "BREAKING CHANGE:",
+    "issuePattern": "#[0-9]+",
+    "issueUrl": "https://github.com/your-username/your-repo/issues/",
+    "replaceText": {
+      "([0-9]+\\.[0-9]+\\.[0-9]+)": "v$1"
+    }
   }
 }

@@ -76,6 +76,7 @@ repo-backup*/
 test.tsx
 TestPage.tsx
 TestMongoDB.tsx
+Git-Ops.md
 
 # VS Code workspace settings
 .vscode/*
@@ -105,3 +106,4 @@ src/pages/UserProfiles-old.tsx
 src/pages/UserProfiles-old-new.tsx
 src/pages/TestPage.tsx
 src/pages/test.css
+CHANGELOG.md

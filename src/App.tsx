@@ -131,6 +131,7 @@ function App() {
          name: user.name || prevState.name || ''
       } : null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.picture]);
 
   // Handle authentication state changes
@@ -139,6 +140,7 @@ function App() {
       setUserMetadata(null);
       navigate('/signed-out');
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, isAuthenticated, navigate]);
 
   // Initialize user data
@@ -157,35 +159,8 @@ function App() {
         
         const userData = await updateUser(normalizedAuthId, {
           email: user?.email || '',
-          name: user?.name || '',          
-          // firstName: user?.given_name || '',
-          // lastName: user?.family_name || '',
-          // profilePictureUrl: user?.picture || '',
-          // phoneNumber: '',
-          // dateOfBirth: '',
-          // gender: '',
-          // 
-          // adBudget: 0,
-          // costPerAcquisition: 0,
-          // dailySpendingLimit: 0,
-          // marketingChannels: '',
-          // monthlyBudget: 0,
-          // preferredPlatforms: '',
-          // notificationPreferences: [],
-          // roiTarget: 0,
-          // marketingBudget: {
-          //   amount: 0,
-          //   frequency: 'monthly',
-          //   adCosts: 0
-          // },
-          // address: {
-          //   street: '',
-          //   city: '',
-          //   state: '',
-          //   zipCode: '',
-          //   country: ''
-          // },
-          //auth0Id: user.sub
+          name: user?.name || '',       
+          
         });
 
         if (userData) {

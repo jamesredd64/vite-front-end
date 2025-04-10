@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 console.log('Starting version update script...');
 console.log('Current directory:', process.cwd());
@@ -30,11 +31,19 @@ const updateVersion = () => {
     fs.writeFileSync(versionPath, newContent);
     console.log(`Version updated to ${newVersion}`);
     
-    // Also update package.json
+    // Update package.json
     const packagePath = path.join(process.cwd(), 'package.json');
     const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
     packageJson.version = newVersion;
     fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
+
+    // Update changelog
+    try {
+      execSync('npm run update-changelog', { stdio: 'inherit' });
+      console.log('Changelog updated successfully');
+    } catch (error) {
+      console.error('Error updating changelog:', error);
+    }
   } catch (error) {
     console.error('Error updating version:', error);
     process.exit(1);
@@ -42,3 +51,4 @@ const updateVersion = () => {
 };
 
 updateVersion();
+
