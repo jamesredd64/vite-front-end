@@ -50,6 +50,7 @@ export const UserAddressCard: React.FC<UserAddressCardProps> = ({ onUpdate, init
     if (JSON.stringify(formData) !== JSON.stringify(newFormData)) {
       setFormData(newFormData);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData]);
 
   const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,15 +160,15 @@ export const UserAddressCard: React.FC<UserAddressCardProps> = ({ onUpdate, init
           <form className="flex flex-col">
             <div className="px-2 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-4">
-                <div>
-                  <Label>Country</Label>
+                
+                <div className="lg:col-span-2">
+                  <Label>Street Address</Label>
                   <Input 
                     type="text" 
-                    value={formData.address.country}
-                    onChange={handleInputChange('country')}
+                    value={formData.address.street}
+                    onChange={handleInputChange('street')}
                   />
                 </div>
-
                 <div>
                   <Label>City</Label>
                   <Input 
@@ -194,15 +195,15 @@ export const UserAddressCard: React.FC<UserAddressCardProps> = ({ onUpdate, init
                     onChange={handleInputChange('zipCode')}
                   />
                 </div>
-
-                <div className="lg:col-span-2">
-                  <Label>Street Address</Label>
+                <div>
+                  <Label>Country</Label>
                   <Input 
                     type="text" 
-                    value={formData.address.street}
-                    onChange={handleInputChange('street')}
+                    value={formData.address.country}
+                    onChange={handleInputChange('country')}
                   />
                 </div>
+               
               </div>
             </div>
 
