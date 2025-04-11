@@ -305,29 +305,59 @@ function Compare-Branches {
 }
 
 function Merge-MultipleBranches {
-    # First, ensure we're up to date
+    # First, ensure we're up to date with all remote branches
+    Write-Host "Fetching latest changes from remote..."
     git fetch --all
     
     # Get current branch name for reference
     $currentBranch = git rev-parse --abbrev-ref HEAD
     Write-Host "`nCurrent branch: $currentBranch"
     
-    # Create new integration branch
-    $newBranchName = Read-Host "Enter name for new integration branch"
-    git checkout -b $newBranchName
-    
-    # Show available branches
+    # Show available branches before creating new one
     Write-Host "`nAvailable branches:"
+    Write-Host "Local branches:"
     git branch
+    Write-Host "`nRemote branches:"
+    git branch -r
+    
+    # Create new integration branch from current branch
+    $newBranchName = Read-Host "`nEnter name for new integration branch"
+    Write-Host "Creating new branch '$newBranchName' from '$currentBranch'..."
+    git checkout -b $newBranchName $currentBranch
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Failed to create new branch. Aborting..."
+        return
+    }
     
     # Get branches to merge
     $branchesToMerge = @()
+    Write-Host "`nEnter branch names to merge (one at a time, press Enter without input when done)"
+    Write-Host "You can use either local branches or remote branches (e.g., 'feature-branch' or 'origin/feature-branch')"
     do {
         $branchName = Read-Host "`nEnter branch name to merge (or press Enter to finish)"
         if ($branchName) {
-            $branchesToMerge += $branchName
+            # Check if branch exists
+            $branchExists = $false
+            if (git rev-parse --verify $branchName 2>$null) {
+                $branchExists = $true
+            } elseif (git rev-parse --verify "origin/$branchName" 2>$null) {
+                $branchName = "origin/$branchName"
+                $branchExists = $true
+            }
+            
+            if ($branchExists) {
+                $branchesToMerge += $branchName
+            } else {
+                Write-Host "Branch '$branchName' not found. Please enter a valid branch name."
+            }
         }
     } while ($branchName)
+    
+    if ($branchesToMerge.Count -eq 0) {
+        Write-Host "No branches selected for merging. Operation cancelled."
+        return
+    }
     
     # Merge each branch
     foreach ($branch in $branchesToMerge) {
@@ -347,19 +377,27 @@ function Merge-MultipleBranches {
                     Write-Host "`nConflict files:"
                     git diff --name-only --diff-filter=U
                     git merge --abort
+                    Write-Host "`nMerge aborted. You can try again with different options."
+                    return
                 }
                 '2' {
                     git merge --abort
                     Write-Host "Merge aborted"
+                    return
                 }
                 '3' {
                     Write-Host "Please resolve conflicts manually, then:"
                     Write-Host "1. git add . "
                     Write-Host "2. git commit -m 'Merge $branch into $newBranchName'"
+                    Write-Host "`nAfter resolving conflicts, would you like to continue with remaining branches? (y/n)"
+                    $continue = Read-Host
+                    if ($continue -ne 'y') {
+                        return
+                    }
                 }
             }
         } else {
-            $commitMessage = Read-Host "Enter commit message for merging $branch"
+            $commitMessage = Read-Host "Enter commit message for merging $branch (or press Enter for default message)"
             if (-not $commitMessage) {
                 $commitMessage = "Merge $branch into $newBranchName"
             }
