@@ -89,3 +89,7 @@ build/
 # If these files are already tracked, run:
 # git rm -r --cached _Dev/
 # git rm -r --cached fe-saved/
+.saved/UserProfiles-old.tsx
+.saved/UserProfiles-old-new.tsx
+.saved/test.css
+src/pages/DemoApp.tsx
