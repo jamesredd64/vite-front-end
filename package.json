@@ -7,7 +7,16 @@
     "build": "vite build",
     "start": "vite",
     "vercel-build": "node src/config/update-version.js && vite build",
-    "git": "scripts\\git-operations.cmd"
+    "git": "scripts\\git-operations.cmd",
+    "move-frontend": "scripts\\move-frontend-files.cmd",
+    "restore-frontend": "scripts\\restore-frontend-files.cmd",
+    "update-svg": "scripts\\update-svg-imports.cmd",
+    "move-server-frontend": "scripts\\move-server-frontend-files.cmd",
+    "find-images": "node scripts/find-image-refs.js",
+    "dev": "vite",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",

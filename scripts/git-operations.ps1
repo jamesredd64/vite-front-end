@@ -13,6 +13,8 @@ function Show-GitMenu {
     Write-Host "10: View commit history"
     Write-Host "11: Overwrite main with backup branch"
     Write-Host "12: Switch Environment (Dev/Prod)"
+    Write-Host "13: Delete branch"
+    Write-Host "15: Merge multiple branches into new branch"
     Write-Host "Q: Quit"
     Write-Host "=================================================="
 }
@@ -229,6 +231,151 @@ function Switch-Environment {
     }
 }
 
+function Delete-Branch {
+    Write-Host "`nCurrent branch:"
+    $currentBranch = git rev-parse --abbrev-ref HEAD
+    Write-Host $currentBranch
+    
+    Write-Host "`nAvailable branches:"
+    Get-BranchList
+    
+    $branchName = Read-Host "`nEnter branch name to delete"
+    
+    if ($branchName -eq $currentBranch) {
+        Write-Host "Cannot delete the current branch. Please switch to a different branch first."
+        return
+    }
+    
+    Write-Host "`nDelete options:"
+    Write-Host "1: Safe delete (only if branch is fully merged)"
+    Write-Host "2: Force delete (WARNING: will delete even if not merged)"
+    Write-Host "3: Cancel"
+    
+    $choice = Read-Host "Choose option"
+    
+    switch ($choice) {
+        '1' {
+            git branch -d $branchName
+            if ($LASTEXITCODE -eq 0) {
+                $deleteRemote = Read-Host "Branch deleted locally. Delete from remote too? (y/n)"
+                if ($deleteRemote -eq 'y') {
+                    git push origin --delete $branchName
+                }
+            }
+        }
+        '2' {
+            Write-Host "WARNING: Force delete will remove the branch and all its unmerged changes"
+            $confirm = Read-Host "Are you sure? (y/n)"
+            if ($confirm -eq 'y') {
+                git branch -D $branchName
+                if ($LASTEXITCODE -eq 0) {
+                    $deleteRemote = Read-Host "Branch deleted locally. Force delete from remote too? (y/n)"
+                    if ($deleteRemote -eq 'y') {
+                        git push origin --delete $branchName -f
+                    }
+                }
+            }
+        }
+        default {
+            Write-Host "Operation cancelled"
+        }
+    }
+}
+
+function Merge-MultipleBranches {
+    # First, ensure we're up to date
+    git fetch --all
+    
+    # Get current branch name for reference
+    $currentBranch = git rev-parse --abbrev-ref HEAD
+    Write-Host "`nCurrent branch: $currentBranch"
+    
+    # Create new integration branch
+    $newBranchName = Read-Host "Enter name for new integration branch"
+    git checkout -b $newBranchName
+    
+    # Show available branches
+    Write-Host "`nAvailable branches:"
+    git branch
+    
+    # Get branches to merge
+    $branchesToMerge = @()
+    do {
+        $branchName = Read-Host "`nEnter branch name to merge (or press Enter to finish)"
+        if ($branchName) {
+            $branchesToMerge += $branchName
+        }
+    } while ($branchName)
+    
+    # Merge each branch
+    foreach ($branch in $branchesToMerge) {
+        Write-Host "`nAttempting to merge $branch..."
+        $mergeResult = git merge $branch --no-commit --no-ff 2>&1
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "`nConflicts detected in $branch. Options:"
+            Write-Host "1: View conflicts"
+            Write-Host "2: Abort merge"
+            Write-Host "3: Resolve manually"
+            Write-Host "4: Force merge (theirs)"
+            Write-Host "5: Force merge (ours)"
+            $choice = Read-Host "Choose option"
+            
+            switch ($choice) {
+                '1' {
+                    git status
+                    Write-Host "`nConflict files:"
+                    git diff --name-only --diff-filter=U
+                    git merge --abort
+                }
+                '2' {
+                    git merge --abort
+                    Write-Host "Merge aborted"
+                }
+                '3' {
+                    Write-Host "Please resolve conflicts manually, then:"
+                    Write-Host "1. git add . "
+                    Write-Host "2. git commit -m 'Merge $branch into $newBranchName'"
+                }
+                '4' {
+                    # Force merge using their changes
+                    git merge --abort
+                    git merge -X theirs $branch --no-edit
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Host "Force merge failed. Trying alternative method..."
+                        git merge --abort
+                        git merge $branch -s recursive -X theirs --no-edit
+                    }
+                }
+                '5' {
+                    # Force merge using our changes
+                    git merge --abort
+                    git merge -X ours $branch --no-edit
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Host "Force merge failed. Trying alternative method..."
+                        git merge --abort
+                        git merge $branch -s recursive -X ours --no-edit
+                    }
+                }
+            }
+        } else {
+            $commitMessage = Read-Host "Enter commit message for merging $branch"
+            if (-not $commitMessage) {
+                $commitMessage = "Merge $branch into $newBranchName"
+            }
+            git commit -m $commitMessage
+        }
+    }
+    
+    Write-Host "`nMerge process completed. New branch '$newBranchName' contains merged changes."
+    Write-Host "You can review changes and push to remote when ready."
+    
+    $pushNow = Read-Host "Would you like to push this branch to remote? (y/n)"
+    if ($pushNow -eq 'y') {
+        git push -u origin $newBranchName
+    }
+}
+
 # Main loop
 do {
     Show-GitMenu
@@ -243,37 +390,16 @@ do {
         '7' { Clean-WorkingDirectory }
         '8' { git status }
         '9' { Push-Changes }
-        '10' {
+        '10' { 
             Write-Host "`nAll Commits (including local):"
             Write-Host "Format: [Hash] [Date] [Author] [Message] [Branch/HEAD info]"
             Write-Host "--------------------------------------------------------"
-            
-            # Show all commits including local ones with branch/ref information
             git log --pretty=format:"%h %ad %an %s %d" --date=short --all -n 15
-            
-            Write-Host "`n"
-            Write-Host "Local unpushed commits on current branch:"
-            Write-Host "----------------------------------------"
-            # Try different methods to show unpushed commits
-            $unpushedCommits = git log '@{u}..' --pretty=format:"%h %ad %an %s" --date=short 2>$null
-            if ($LASTEXITCODE -ne 0) {
-                $unpushedCommits = git log 'origin/main..HEAD' --pretty=format:"%h %ad %an %s" --date=short 2>$null
-            }
-            
-            if ($LASTEXITCODE -eq 0 -and $unpushedCommits) {
-                Write-Host $unpushedCommits
-            } else {
-                Write-Host "All commits are in sync with remote repository."
-            }
-            
-            Write-Host "`nTo roll back to any of these commits:"
-            Write-Host "1. Copy the commit hash (first column)"
-            Write-Host "2. Select option 5 from main menu"
-            Write-Host "3. Choose option 3 (Reset to specific commit)"
-            Write-Host "4. Paste the commit hash when prompted"
         }
         '11' { Reset-ToBackupBranch }
         '12' { Switch-Environment }
+        '13' { Delete-Branch }
+        '15' { Merge-MultipleBranches }
     }
     if ($selection -ne 'q') {
         Write-Host "`nPress any key to continue..."
