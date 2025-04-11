@@ -15,6 +15,7 @@ function Show-GitMenu {
     Write-Host "12: Switch Environment (Dev/Prod)"
     Write-Host "13: Overwrite specified branch"
     Write-Host "14: Compare branches (diff)"
+    Write-Host "15: Merge multiple branches into new branch"
     Write-Host "Q: Quit"
     Write-Host "=================================================="
 }
@@ -303,6 +304,78 @@ function Compare-Branches {
     }
 }
 
+function Merge-MultipleBranches {
+    # First, ensure we're up to date
+    git fetch --all
+    
+    # Get current branch name for reference
+    $currentBranch = git rev-parse --abbrev-ref HEAD
+    Write-Host "`nCurrent branch: $currentBranch"
+    
+    # Create new integration branch
+    $newBranchName = Read-Host "Enter name for new integration branch"
+    git checkout -b $newBranchName
+    
+    # Show available branches
+    Write-Host "`nAvailable branches:"
+    git branch
+    
+    # Get branches to merge
+    $branchesToMerge = @()
+    do {
+        $branchName = Read-Host "`nEnter branch name to merge (or press Enter to finish)"
+        if ($branchName) {
+            $branchesToMerge += $branchName
+        }
+    } while ($branchName)
+    
+    # Merge each branch
+    foreach ($branch in $branchesToMerge) {
+        Write-Host "`nAttempting to merge $branch..."
+        $mergeResult = git merge $branch --no-commit --no-ff 2>&1
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "`nConflicts detected in $branch. Options:"
+            Write-Host "1: View conflicts"
+            Write-Host "2: Abort merge"
+            Write-Host "3: Resolve manually"
+            $choice = Read-Host "Choose option"
+            
+            switch ($choice) {
+                '1' {
+                    git status
+                    Write-Host "`nConflict files:"
+                    git diff --name-only --diff-filter=U
+                    git merge --abort
+                }
+                '2' {
+                    git merge --abort
+                    Write-Host "Merge aborted"
+                }
+                '3' {
+                    Write-Host "Please resolve conflicts manually, then:"
+                    Write-Host "1. git add . "
+                    Write-Host "2. git commit -m 'Merge $branch into $newBranchName'"
+                }
+            }
+        } else {
+            $commitMessage = Read-Host "Enter commit message for merging $branch"
+            if (-not $commitMessage) {
+                $commitMessage = "Merge $branch into $newBranchName"
+            }
+            git commit -m $commitMessage
+        }
+    }
+    
+    Write-Host "`nMerge process completed. New branch '$newBranchName' contains merged changes."
+    Write-Host "You can review changes and push to remote when ready."
+    
+    $pushNow = Read-Host "Would you like to push this branch to remote? (y/n)"
+    if ($pushNow -eq 'y') {
+        git push -u origin $newBranchName
+    }
+}
+
 # Main loop
 do {
     Show-GitMenu
@@ -350,6 +423,7 @@ do {
         '12' { Switch-Environment }
         '13' { Overwrite-Branch }
         '14' { Compare-Branches }
+        '15' { Merge-MultipleBranches }
     }
     if ($selection -ne 'q') {
         Write-Host "`nPress any key to continue..."
