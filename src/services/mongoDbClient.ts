@@ -262,6 +262,7 @@ export const useMongoDbClient = () => {
       setLoading(false);
       requestInProgress.current = false;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getAccessTokenSilently]);
 
   const fetchCalendarEvents = useCallback(async (userId: string): Promise<CalendarEvent[]> => {
@@ -278,6 +279,7 @@ export const useMongoDbClient = () => {
       console.error('Error fetching calendar events:', error);
       return [];
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getAuthHeaders]);
 
   const createCalendarEvent = useCallback(async (eventData: Omit<CalendarEvent, 'id'>): Promise<CalendarEvent> => {

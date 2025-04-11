@@ -15,7 +15,8 @@ import Loader from './components/common/Loader';
 import { useMongoDbClient } from './services/mongoDbClient';
 import Marketing from "./pages/Dashboard/Marketing";
 import MarketingOverview from "./pages/MarketingOverview";
-import CreateNotification from "./pages/admin/CreateNotification";
+import CreateNotification from "./pages/CreateNotification";
+// import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 
 // import Mypage from "./pages/test";
 
@@ -103,6 +104,7 @@ function App() {
     return true; // Allow navigation
   }, [hasUnsavedChanges]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleConfirmNavigation = () => {
     if (navigationState.pendingPath) {
       setHasUnsavedChanges(false);
@@ -114,6 +116,7 @@ function App() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleCancelNavigation = () => {
     setNavigationState({
       isModalOpen: false,
@@ -216,39 +219,48 @@ function App() {
   }
 
   return (
-    <div className="dark:bg-boxdark-2 dark:text-bodydark min-h-screen">
-      <div className="flex h-screen overflow-hidden">
-        <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-          <Routes>        
-            <Route path="/signed-out" element={<SignedOut />} />
-            {isAuthenticated ? (
-              <Route element={<AppLayout />}>
-                <Route index path="/" element={<Navigate to="/marketing" replace />} />              
-                <Route path="/dashboard" element={<DashboardHome />} />
-                <Route path="/profile" element={<UserProfile/>} />                
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/marketing" element={<Marketing />} />
-                <Route path="/marketing-overview" element={<MarketingOverview />} />
-                
-                {/* Admin Routes */}
-                <Route path="/admin/*" element={
-                  isAdmin() ? (
-                    <Routes>
-                      <Route path="notifications/create" element={<CreateNotification />} />
-                      {/* Add more admin routes here */}
-                    </Routes>
-                  ) : (
-                    <Navigate to="/dashboard" replace />
-                  )
-                } />
+    <NavigationContext.Provider value={{ handleNavigation, hasUnsavedChanges, setHasUnsavedChanges }}>
+      <div className="dark:bg-boxdark-2 dark:text-bodydark min-h-screen">
+        <div className="flex h-screen overflow-hidden">
+          <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+            <Routes>        
+              <Route path="/signed-out" element={<SignedOut />} />
+              {isAuthenticated ? (
+                <Route element={<AppLayout />}>
+                  <Route index path="/" element={<Navigate to="/marketing" replace />} />              
+                  <Route path="/dashboard" element={<DashboardHome />} />
+                  <Route path="/profile" element={<UserProfile/>} />                
+                  <Route path="/calendar" element={<Calendar />} />
+                  <Route path="/marketing" element={<Marketing />} />
+                  <Route path="notifications/create" element={<CreateNotification />} />
+                  <Route path="/marketing-overview" element={<MarketingOverview />} />
+                  
+                  {/* Admin Routes */}
+                  <Route path="/admin/*" element={
+                    isAdmin() ? (
+                      <Routes>
+                        {/* <Route path="notifications/create" element={<CreateNotification />} /> */}
+                        {/* Add more admin routes here */}
+                      </Routes>
+                    ) : (
+                      <Navigate to="/dashboard" replace />
+                    )
+                  } />
 
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            ) : (
-              <Route path="*" element={<Navigate to="/signed-out" replace />} />
-            )}
-          </Routes>
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              ) : (
+                <Route path="*" element={<Navigate to="/signed-out" replace />} />
+              )}
+            </Routes>
+          </div>
         </div>
+        {/* {navigationState.isModalOpen && (
+          <UnsavedChangesModal
+            onConfirm={handleConfirmNavigation}
+            onCancel={handleCancelNavigation}
+          />
+        )} */}
       </div>
     </NavigationContext.Provider>
   );

@@ -46,7 +46,7 @@ const navItems: NavItem[] = [
     subItems: [
       { 
         name: "Create Notification", 
-        path: "/admin/notifications/create", 
+        path: "/notifications/create", 
         pro: false,
         icon: <BellIcon />
       },

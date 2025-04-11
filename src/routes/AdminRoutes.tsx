@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import CreateNotification from '../pages/admin/CreateNotification';
+import CreateNotification from '../pages/CreateNotification';
 import AdminLayout from '../layouts/AdminLayout';
 
 export default function AdminRoutes() {

@@ -20,11 +20,12 @@ export interface Notification {
 
 export const notificationService = {
   async getUserNotifications(userId: string): Promise<Notification[]> {
+    console.log('Trying notificationService'); // Initial render log
     return fetch(
       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_NOTIFICATIONS(userId)}`
     ).then(res => res.json());
   },
-
+  
   async createNotification(data: {
     title: string;
     message: string;

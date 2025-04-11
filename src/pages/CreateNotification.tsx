@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { notificationService } from '../../services/notificationService';
-import Alert from '../../components/ui/alert/Alert';
+import { notificationService } from '../services/notificationService';
+import Alert from '../components/ui/alert/Alert';
+
+// Add immediate debugging
+(() => {
+  console.log('CreateNotification file is being executed');
+  console.log('Current pathname:', window.location.pathname);
+})();
 
 interface User {
   _id: string;
@@ -8,34 +14,60 @@ interface User {
   email: string;
 }
 
+console.log('CreateNotification module loaded');
+
 export default function CreateNotification() {
-  const [formData, setFormData] = useState({
-    title: '',
-    message: '',
-    type: 'all',
-    recipients: [] as string[]
+  console.log('CreateNotification component starting to render');
+  console.warn('CreateNotification render check');
+
+  const [formData, setFormData] = useState(() => {
+    console.log('Initializing formData state');
+    return {
+      title: '',
+      message: '',
+      type: 'all',
+      recipients: [] as string[]
+    };
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [users, setUsers] = useState<User[]>([]);
   const [status, setStatus] = useState<{
     type: 'success' | 'error' | 'info' | 'warning';
     message: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<Error | null>(null);
+
+  // Component mounted effect
+  useEffect(() => {
+    console.log('CreateNotification mounted');
+    return () => {
+      console.log('CreateNotification unmounting');
+    };
+  }, []);
 
   useEffect(() => {
-    // Fetch users for selection when type is 'selected'
+    console.log('Type changed effect triggered', { type: formData.type });
+    
     const fetchUsers = async () => {
       try {
+        console.log('Fetching users...');
         const response = await fetch('/api/users', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
+        console.log('Users fetched successfully:', data);
         setUsers(data);
       } catch (error) {
         console.error('Error fetching users:', error);
+        setError(error instanceof Error ? error : new Error('Unknown error'));
       }
     };
 
@@ -46,25 +78,47 @@ export default function CreateNotification() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submission started', { formData });
     setLoading(true);
     setStatus(null);
 
     try {
-      await notificationService.createNotification(formData);
+      console.log('Calling notification service...');
+      await notificationService.createNotification({
+        ...formData,
+        type: formData.type as 'all' | 'selected'
+      });
+      console.log('Notification created successfully');
       setFormData({ title: '', message: '', type: 'all', recipients: [] });
       setStatus({
         type: 'success',
         message: 'Notification sent successfully!'
       });
     } catch (error) {
+      console.error('Error creating notification:', error);
       setStatus({
         type: 'error',
         message: 'Failed to send notification. Please try again.'
       });
     } finally {
       setLoading(false);
+      console.log('Form submission completed');
     }
   };
+
+  console.log('About to render CreateNotification component', { 
+    formData, 
+    usersCount: users.length, 
+    status, 
+    loading 
+  });
+
+  if (error) {
+    return <div className="p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-red-600">Error</h2>
+      <p>{error.message}</p>
+    </div>;
+  }
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
@@ -117,7 +171,7 @@ export default function CreateNotification() {
               setFormData({
                 ...formData,
                 type: e.target.value as 'all' | 'selected',
-                recipients: [] // Reset recipients when changing type
+                recipients: []
               });
             }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"

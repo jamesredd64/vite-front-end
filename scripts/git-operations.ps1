@@ -290,13 +290,34 @@ function Merge-MultipleBranches {
     $currentBranch = git rev-parse --abbrev-ref HEAD
     Write-Host "`nCurrent branch: $currentBranch"
     
-    # Create new integration branch
-    $newBranchName = Read-Host "Enter name for new integration branch"
-    git checkout -b $newBranchName
-    
     # Show available branches
     Write-Host "`nAvailable branches:"
     git branch
+    
+    # Ask whether to use existing branch or create new one
+    Write-Host "`nBranch Options:"
+    Write-Host "1: Create new integration branch"
+    Write-Host "2: Use existing branch"
+    $branchChoice = Read-Host "Choose option"
+    
+    $newBranchName = ""
+    switch ($branchChoice) {
+        '1' {
+            $newBranchName = Read-Host "Enter name for new integration branch"
+            git checkout -b $newBranchName
+        }
+        '2' {
+            $newBranchName = Read-Host "Enter name of existing branch"
+            # Check if branch exists
+            $branchExists = git show-ref --verify --quiet "refs/heads/$newBranchName"
+            if ($LASTEXITCODE -eq 0) {
+                git checkout $newBranchName
+            } else {
+                Write-Host "Branch '$newBranchName' does not exist. Creating new branch..."
+                git checkout -b $newBranchName
+            }
+        }
+    }
     
     # Get branches to merge
     $branchesToMerge = @()
@@ -367,7 +388,7 @@ function Merge-MultipleBranches {
         }
     }
     
-    Write-Host "`nMerge process completed. New branch '$newBranchName' contains merged changes."
+    Write-Host "`nMerge process completed. Branch '$newBranchName' contains merged changes."
     Write-Host "You can review changes and push to remote when ready."
     
     $pushNow = Read-Host "Would you like to push this branch to remote? (y/n)"
