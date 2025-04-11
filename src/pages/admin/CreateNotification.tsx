@@ -50,12 +50,16 @@ export default function CreateNotification() {
     setStatus(null);
 
     try {
-      await notificationService.createNotification(formData);
+      await notificationService.createNotification({
+        ...formData,
+        type: formData.type as 'all' | 'selected'
+      });
       setFormData({ title: '', message: '', type: 'all', recipients: [] });
       setStatus({
         type: 'success',
         message: 'Notification sent successfully!'
       });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setStatus({
         type: 'error',
