@@ -1,18 +1,27 @@
 /* Calendar event colors */
 .bg-primary {
-  background-color: #3788d8;
+  background-color: #1333ff; /* Updated to match our new brand blue */
 }
 
 .bg-success {
-  background-color: #28a745;
+  background-color: #28a745; /* Already working */
 }
 
 .bg-danger {
-  background-color: #dc3545;
+  background-color: #ef4444; /* Updated to match our error-500 color */
 }
 
 .bg-warning {
-  background-color: #ffc107;
+  background-color: #ffc107; /* Already working */
+}
+
+/* Dark mode variants */
+.dark .bg-primary {
+  background-color: #4d66ff; /* Using brand-400 for better visibility in dark mode */
+}
+
+.dark .bg-danger {
+  background-color: #f87171; /* Using error-400 for better visibility in dark mode */
 }
 
 /* Make calendar events more visible */

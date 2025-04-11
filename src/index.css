@@ -21,10 +21,10 @@
   --color-gray-800: #1f2937;
   --color-gray-900: #111827;
 
-  --color-brand-50: #ecf3ff;
-  --color-brand-400: #6B7FFF;
-  --color-brand-500: #465fff;
-  --color-brand-600: #3641f5;
+  --color-brand-50: #e6ebff;
+  --color-brand-400: #4d66ff;
+  --color-brand-500: #1333ff;
+  --color-brand-600: #0f29cc;
 
   --color-error-50: #fef2f2;
   --color-error-500: #ef4444;
@@ -191,7 +191,40 @@
   /* ... other ApexCharts styles ... */
 
   .flatpickr-calendar {
-    @apply mt-2 bg-white rounded-xl p-5 border border-gray-200 text-gray-500 dark:bg-gray-dark dark:text-gray-400 dark:shadow-theme-xl 2xsm:w-auto;
+    @apply mt-2 bg-white rounded-xl p-5 border border-gray-200 text-gray-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-400 shadow-theme-xl dark:shadow-theme-xl;
+  }
+
+  .flatpickr-day {
+    @apply rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800;
+  }
+
+  .flatpickr-day.selected {
+    @apply bg-brand-500 text-white hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-700;
+  }
+
+  .flatpickr-day.today {
+    @apply border-brand-500 text-brand-500 dark:border-brand-400 dark:text-brand-400;
+  }
+
+  .flatpickr-months .flatpickr-month {
+    @apply text-gray-700 dark:text-gray-300;
+  }
+
+  .flatpickr-current-month .flatpickr-monthDropdown-months {
+    @apply bg-transparent dark:bg-transparent;
+  }
+
+  .flatpickr-weekdays {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  .flatpickr-weekday {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  .flatpickr-months .flatpickr-prev-month, 
+  .flatpickr-months .flatpickr-next-month {
+    @apply text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200;
   }
 
   /* ... other Flatpickr styles ... */
@@ -226,9 +259,9 @@
     @apply px-4 py-3;
   }
 
-  .fc-addEventButton-button {
+  /* .fc-addEventButton-button {
     @apply bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-800 dark:hover:bg-gray-800;
-  }
+  } */
 
   /* Update the calendar event styles */
   .fc-h-event {

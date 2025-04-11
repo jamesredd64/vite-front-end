@@ -45,10 +45,15 @@ export const updateCalendarEvent = async (eventId: string, eventData: CalendarEv
 };
 
 export const fetchCalendarEvents = async (auth0Id: string) => {
+  if (!auth0Id) {
+    console.error('No auth0Id provided to fetchCalendarEvents');
+    return [];
+  }
+
   console.log('Fetching events for auth0Id:', auth0Id);
   
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/calendar`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/calendar/user/${encodeURIComponent(auth0Id)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -62,6 +67,7 @@ export const fetchCalendarEvents = async (auth0Id: string) => {
     }
     
     const data = await response.json();
+    console.log('Fetched calendar events:', data);
     return data;
   } catch (error) {
     console.error('Error fetching calendar events:', error);

@@ -7,6 +7,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Important files that should NOT be ignored
+!CHANGELOG.md
+
 node_modules
 dist
 dist-ssr
@@ -22,7 +25,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-fe-saved
+
+# Development and backup directories
+_Dev/
+fe-saved/
+**/fe-saved/
+repo-backup/
+repo-backup*/
+.saved/
+**/.saved/
+user cards*/
+user cards/
+
 # Security and Environment
 .env
 .env.local
@@ -30,11 +44,6 @@ fe-saved
 .env.development
 .env.test
 .env.production
-
-# Debug logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Build directories
 /dist
@@ -65,6 +74,7 @@ repo-backup*/
 test.tsx
 TestPage.tsx
 TestMongoDB.tsx
+Git-Ops.md
 
 # VS Code workspace settings
 .vscode/*

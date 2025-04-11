@@ -65,7 +65,7 @@ const LeadConversion: React.FC = () => {
               Lead Conversion Rate
             </h3>
             <p className="mt-1 text-gray-500 text-theme-sm dark:text-gray-400">
-              Monthly lead to customer conversion
+              Monthly lead to Attendee conversion
             </p>
           </div>
           <div className="relative inline-block">

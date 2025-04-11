@@ -8,13 +8,6 @@ import { CalendarEvent, CalendarApiResponse } from '../types/calendar.types';
 // const RETRY_DELAY = 1000;
 const TIMEOUT = 5000; // 5 seconds timeout
 
-// const API_CONFIG = {
-//   BASE_URL: 'https://admin-backend-eta.vercel.app/api',
-//   ENDPOINTS: {
-//     USERS: '/users',
-//     USER_BY_ID: (id: string) => `/users/${id}`
-//   }
-// };
 
 interface ApiError {
   message: string;
@@ -22,6 +15,13 @@ interface ApiError {
 }
 
 // const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const normalizeAuthId = (auth0Id: string): string => {
+  // Convert google-oauth2| to auth0| for database lookup
+  return auth0Id.startsWith('google-oauth2|') 
+    ? `auth0|${auth0Id.split('|')[1]}`
+    : auth0Id;
+};
 
 export const useMongoDbClient = () => {
   const { getAccessTokenSilently } = useAuth0();
@@ -50,9 +50,12 @@ export const useMongoDbClient = () => {
     console.group('getUserById Operation');
     try {
       const headers = await getAuthHeaders();
-      const encodedAuth0Id = encodeURIComponent(auth0Id);
+      const normalizedId = normalizeAuthId(auth0Id);
+      const encodedAuth0Id = encodeURIComponent(normalizedId);
       const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_BY_ID(encodedAuth0Id)}`;
       
+      console.log('Original auth0Id:', auth0Id);
+      console.log('Normalized auth0Id:', normalizedId);
       console.log('Fetching from URL:', url);
       console.log('Headers:', headers);
   
@@ -89,14 +92,16 @@ export const useMongoDbClient = () => {
   const checkAndInsertUser = useCallback(async (auth0Id: string, userData: {
     email: string;
     name: string;
-    firstName: string;
-    lastName: string;
+    // firstName: string;
+    // lastName: string;
     [key: string]: unknown;  // Allow for additional properties
   }) => {
     console.group('checkAndInsertUser Operation');
     try {
+      const normalizedId = normalizeAuthId(auth0Id);
       console.log('Input Parameters:', {
-        auth0Id,
+        originalAuth0Id: auth0Id,
+        normalizedAuth0Id: normalizedId,
         userData: JSON.stringify(userData, null, 2)
       });
 
@@ -108,7 +113,7 @@ export const useMongoDbClient = () => {
       
       const newUserData = {
         ...userData,
-        auth0Id,
+        auth0Id: normalizedId,
         createdAt: new Date().toISOString()
       };
       console.log('New user payload:', JSON.stringify(newUserData, null, 2));
@@ -136,8 +141,8 @@ export const useMongoDbClient = () => {
   const updateUser = useCallback(async (auth0Id: string, userData: {
     email: string;
     name: string;
-    firstName: string;
-    lastName: string;
+    // firstName: string;
+    // lastName: string;
   }) => {
     setLoading(true);
     setError(null);
@@ -260,45 +265,37 @@ export const useMongoDbClient = () => {
   }, [getAccessTokenSilently]);
 
   const fetchCalendarEvents = useCallback(async (userId: string): Promise<CalendarEvent[]> => {
+    const normalizedId = normalizeAuthId(userId);
+    
     try {
-      const auth0Id = userId.startsWith('auth0|') ? userId : `auth0|${userId}`;
-      const headers = await getAuthHeaders(); // Use the existing getAuthHeaders function
-
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_CALENDAR_EVENTS(auth0Id)}`,
-        {
-          method: 'GET',
-          headers: {
-            ...headers,
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        }
-      );
-
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_CALENDAR_EVENTS(normalizedId)}`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Failed to fetch events');
       }
-
       const data = await response.json();
-      return Array.isArray(data) ? data : Array.isArray(data.events) ? data.events : [];
+      return Array.isArray(data) ? data : data?.events || [];
     } catch (error) {
-      console.error('Error fetching events:', error);
-      if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        console.error('Network error - check if the API is accessible and CORS is configured correctly');
-      }
-      return []; // Return empty array on error
+      console.error('Error fetching calendar events:', error);
+      return [];
     }
   }, [getAuthHeaders]);
 
   const createCalendarEvent = useCallback(async (eventData: Omit<CalendarEvent, 'id'>): Promise<CalendarEvent> => {
+    // Convert google-oauth2| to auth0| for database storage
+    const dbEventData = {
+      ...eventData,
+      auth0Id: eventData.auth0Id.startsWith('google-oauth2|')
+        ? `auth0|${eventData.auth0Id.split('|')[1]}`
+        : eventData.auth0Id
+    };
+
     try {
       const response = await fetch(
         `${API_CONFIG.BASE_URL}/calendar`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventData)
+          body: JSON.stringify(dbEventData)
         }
       );
 
@@ -341,6 +338,24 @@ export const useMongoDbClient = () => {
     }
   }, []);
 
+  const deleteCalendarEvent = useCallback(async (eventId: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}/calendar/${eventId}`,
+        {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('Failed to delete event');
+    }
+  }, []);
+
   return { 
     fetchUserData, 
     error, 
@@ -351,7 +366,8 @@ export const useMongoDbClient = () => {
     saveUserData,
     fetchCalendarEvents,
     createCalendarEvent,
-    updateCalendarEvent
+    updateCalendarEvent,
+    deleteCalendarEvent
   };
 }; 
   

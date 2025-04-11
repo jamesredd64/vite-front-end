@@ -12,6 +12,7 @@ import { SidebarProvider } from './context/SidebarContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SearchProvider } from './context/SearchContext';
 import { CalendarProvider } from './context/CalendarContext';
+import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -31,13 +32,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         >
           <CalendarProvider>
             <Provider store={store}>
-              <SidebarProvider>
-                <SearchProvider>
-                  <BrowserRouter>
-                    <App />
-                  </BrowserRouter>
-                </SearchProvider>
-              </SidebarProvider>
+              <UnsavedChangesProvider>
+                <SidebarProvider>
+                  <SearchProvider>
+                    <BrowserRouter>
+                      <App />
+                    </BrowserRouter>
+                  </SearchProvider>
+                </SidebarProvider>
+              </UnsavedChangesProvider>
             </Provider>
           </CalendarProvider>
         </Auth0Provider>

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import MarketingOverview from "../pages/MarketingOverview";
+import { useSidebar } from "../context/SidebarContext";
+import { useNavigation } from "../hooks/useNavigation";
 
 // Assume these icons are imported from an icon library
 import {
@@ -12,7 +14,6 @@ import {
   ShieldIcon,
   BellIcon,
 } from "../icons";
-import { useSidebar } from "../context/SidebarContext";
 
 type NavItem = {
   name: string;
@@ -31,10 +32,11 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [
+    subItems: [      
+      { name: "Attendee Demographics", path: "/customer-demographics", pro: false },
       { name: "Calendar", path: "/calendar", pro: false, icon: <CalenderIcon /> },
       { name: "Ecommerce", path: "/dashboard", pro: false },
-      { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview /> },      
+      { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview /> },
       { name: "User Profile", path: "/profile", pro: false, icon: <UserCircleIcon /> },
     ],
   },
@@ -50,17 +52,7 @@ const navItems: NavItem[] = [
       },
       // Add more admin routes as needed
     ],
-  },
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Calendar",
-  //   path: "/calendar",
-  // },
-  // {
-  //   icon: <UserCircleIcon />,
-  //   name: "User Profile",
-  //   path: "/profile",
-  // }
+  }, 
   
 ];
 
@@ -96,6 +88,8 @@ const othersItems: NavItem[] = [
 ];
 
 const AppSidebar: React.FC = () => {
+  const navigate = useNavigate();
+  const { handleNavigation } = useNavigation();
   const { isExpanded, isMobileOpen, isHovered, setIsHovered, toggleMobileSidebar } = useSidebar();
   const location = useLocation();
 
@@ -113,6 +107,18 @@ const AppSidebar: React.FC = () => {
     (path: string) => location.pathname === path,
     [location.pathname]
   );
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault();
+    
+    if (window.innerWidth < 768) {
+      toggleMobileSidebar();
+    }
+
+    if (handleNavigation(path)) {
+      navigate(path);
+    }
+  };
 
   useEffect(() => {
     let submenuMatched = false;
@@ -207,11 +213,7 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 to={nav.path}
-                onClick={() => {
-                  if (window.innerWidth < 768) {
-                    toggleMobileSidebar();
-                  }
-                }}
+                onClick={(e) => handleLinkClick(e, nav.path!)}
                 className={`menu-item group ${
                   isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
                 }`}
@@ -249,11 +251,7 @@ const AppSidebar: React.FC = () => {
                   <li key={subItem.name}>
                     <Link
                       to={subItem.path}
-                      onClick={() => {
-                        if (window.innerWidth < 768) {
-                          toggleMobileSidebar();
-                        }
-                      }}
+                      onClick={(e) => handleLinkClick(e, subItem.path)}
                       className={`menu-dropdown-item ${
                         isActive(subItem.path)
                           ? "menu-dropdown-item-active"

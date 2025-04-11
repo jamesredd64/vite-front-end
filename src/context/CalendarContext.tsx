@@ -1,6 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth0 } from "@auth0/auth0-react";
-import { fetchCalendarEvents } from '../services/calendarApi';
+import React, { createContext, useContext, useState } from 'react';
 
 interface CalendarEvent {
   id: string;
@@ -23,23 +21,6 @@ const CalendarContext = createContext<CalendarContextType | undefined>(undefined
 
 export const CalendarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const { user } = useAuth0();
-
-  useEffect(() => {
-    const loadEvents = async () => {
-      if (!user?.sub) return;
-      try {
-        const fetchedEvents = await fetchCalendarEvents(user.sub);
-        // Ensure we're setting an array
-        setEvents(Array.isArray(fetchedEvents) ? fetchedEvents : []);
-      } catch (error) {
-        console.error('Failed to load events:', error);
-        setEvents([]); // Reset to empty array on error
-      }
-    };
-
-    loadEvents();
-  }, [user?.sub]);
 
   return (
     <CalendarContext.Provider value={{ events, setEvents }}>

@@ -110,13 +110,6 @@ const AppHeader: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (searchQuery.trim() && searchResults.length > 0) {
-      // Navigate to the first matching result
-      handleResultClick(searchResults[0].id);
-    }
-  };
-
-  const handleSearchClick = () => {
     if (searchQuery.trim()) {
       handleSearch(searchQuery);
       if (searchResults.length > 0) {
@@ -124,22 +117,7 @@ const AppHeader: React.FC = () => {
       }
     }
   };
-
-  // useEffect(() => {
-  //   const handleKeyDown = (event: KeyboardEvent) => {
-  //     if ((event.metaKey || event.ctrlKey) && event.key === "k") {
-  //       event.preventDefault();
-  //       inputRef.current?.focus();
-  //     }
-  //   };
-
-  //   document.addEventListener("keydown", handleKeyDown);
-
-  //   return () => {
-  //     document.removeEventListener("keydown", handleKeyDown);
-  //   };
-  // }, []);
-
+  
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b z-[999999]">
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
@@ -241,14 +219,12 @@ const AppHeader: React.FC = () => {
                   onChange={(e) => {
                     const query = e.target.value;
                     setSearchQuery(query);
-                    // Removed handleSearch(query) from here
                   }}
                   className="w-[600px] pl-12 pr-24 py-3 bg-transparent border border-gray-200 rounded-lg outline-none focus:border-primary dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
                 />
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-2">
                   <button
-                    type="button"
-                    onClick={handleSearchClick}
+                    type="submit"
                     className="inline-flex items-center justify-center w-8 h-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                     aria-label="Search"
                   >

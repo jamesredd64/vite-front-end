@@ -1,9 +1,10 @@
+/* eslint-disable react-refresh/only-export-components */
 
-import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth0 } from '@auth0/auth0-react';
 import { useGlobalStorage } from './hooks/useGlobalStorage';
 import AppLayout from "./layout/AppLayout";
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfile from "./pages/ProfilePage";
 import  Calendar from "./pages/Calendar";
@@ -61,12 +62,64 @@ interface UserMetadata {
   };
 }
 
+interface NavigationContextType {
+  handleNavigation: (path: string) => boolean;
+  hasUnsavedChanges: boolean;
+  setHasUnsavedChanges: (value: boolean) => void;
+}
+
+type NavigationState = {
+  isModalOpen: boolean;
+  pendingPath: string | null;
+};
+
+export const NavigationContext = React.createContext<NavigationContextType | undefined>(undefined);
+
 function App() {
   const { isLoading, isAuthenticated, error: auth0Error, user } = useAuth0();
   const navigate = useNavigate();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const location = useLocation();
   const [userMetadata, setUserMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const { updateUser } = useMongoDbClient();
   const initializationAttempted = useRef(false);
+  
+  // Add state for handling unsaved changes
+  const [navigationState, setNavigationState] = useState<NavigationState>({
+    isModalOpen: false,
+    pendingPath: null,
+  });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Add context or global state management for unsaved changes
+  const handleNavigation = useCallback((path: string) => {
+    if (hasUnsavedChanges) {
+      setNavigationState({
+        isModalOpen: true,
+        pendingPath: path,
+      });
+      return false; // Prevent immediate navigation
+    }
+    return true; // Allow navigation
+  }, [hasUnsavedChanges]);
+
+  const handleConfirmNavigation = () => {
+    if (navigationState.pendingPath) {
+      setHasUnsavedChanges(false);
+      navigate(navigationState.pendingPath);
+      setNavigationState({
+        isModalOpen: false,
+        pendingPath: null,
+      });
+    }
+  };
+
+  const handleCancelNavigation = () => {
+    setNavigationState({
+      isModalOpen: false,
+      pendingPath: null,
+    });
+  };
 
   // Add this function to check if user is admin
   const isAdmin = () => {
@@ -104,11 +157,15 @@ function App() {
       initializationAttempted.current = true;
 
       try {
-        const userData = await updateUser(user.sub, {
+        const normalizedAuthId = user.sub.startsWith('google-oauth2|') 
+          ? `auth0|${user.sub.split('|')[1]}`
+          : user.sub;
+        
+        const userData = await updateUser(normalizedAuthId, {
           email: user?.email || '',
           name: user?.name || '',          
-          firstName: user?.given_name || '',
-          lastName: user?.family_name || '',
+          // firstName: user?.given_name || '',
+          // lastName: user?.family_name || '',
           // profilePictureUrl: user?.picture || '',
           // phoneNumber: '',
           // dateOfBirth: '',
@@ -141,7 +198,7 @@ function App() {
           setUserMetadata(userData);
         }
       } catch (error) {
-        console.error('Error initializing user data:', error);
+        console.error('Error updating user:', error);
       }
     };
 
@@ -193,7 +250,7 @@ function App() {
           </Routes>
         </div>
       </div>
-    </div>
+    </NavigationContext.Provider>
   );
 }
 

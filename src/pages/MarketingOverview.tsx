@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useNavigate } from 'react-router-dom';
 import PageMeta from "../components/common/PageMeta";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import StatsCard from "../components/marketing/StatsCard";
@@ -8,13 +9,18 @@ import LeadConversion from "../components/marketing/LeadConversion";
 import CampaignPerformance from "../components/marketing/CampaignPerformance";
 
 const MarketingOverview: FC = () => {
+  const navigate = useNavigate();
+  
   return (
     <>
       <PageMeta
         title="Marketing Overview Dashboard | Your App Name"
         description="Marketing overview dashboard showing key metrics and analytics"
       />
-      <PageBreadcrumb pageTitle="Marketing Overview" />
+      <PageBreadcrumb 
+        pageTitle="Marketing Overview" 
+        onNavigate={(path) => navigate(path)}
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -79,3 +85,4 @@ const MarketingOverview: FC = () => {
 };
 
 export default MarketingOverview;
+

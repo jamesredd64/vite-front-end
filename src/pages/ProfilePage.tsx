@@ -1,14 +1,27 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-// import { UserInfoCard } from "../components/UserProfile/UserInfoCard";
+import { useNavigate } from "react-router-dom";
 import { UserMetaCard } from "../components/UserProfile/UserMetaCard";
 import { UserAddressCard } from "../components/UserProfile/UserAddressCard";
 import { UserMarketingCard } from "../components/UserProfile/UserMarketingCard";
-import  UserMetadata  from "../types/user";
+import { UnsavedChangesNotification } from "../components/UnsavedChangesNotification";
 import { useMongoDbClient } from "../services/mongoDbClient";
 import PageMeta from "../components/common/PageMeta";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
-// import { useGlobalStorage } from '../hooks/useGlobalStorage';
+import UserMetadata from "../types/user";
+// import { useUnsavedChanges } from "../hooks/useUnsavedChanges";
+import { useNavigation } from "../hooks/useNavigation";
+import deepEqual from 'fast-deep-equal';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import Button from "../components/ui/button/Button";
+
+// Logger utility
+const logger = (message: string, data?: unknown) => {
+  if (import.meta.env.DEV) {
+    console.log(message, data);
+  }
+};
 
 interface UserData {
   auth0Id: string;
@@ -45,11 +58,24 @@ interface UserData {
   updatedAt?: Date;
 }
 
-
 const UserProfile = () => {
+  const navigate = useNavigate();
   const { user, isAuthenticated, isLoading: auth0Loading } = useAuth0();
   const { getUserById, saveUserData } = useMongoDbClient();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { handleNavigation } = useNavigation();
   
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [initialUserData, setInitialUserData] = useState<UserData | null>(null);
+  const [saveStatus, setSaveStatus] = useState<{ message: string; isError: boolean } | null>(null);
+
+  // Update both states together
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const updateUnsavedChanges = (value: boolean) => {
+    setHasUnsavedChanges(value);
+  };
+
   // Define default marketing budget
   const defaultMarketingBudget = {
     adBudget: 0,
@@ -98,38 +124,73 @@ const UserProfile = () => {
     isActive: true
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [saveStatus, setSaveStatus] = useState<{
-    message: string;
-    isError: boolean;
-  } | null>(null);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [initialUserData, setInitialUserData] = useState<UserData | null>(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Add this useEffect to track changes
+  // Navigation handler
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onNavigate = async (path: string) => {
+    if (hasUnsavedChanges) {
+      // Let the user continue navigation, the notification will handle saving
+      navigate(path);
+    } else {
+      navigate(path);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      await handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      logger('Error saving changes:', error);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    if (initialUserData) {
+      setUserData(initialUserData);
+      setHasUnsavedChanges(false);
+    }
+  };
+
+  // Improved beforeunload handler
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return function cleanup() {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
+
+  // Improved change detection using fast-deep-equal
   useEffect(() => {
     if (isInitialLoad) {
-      console.log('Skipping change detection during initial load');
+      logger('Skipping change detection during initial load');
       return;
     }
 
-    const hasChanges = JSON.stringify(initialUserData) !== JSON.stringify(userData);
-    console.log('Checking for changes:', {
-      isInitialLoad,
-      initialData: initialUserData,
-      currentData: userData,
-      hasChanges
-    });
+    if (!initialUserData || !userData) {
+      logger('Missing data for change detection');
+      return;
+    }
+
+    const hasChanges = !deepEqual(initialUserData, userData);
+    logger('Change detection:', { hasChanges, userData, initialUserData });
     setHasUnsavedChanges(hasChanges);
   }, [userData, initialUserData, isInitialLoad]);
 
-  // Clear save status after 15 seconds
+  // Clear save status after 5 seconds
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     if (saveStatus) {
       timeoutId = setTimeout(() => {
         setSaveStatus(null);
-      }, 15000); // 15 seconds
+      }, 5000); // Changed from 15000 to 5000 (5 seconds)
     }
     return () => {
       if (timeoutId) {
@@ -199,6 +260,7 @@ const UserProfile = () => {
     };
 
     fetchUserData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user, getUserById]);
 
   const handleUpdate = (updates: Partial<UserMetadata>) => {
@@ -280,36 +342,18 @@ const UserProfile = () => {
         title="React.js Profile Dashboard | TailAdmin - Next.js Admin Dashboard Template"
         description="This is React.js Profile Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
       />
-      <PageBreadcrumb pageTitle="Profile" />
+      <PageBreadcrumb 
+        pageTitle="Profile" 
+        // onNavigate={onNavigate}
+      />
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800/50 lg:p-6">
         <div className="flex flex-col gap-5">
-          {/* Centered Save All button with logging */}
-          <div 
-            className={`${hasUnsavedChanges ? 'flex' : 'hidden'} justify-center`}
-            onClick={() => console.log('Save button container clicked, hasUnsavedChanges:', hasUnsavedChanges)}
-          >
-            <button
-              onClick={handleSubmit}
-              className="flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-              disabled={!hasUnsavedChanges}
-            >
-              <svg
-                className="fill-current"
-                width="18"
-                height="18"
-                viewBox="0 0 18 18"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206Z"
-                  fill=""
-                />
-              </svg>
-              Save All Changes
-            </button>
+          {/* Replace the existing unsaved changes UI with UnsavedChangesNotification */}
+          <div className={`${hasUnsavedChanges ? 'block' : 'hidden'}`}>
+            <UnsavedChangesNotification
+              onSave={handleSaveChanges}
+              onDiscard={handleDiscardChanges}
+            />
           </div>
 
           {/* Save Status Message Container with fixed height */}
@@ -375,8 +419,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
-
-
-
-
+export default React.memo(UserProfile);
