@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
-import dbConfig from '../src/config/db.config.js';
+import dbConfig from '../src/config/db.config.ts';
 
 dotenv.config({ path: '../.env' });
 
@@ -17,6 +17,7 @@ const notificationSchema = new mongoose.Schema({
     default: 'all' 
   },
   recipients: [{ type: String }],
+  sentUserProfilePic: { type: String },
   read: [{
     userId: { type: String, required: true },
     readAt: { type: Date, default: Date.now }

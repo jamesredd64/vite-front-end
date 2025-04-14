@@ -1,7 +1,7 @@
 {
   "name": "stockholme.application",
   "private": true,
-  "version": "2.0.18",
+  "version": "2.0.19",
   "scripts": {
     "prebuild": "node src/config/update-version.js",
     "build": "vite build",
@@ -16,7 +16,8 @@
     "dev": "vite",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "migrate:notifications": "node scripts/migrate-notifications-profile-pic.js"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",

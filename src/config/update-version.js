@@ -11,19 +11,19 @@ const updateVersion = () => {
     
     const content = fs.readFileSync(versionPath, 'utf8');
     
-    // Extract current version
-    const versionMatch = content.match(/number: '(\d+\.\d+\.\d+)'/);
+    // Extract current version - updated pattern to match the file
+    const versionMatch = content.match(/number: ['"](\d+\.\d+\.\d+(?:-\d+)?)['"]/);
     if (!versionMatch) throw new Error('Version pattern not found');
     
     const currentVersion = versionMatch[1];
-    const [major, minor, patch] = currentVersion.split('.').map(Number);
+    const [major, minor, patch] = currentVersion.split('.').map(v => parseInt(v));
     
     // Increment patch version
     const newVersion = `${major}.${minor}.${patch + 1}`;
     
     // Update file content
     const newContent = content.replace(
-      /number: '\d+\.\d+\.\d+'/,
+      /number: ['"](\d+\.\d+\.\d+(?:-\d+)?)['"]/,
       `number: '${newVersion}'`
     );
     
@@ -42,3 +42,4 @@ const updateVersion = () => {
 };
 
 updateVersion();
+

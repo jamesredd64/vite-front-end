@@ -11,8 +11,7 @@ import {
   GridIcon,
   HorizontaLDots, 
   UserCircleIcon,
-  ShieldIcon,
-  BellIcon,
+  
 } from "../icons";
 
 type NavItem = {
@@ -38,21 +37,23 @@ const navItems: NavItem[] = [
       { name: "Ecommerce", path: "/dashboard", pro: false },
       { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview /> },
       { name: "User Profile", path: "/profile", pro: false, icon: <UserCircleIcon /> },
+      { name: "User Management", path: "/users", pro: false, icon: <UserCircleIcon /> },
+      // { name: "Create Notification", path: "/notifications/create", pro: false, icon: <UserCircleIcon /> },
     ],
   },
-  {
-    icon: <ShieldIcon />,
-    name: "Admin",
-    subItems: [
-      { 
-        name: "Create Notification", 
-        path: "/notifications/create", 
-        pro: false,
-        icon: <BellIcon />
-      },
-      // Add more admin routes as needed
-    ],
-  }, 
+  // {
+  //   icon: <ShieldIcon />,
+  //   name: "Admin",
+  //   subItems: [
+  //     { 
+  //       name: "Create Notification", 
+  //       path: "/notifications/create", 
+  //       pro: false,
+  //       icon: <BellIcon />
+  //     },
+  //     // Add more admin routes as needed
+  //   ],
+  // }, 
   
 ];
 

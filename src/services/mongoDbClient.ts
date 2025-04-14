@@ -17,10 +17,7 @@ interface ApiError {
 // const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const normalizeAuthId = (auth0Id: string): string => {
-  // Convert google-oauth2| to auth0| for database lookup
-  return auth0Id.startsWith('google-oauth2|') 
-    ? `auth0|${auth0Id.split('|')[1]}`
-    : auth0Id;
+  return auth0Id;
 };
 
 export const useMongoDbClient = () => {
@@ -89,31 +86,46 @@ export const useMongoDbClient = () => {
     }
   }, [getAuthHeaders]);
 
-  const checkAndInsertUser = useCallback(async (auth0Id: string, userData: {
-    email: string;
-    name: string;
-    // firstName: string;
-    // lastName: string;
-    [key: string]: unknown;  // Allow for additional properties
+  const checkAndInsertUser = useCallback(async (userId: string, userData: {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+    profile?: {
+      dateOfBirth?: string | null;
+      gender?: string;
+      profilePictureUrl?: string;
+      marketingBudget?: {
+        adBudget?: number;
+        costPerAcquisition?: number;
+        dailySpendingLimit?: number;
+        marketingChannels?: string;
+        monthlyBudget?: number;
+        preferredPlatforms?: string;
+        notificationPreferences?: string[];
+        roiTarget?: number;
+        frequency?: "daily" | "monthly" | "quarterly" | "yearly";
+      };
+    };
+    address?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      zipCode?: string;
+      country?: string;
+    };
+    [key: string]: unknown;
   }) => {
     console.group('checkAndInsertUser Operation');
     try {
-      const normalizedId = normalizeAuthId(auth0Id);
-      console.log('Input Parameters:', {
-        originalAuth0Id: auth0Id,
-        normalizedAuth0Id: normalizedId,
-        userData: JSON.stringify(userData, null, 2)
-      });
-
       const headers = await getAuthHeaders();
       
-      // Fix the URL construction - remove the https:// prefix
       const createUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`;
       console.log('Creating user at:', createUrl);
       
       const newUserData = {
         ...userData,
-        auth0Id: normalizedId,
+        auth0Id: userId,  // Store the original Auth0 ID without modification
         createdAt: new Date().toISOString()
       };
       console.log('New user payload:', JSON.stringify(newUserData, null, 2));
@@ -139,10 +151,33 @@ export const useMongoDbClient = () => {
   }, [getAuthHeaders]);
   
   const updateUser = useCallback(async (auth0Id: string, userData: {
-    email: string;
-    name: string;
-    // firstName: string;
-    // lastName: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+    profile?: {
+      dateOfBirth?: string | null;
+      gender?: string;
+      profilePictureUrl?: string;
+      marketingBudget?: {
+        adBudget?: number;
+        costPerAcquisition?: number;
+        dailySpendingLimit?: number;
+        marketingChannels?: string;
+        monthlyBudget?: number;
+        preferredPlatforms?: string;
+        notificationPreferences?: string[];
+        roiTarget?: number;
+        frequency?: "daily" | "monthly" | "quarterly" | "yearly";
+      };
+    };
+    address?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      zipCode?: string;
+      country?: string;
+    };
   }) => {
     setLoading(true);
     setError(null);
@@ -152,6 +187,10 @@ export const useMongoDbClient = () => {
       const userDataWithAuth = {
         ...userData,
         auth0Id,
+        profile: {
+          ...userData.profile,
+          profilePictureUrl: userData.profile?.profilePictureUrl || ''
+        }
       };
       console.log('Sending data to server:', JSON.stringify(userDataWithAuth));
       const updatedUser = await checkAndInsertUser(auth0Id, userDataWithAuth);
@@ -168,7 +207,7 @@ export const useMongoDbClient = () => {
     } finally {
       setLoading(false);
     }
-  }, [ checkAndInsertUser]);  
+  }, [checkAndInsertUser]);
   
 
   const saveUserData = useCallback(async (auth0Id: string, userData: Partial<UserMetadata>) => {
@@ -181,6 +220,7 @@ export const useMongoDbClient = () => {
       // Add these debug logs here
       console.log('Save URL:', `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`);
       console.log('API_CONFIG:', API_CONFIG);
+      console.log('userData:', userData);
       
       const response = await fetch(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`,
@@ -283,12 +323,9 @@ export const useMongoDbClient = () => {
   }, [getAuthHeaders]);
 
   const createCalendarEvent = useCallback(async (eventData: Omit<CalendarEvent, 'id'>): Promise<CalendarEvent> => {
-    // Convert google-oauth2| to auth0| for database storage
     const dbEventData = {
       ...eventData,
-      auth0Id: eventData.auth0Id.startsWith('google-oauth2|')
-        ? `auth0|${eventData.auth0Id.split('|')[1]}`
-        : eventData.auth0Id
+      auth0Id: eventData.auth0Id
     };
 
     try {

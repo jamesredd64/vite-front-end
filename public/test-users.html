@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Local Users API</title>
+    <style>
+        .response { 
+            white-space: pre-wrap; 
+            background: #f5f5f5; 
+            padding: 10px; 
+            margin: 10px 0; 
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h2>Test Local Users API</h2>
+    <button onclick="getAllUsers()">Get All Users</button>
+    <div id="response" class="response"></div>
+
+    <script>
+        async function getAllUsers() {
+            const responseDiv = document.getElementById('response');
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:5000/api/users', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                responseDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

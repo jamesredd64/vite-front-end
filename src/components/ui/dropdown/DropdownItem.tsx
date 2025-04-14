@@ -1,46 +1,26 @@
-import type React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
 
 interface DropdownItemProps {
-  tag?: "a" | "button";
-  to?: string;
-  onClick?: () => void;
-  onItemClick?: () => void;
-  baseClassName?: string;
-  className?: string;
   children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+  as?: 'button' | 'div';
 }
 
 export const DropdownItem: React.FC<DropdownItemProps> = ({
-  tag = "button",
-  to,
-  onClick,
-  onItemClick,
-  baseClassName = "block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900",
-  className = "",
   children,
+  className = '',
+  onClick,
+  as = 'div'  // default to div instead of button
 }) => {
-  const combinedClasses = `${baseClassName} ${className}`.trim();
-
-  const handleClick = (event: React.MouseEvent) => {
-    if (tag === "button") {
-      event.preventDefault();
-    }
-    if (onClick) onClick();
-    if (onItemClick) onItemClick();
-  };
-
-  if (tag === "a" && to) {
-    return (
-      <Link to={to} className={combinedClasses} onClick={handleClick}>
-        {children}
-      </Link>
-    );
-  }
-
+  const Component = as;
+  
   return (
-    <button onClick={handleClick} className={combinedClasses}>
+    <Component
+      className={`w-full text-left hover:bg-gray-50 dark:hover:bg-gray-800 ${className}`}
+      onClick={onClick}
+    >
       {children}
-    </button>
+    </Component>
   );
 };

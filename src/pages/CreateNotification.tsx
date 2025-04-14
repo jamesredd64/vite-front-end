@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { notificationService } from '../services/notificationService';
 import Alert from '../components/ui/alert/Alert';
+import { API_CONFIG } from '../config/api.config';
 
 // Add immediate debugging
-(() => {
-  console.log('CreateNotification file is being executed');
-  console.log('Current pathname:', window.location.pathname);
-})();
+// (() => {
+//   console.log('CreateNotification file is being executed');
+//   console.log('Current pathname:', window.location.pathname);
+// })();
 
 interface User {
   _id: string;
@@ -14,11 +15,11 @@ interface User {
   email: string;
 }
 
-console.log('CreateNotification module loaded');
+// console.log('CreateNotification module loaded');
 
 export default function CreateNotification() {
-  console.log('CreateNotification component starting to render');
-  console.warn('CreateNotification render check');
+  // console.log('CreateNotification component starting to render');
+  // console.warn('CreateNotification render check');
 
   const [formData, setFormData] = useState(() => {
     console.log('Initializing formData state');
@@ -37,31 +38,35 @@ export default function CreateNotification() {
     message: string;
   } | null>(null);
   const [loading, setLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
   const [error, setError] = useState<Error | null>(null);
 
   // Component mounted effect
-  useEffect(() => {
-    console.log('CreateNotification mounted');
-    return () => {
-      console.log('CreateNotification unmounting');
-    };
-  }, []);
+  // useEffect(() => {
+  //   console.log('CreateNotification mounted');
+  //   return () => {
+  //     console.log('CreateNotification unmounting');
+  //   };
+  // }, []);
 
   useEffect(() => {
-    console.log('Type changed effect triggered', { type: formData.type });
+    console.log('fetchUsers effect running', { type: formData.type });
     
     const fetchUsers = async () => {
       try {
         console.log('Fetching users...');
-        const response = await fetch('/api/users', {
+        // Use the API service instead of direct fetch
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
           }
         });
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         const data = await response.json();
         console.log('Users fetched successfully:', data);
         setUsers(data);
@@ -71,7 +76,7 @@ export default function CreateNotification() {
       }
     };
 
-    if (formData.type === 'selected') {
+    if (formData.type === 'all') {
       fetchUsers();
     }
   }, [formData.type]);

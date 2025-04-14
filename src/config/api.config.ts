@@ -47,7 +47,7 @@ export const API_CONFIG = {
     },
     // User endpoints
     USERS: '/users',
-    USER_BY_ID: (id: string) => `/users/${encodeURIComponent(id.replace('google-oauth2|', 'auth0|'))}`,
+    USER_BY_ID: (id: string) => `/users/${encodeURIComponent(id)}`,
     USER_BY_EMAIL: (email: string) => `/users/email/${encodeURIComponent(email)}`,
     SAVE_USER_DATA: (id: string) => `/users/${encodeURIComponent(id)}`,
     
@@ -57,7 +57,8 @@ export const API_CONFIG = {
     
     // Notification endpoints
     NOTIFICATIONS: '/notifications',
-    USER_NOTIFICATIONS: (id: string) => `/notifications/user/${encodeURIComponent(id)}`,
+    USER_NOTIFICATIONS: (auth0Id: string) => `/notifications/${encodeURIComponent(auth0Id)}`,
+    NOTIFICATION_BY_ID: (id: string) => `/notifications/id/${encodeURIComponent(id)}`,
     
     // Asset endpoints
     ASSETS: {
