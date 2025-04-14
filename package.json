@@ -1,10 +1,10 @@
 {
   "name": "stockholme.application",
   "private": true,
-  "version": "2.0.19",
+  "version": "2.0.21",
   "scripts": {
     "prebuild": "node src/config/update-version.js",
-    "build": "vite build",
+    "build": "node src/config/update-version.js && vite build",
     "start": "vite",
     "vercel-build": "node src/config/update-version.js && vite build",
     "git": "scripts\\git-operations.cmd",
