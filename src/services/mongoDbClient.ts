@@ -21,7 +21,7 @@ const normalizeAuthId = (auth0Id: string): string => {
 };
 
 export const useMongoDbClient = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
   const requestInProgress = useRef<boolean>(false);
@@ -44,6 +44,12 @@ export const useMongoDbClient = () => {
   }, [getAccessTokenSilently]);
 
   const getUserById = useCallback(async (auth0Id: string) => {
+    // Don't make API calls if not authenticated
+    if (!isAuthenticated) {
+      console.debug('Skipping API call - user not authenticated');
+      return null;
+    }
+
     console.group('getUserById Operation');
     try {
       const headers = await getAuthHeaders();
@@ -82,9 +88,9 @@ export const useMongoDbClient = () => {
       return result;
     } catch (error) {
       console.error('Error in getUserById:', error);
-      throw error;
+      return null;
     }
-  }, [getAuthHeaders]);
+  }, [isAuthenticated, getAuthHeaders]);
 
   const checkAndInsertUser = useCallback(async (userId: string, userData: {
     email?: string;

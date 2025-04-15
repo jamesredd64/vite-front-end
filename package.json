@@ -1,13 +1,23 @@
 {
   "name": "stockholme.vite.application",
   "private": true,
-  "version": "2.0.21",
+  "version": "2.0.24",
   "scripts": {
     "prebuild": "node src/config/update-version.js",
     "build": "vite build",
     "vercel-build": "npm run prebuild && vite build",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src --ext ts,tsx --fix",
+    "prettier": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format": "npm run prettier && npm run lint:fix",
+    "move-fe": "scripts\\move-frontend-files.cmd",
+    "restore-fe": "scripts\\restore-frontend-files.cmd",
+    "move-server-fe": "scripts\\move-server-frontend-files.cmd",
+    "update-svg": "scripts\\update-svg-imports.cmd",
+    "find-images": "scripts\\find-image-refs.cmd",
+    "git": "scripts\\git-operations.cmd"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",

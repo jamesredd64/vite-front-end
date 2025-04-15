@@ -1,10 +1,39 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 // import { getImageUrl } from '../config/images.config';
 
 export const SignedOut = () => {
   const { loginWithRedirect } = useAuth0();
-  // const { theme } = useTheme();
+
+  useEffect(() => {
+    // Ensure cleanup happens regardless of how we got here
+    const cleanup = () => {
+      // Clear any remaining auth state
+      const savedTheme = localStorage.getItem('theme');
+      localStorage.clear();
+      sessionStorage.clear();
+      if (savedTheme) {
+        localStorage.setItem('theme', savedTheme);
+      }
+
+      // Cancel any pending requests
+      window.stop();
+      
+      // Clear any existing timeouts and intervals
+      const highestTimeoutId = setTimeout(() => {});
+      for (let i = 0; i < Number(highestTimeoutId); i++) {
+        clearTimeout(i);
+        clearInterval(i);
+      }
+      
+      // Remove any query parameters from URL
+      if (window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+
+    cleanup();
+  }, []);
 
   return (
     <div className="min-h-screen w-full bg-white dark:bg-gray-900">

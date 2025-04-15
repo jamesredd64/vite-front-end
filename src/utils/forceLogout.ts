@@ -1,26 +1,44 @@
 import { Auth0Client } from '@auth0/auth0-spa-js';
 
 export const forceLogout = async (auth0Client?: Auth0Client) => {
-  // Clear all storage
+  // Cancel all pending requests
+  window.stop();
+  
+  // Clear all storage except theme
+  const savedTheme = localStorage.getItem('theme');
   localStorage.clear();
   sessionStorage.clear();
-
-  // Save the current theme preference if needed
-  const savedTheme = localStorage.getItem('theme');
   if (savedTheme) {
     localStorage.setItem('theme', savedTheme);
   }
 
-  // If auth0Client is provided, use it to logout
-  if (auth0Client) {
-    await auth0Client.logout({
-      logoutParams: {
-        returnTo: window.location.origin,
-        clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
-      }
-    });
+  // Clear any existing timeouts and intervals
+  const highestTimeoutId = setTimeout(() => {});
+  for (let i = 0; i < highestTimeoutId; i++) {
+    clearTimeout(i);
+    clearInterval(i);
   }
 
-  // Force reload the page
-  window.location.href = '/signed-out';
+  // Remove all event listeners (if any were set globally)
+  const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+  events.forEach(event => {
+    window.removeEventListener(event, () => {});
+  });
+
+  if (auth0Client) {
+    try {
+      await auth0Client.logout({
+        logoutParams: {
+          returnTo: `${window.location.origin}/signed-out`,
+          clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
+        }
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback to manual redirect
+      window.location.href = '/signed-out';
+    }
+  } else {
+    window.location.href = '/signed-out';
+  }
 };

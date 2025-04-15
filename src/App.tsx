@@ -109,14 +109,49 @@ function App() {
     if (isAuthenticated) {
       const cleanup = initSessionTimeout({
         logout: async () => {
-          await getAccessTokenSilently();
-          window.location.href = '/signed-out';
+          try {
+            // Get a fresh token before logout to ensure the request goes through
+            await getAccessTokenSilently();
+            
+            // Cancel all pending requests
+            window.stop();
+            
+            // Clear all storage except theme
+            const savedTheme = localStorage.getItem('theme');
+            localStorage.clear();
+            sessionStorage.clear();
+            if (savedTheme) {
+              localStorage.setItem('theme', savedTheme);
+            }
+
+            // Navigate to signed-out page
+            window.location.href = '/signed-out';
+          } catch (error) {
+            console.error('Timeout logout error:', error);
+            // Force navigation to signed-out page if token refresh fails
+            window.location.href = '/signed-out';
+          }
         }
       });
       return cleanup;
     }
   }, [isAuthenticated, getAccessTokenSilently]);
 
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      // Clear all storage except theme
+      const savedTheme = localStorage.getItem('theme');
+      localStorage.clear();
+      sessionStorage.clear();
+      if (savedTheme) {
+        localStorage.setItem('theme', savedTheme);
+      }
+      
+      // Cancel any pending requests
+      window.stop();
+    }
+  }, [isLoading, isAuthenticated]);
+  
   // Add new effect to fetch MongoDB user data early
   useEffect(() => {
     const fetchMongoUserData = async () => {
@@ -273,7 +308,7 @@ function App() {
       setUserMetadata(null);
       navigate('/signed-out');
     }
-  }, [isLoading, isAuthenticated, navigate]);
+  }, [isLoading, isAuthenticated, navigate, setUserMetadata]);
 
   // Initialize user data
   useEffect(() => {

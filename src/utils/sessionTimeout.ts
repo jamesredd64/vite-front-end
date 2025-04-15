@@ -6,15 +6,40 @@ const SESSION_TIMEOUT = 10 * 60 * 1000; // 30 minutes in milliseconds
 let timeoutId: NodeJS.Timeout;
 let client: TimeoutClient | undefined;
 
+const handleTimeout = async () => {
+  if (client) {
+    try {
+      // Cancel all pending requests
+      window.stop();
+      
+      // Clear all storage except theme
+      const savedTheme = localStorage.getItem('theme');
+      localStorage.clear();
+      sessionStorage.clear();
+      if (savedTheme) {
+        localStorage.setItem('theme', savedTheme);
+      }
+
+      // Clear any existing timeouts and intervals
+      const highestTimeoutId = setTimeout(() => {});
+      for (let i = 0; i < highestTimeoutId; i++) {
+        clearTimeout(i);
+        clearInterval(i);
+      }
+
+      await client.logout();
+    } catch (error) {
+      console.error('Session timeout logout error:', error);
+      window.location.href = '/signed-out';
+    }
+  }
+};
+
 const resetTimeout = () => {
   if (timeoutId) {
     clearTimeout(timeoutId);
   }
-  timeoutId = setTimeout(() => {
-    if (client) {
-      client.logout();
-    }
-  }, SESSION_TIMEOUT);
+  timeoutId = setTimeout(handleTimeout, SESSION_TIMEOUT);
 };
 
 export const initSessionTimeout = (timeoutClient: TimeoutClient) => {
@@ -37,6 +62,8 @@ export const initSessionTimeout = (timeoutClient: TimeoutClient) => {
     events.forEach(event => {
       window.removeEventListener(event, resetTimeout);
     });
+    client = undefined;
   };
 };
+
 
