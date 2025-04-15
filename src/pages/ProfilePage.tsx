@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { UserMetaCard } from "../components/UserProfile/UserMetaCard";
 import { UserAddressCard } from "../components/UserProfile/UserAddressCard";
 import { UserMarketingCard } from "../components/UserProfile/UserMarketingCard";
@@ -12,7 +12,7 @@ import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import UserMetadata from "../types/user";
 // import { useUnsavedChanges } from "../hooks/useUnsavedChanges";
 import { useNavigation } from "../hooks/useNavigation";
-import deepEqual from 'fast-deep-equal';
+// import deepEqual from 'fast-deep-equal';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from "../components/ui/button/Button";
 
@@ -30,20 +30,9 @@ interface UserData {
   lastName: string;
   phoneNumber: string;
   profile: {    
-    dateOfBirth: string;
+    dateOfBirth: string | null;
     gender: string;
     profilePictureUrl: string;
-    marketingBudget: {
-      adBudget: number;
-      costPerAcquisition: number;
-      dailySpendingLimit: number;
-      marketingChannels: string;
-      monthlyBudget: number;
-      preferredPlatforms: string;
-      notificationPreferences: string[];
-      roiTarget: number;
-      frequency: 'daily' | 'monthly' | 'quarterly' | 'yearly';
-    };
   };
   address: {
     street: string;
@@ -51,6 +40,17 @@ interface UserData {
     state: string;
     zipCode: string;
     country: string;
+  };
+  marketingBudget: {
+    adBudget: number;
+    costPerAcquisition: number;
+    dailySpendingLimit: number;
+    marketingChannels: string;
+    monthlyBudget: number;
+    preferredPlatforms: string;
+    notificationPreferences: string[];
+    roiTarget: number;
+    frequency: "daily" | "monthly" | "quarterly" | "yearly";
   };
   isActive: boolean;
   createdAt?: Date;
@@ -67,7 +67,7 @@ interface UserProfileProps {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { user, isAuthenticated, isLoading: auth0Loading } = useAuth0();
   const { getUserById, saveUserData } = useMongoDbClient();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -87,7 +87,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
     setHasUnsavedChanges(value);
   };
 
-  // Define default marketing budget
+  // Define default marketing budget matching schema defaults
   const defaultMarketingBudget = {
     adBudget: 0,
     costPerAcquisition: 0,
@@ -95,12 +95,21 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
     marketingChannels: '',
     monthlyBudget: 0,
     preferredPlatforms: '',
-    notificationPreferences:  [],
+    notificationPreferences: [] as string[],
     roiTarget: 0,
-    frequency: "monthly" as const
+    frequency: 'monthly' as const
   };
 
-  // Initialize state with default values
+  // Define default address
+  const defaultAddress = {
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: ''
+  };
+
+  // Initialize state with schema-matching defaults
   const [userData, setUserData] = useState<UserData>({
     auth0Id: "",
     email: "",
@@ -108,43 +117,33 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
     lastName: "",    
     phoneNumber: "",
     profile: {
-      dateOfBirth: "",
+      dateOfBirth: null,
       gender: "",
-      profilePictureUrl: "",
-      marketingBudget: {
-        ...defaultMarketingBudget,
-        adBudget: 0,
-        costPerAcquisition: 0,
-        dailySpendingLimit: 0,
-        marketingChannels: "",
-        monthlyBudget: 0,
-        preferredPlatforms: "",
-        notificationPreferences: [],
-        roiTarget: 0,
-        frequency: "daily"
-      }
+      profilePictureUrl: "",          
     },    
     address: {
-      street: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      country: ""
+      ...defaultAddress
+    },
+    marketingBudget: {
+      ...defaultMarketingBudget
     },
     isActive: true
   });
   const [isLoading, setIsLoading] = useState(true);
 
+  
+    
+  
   // Navigation handler
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onNavigate = async (path: string) => {
-    if (hasUnsavedChanges) {
-      // Let the user continue navigation, the notification will handle saving
-      navigate(path);
-    } else {
-      navigate(path);
-    }
-  };
+  // const onNavigate = async (path: string) => {
+  //   if (hasUnsavedChanges) {
+  //     // Let the user continue navigation, the notification will handle saving
+  //     navigate(path);
+  //   } else {
+  //     navigate(path);
+  //   }
+  // };
 
   const handleSaveChanges = async () => {
     try {
@@ -189,10 +188,21 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
       return;
     }
 
-    const hasChanges = !deepEqual(initialUserData, userData);
-    logger('Change detection:', { hasChanges, userData, initialUserData });
+    const hasChanges = JSON.stringify(initialUserData) !== JSON.stringify(userData);
+    console.log('Checking for changes:', {
+      isInitialLoad,
+      initialData: initialUserData,
+      currentData: userData,
+      hasChanges
+    });
     setHasUnsavedChanges(hasChanges);
   }, [userData, initialUserData, isInitialLoad]);
+
+
+  //   const hasChanges = !deepEqual(initialUserData, userData);
+  //   logger('Change detection:', { hasChanges, userData, initialUserData });
+  //   setHasUnsavedChanges(hasChanges);
+  // }, [userData, initialUserData, isInitialLoad]);
 
   // Clear save status after 5 seconds
   useEffect(() => {
@@ -211,26 +221,37 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      // If auth0Id is provided (from UserManagement), use it
-      // Otherwise, use the authenticated user's ID
       const userIdToFetch = auth0Id || (isAuthenticated && user?.sub);
 
       if (userIdToFetch) {
         try {
           const fetchedUserData = await getUserById(userIdToFetch);
-          setUserData(() => ({
-            ...fetchedUserData,
-            marketingBudget: {
-              ...defaultMarketingBudget,
-              ...fetchedUserData?.marketingBudget,
+          // Restructure the data to ensure marketingBudget is only under profile
+          const restructuredData: UserData = {
+            auth0Id: fetchedUserData.auth0Id,
+            email: fetchedUserData.email,
+            firstName: fetchedUserData.firstName,
+            lastName: fetchedUserData.lastName,
+            phoneNumber: fetchedUserData.phoneNumber,            
+            isActive: fetchedUserData.isActive,
+            profile: {
+              dateOfBirth: fetchedUserData.profile?.dateOfBirth || '',
+              gender: fetchedUserData.profile?.gender || '',
+              profilePictureUrl: fetchedUserData.profile?.profilePictureUrl || '',
             },
-          }));
+            marketingBudget: {
+              ...defaultMarketingBudget
+            },
+            address: {
+              ...defaultAddress
+            }
+          };
           
-          setInitialUserData(fetchedUserData);
-          console.log('Initial user data loaded:', fetchedUserData);
+          setUserData(restructuredData);
+          setInitialUserData(restructuredData);
+          console.log('Initial user data loaded:', restructuredData);
         } catch (error) {
           console.error('Error fetching user data:', error);
-          // Handle error case...
         } finally {
           setIsLoading(false);
           setTimeout(() => {
@@ -242,23 +263,35 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
     };
 
     fetchUserData();
-  // Remove defaultMarketingBudget from dependencies
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user, getUserById, auth0Id]);
 
   const handleUpdate = (updates: Partial<UserMetadata>) => {
     console.log('handleUpdate called with:', updates);
     setUserData((prevData: UserData) => {
-      const processedUpdates: Partial<UserMetadata> = {
-        ...updates,
-        profile: updates.profile ? {
-          ...updates.profile
-        } : updates.profile
-      };
-
+      // Create a new data object with correct nested structure
       const newData: UserData = {
         ...prevData,
-        ...processedUpdates as UserData
+        auth0Id: prevData.auth0Id,
+        email: updates.email || prevData.email,
+        firstName: updates.firstName || prevData.firstName,
+        lastName: updates.lastName || prevData.lastName,
+        phoneNumber: updates.phoneNumber || prevData.phoneNumber,
+        address: {
+          ...prevData.address,
+          ...(updates.address || {})
+        },
+        profile: {
+          ...prevData.profile,
+          dateOfBirth: updates.profile?.dateOfBirth || prevData.profile.dateOfBirth,
+          gender: updates.profile?.gender || prevData.profile.gender,
+          profilePictureUrl: updates.profile?.profilePictureUrl || prevData.profile.profilePictureUrl,          
+        },
+        marketingBudget: {
+          ...prevData.marketingBudget,
+          ...(updates.marketingBudget || {})
+        },
+        isActive: prevData.isActive
       };
       
       console.log('Previous data:', prevData);
@@ -270,40 +303,29 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
     try {
+      console.group('ProfilePage - handleSubmit');
+      console.log('Current userData state:', userData);
+      console.log('Current marketingBudget:', userData.marketingBudget);
+      
       const transformedData: Partial<UserMetadata> = {
         email: userData.email,
         firstName: userData.firstName,
         lastName: userData.lastName,
         phoneNumber: userData.phoneNumber,
         profile: {
-          // Use the correct profile picture based on context
           profilePictureUrl: auth0Id ? userData.profile.profilePictureUrl : (user?.picture || userData?.profile.profilePictureUrl),
           dateOfBirth: userData.profile.dateOfBirth || "",
-          gender: userData.profile.gender || "",
-          marketingBudget: {
-            adBudget: userData.profile.marketingBudget.adBudget || 0,
-            costPerAcquisition: userData.profile.marketingBudget.costPerAcquisition || 0,
-            dailySpendingLimit: userData.profile.marketingBudget.dailySpendingLimit || 0,
-            marketingChannels: userData.profile.marketingBudget.marketingChannels || "",
-            monthlyBudget: userData.profile.marketingBudget.monthlyBudget || 0,
-            preferredPlatforms: userData.profile.marketingBudget.preferredPlatforms  || "",
-            notificationPreferences: userData.profile.marketingBudget.notificationPreferences  || "",
-            roiTarget: userData.profile.marketingBudget.roiTarget || 0,
-            frequency: userData.profile.marketingBudget.frequency|| 0,
-            // "daily" | "monthly" | "quarterly" | "yearly";
-          },
+          gender: userData.profile.gender || "",          
         },
-       
-         address: {
-          street: userData.address.street || "",
-          city: userData.address.city || "",
-          state: userData.address.state || "",
-          zipCode: userData.address.zipCode || "",
-          country: userData.address.country || ""
-        },
-        isActive: userData.isActive,
-      };      
+        marketingBudget: {
+          ...userData.marketingBudget
+        }
+      };
       
+      console.log('Transformed data being sent to updateUser:', transformedData);
+      console.log('Marketing budget being sent:', transformedData.marketingBudget);
+      console.groupEnd();
+
       await saveUserData(userData.auth0Id, transformedData);
       setSaveStatus({ message: "Changes Saved Successfully", isError: false });
       setHasUnsavedChanges(false);
@@ -360,29 +382,28 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
                 firstName: newInfo.firstName || userData.firstName || user?.name,
                 lastName: newInfo.lastName || userData.lastName,
                 profile: {
-                  dateOfBirth: userData.profile.dateOfBirth || '',
-                  gender: userData.profile.gender || '',
-                  profilePictureUrl: userData.profile.profilePictureUrl || (user?.picture || userData?.profile.profilePictureUrl),
-                  marketingBudget: {
-                    adBudget: 0 ,
-                    costPerAcquisition: 0,
-                    dailySpendingLimit: 0,
-                    marketingChannels: "",
-                    monthlyBudget: 0,
-                    preferredPlatforms: "",
-                    notificationPreferences: [],
-                    roiTarget: 0,
-                    frequency: "daily"
-                  }
+                  ...userData.profile,
+                  dateOfBirth: newInfo.profile?.dateOfBirth || userData.profile.dateOfBirth || '',
+                  gender: newInfo.profile?.gender || userData.profile.gender || '',
+                  profilePictureUrl: newInfo.profile?.profilePictureUrl || userData.profile.profilePictureUrl || (user?.picture || ''),
+                  
                 },
+                marketingBudget: {
+                  ...userData.marketingBudget,
+                  ...defaultMarketingBudget,
+                  ...(newInfo.marketingBudget || {})
+                }
               });
             }}
             initialData={{
               email: userData?.email || "",
               firstName: userData?.firstName || "",
-              lastName: userData?.lastName || "",
-              name: `${userData?.firstName || ''} ${userData?.lastName || ''}`.trim(),
-              profilePictureUrl: auth0Id ? (userData?.profile?.profilePictureUrl || "") : (user?.picture || userData?.profile?.profilePictureUrl || "")
+              lastName: userData?.lastName || "",              
+              profile: {
+                dateOfBirth: userData?.profile?.dateOfBirth || "",
+                gender: userData?.profile?.gender || "",
+                profilePictureUrl: auth0Id ? (userData?.profile?.profilePictureUrl || "") : (user?.picture || userData?.profile?.profilePictureUrl || "")
+              },              
             }}
           />
 
@@ -395,21 +416,22 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
 
           <UserMarketingCard
             onUpdate={handleUpdate}
-            initialData={{
-              marketingBudget: {
-                frequency: userData.profile.marketingBudget?.frequency || 'monthly',                  
-                adBudget: userData.profile.marketingBudget?.adBudget || 0,
-                costPerAcquisition: userData.profile.marketingBudget?.costPerAcquisition || 0,
-                dailySpendingLimit: userData.profile.marketingBudget?.dailySpendingLimit || 0,
-                marketingChannels: userData.profile.marketingBudget?.marketingChannels || '',
-                monthlyBudget: userData.profile.marketingBudget?.monthlyBudget || 0,
-                preferredPlatforms: userData.profile.marketingBudget?.preferredPlatforms || '',
-                notificationPreferences: Array.isArray(userData.profile.marketingBudget?.notificationPreferences) 
-                  ? userData.profile.marketingBudget.notificationPreferences 
-                  : [],
-                roiTarget: userData.profile.marketingBudget?.roiTarget || 0
+            initialData={{              
+                marketingBudget: {
+                  frequency: userData.marketingBudget?.frequency || 'monthly',
+                  adBudget: userData.marketingBudget?.adBudget || 0,
+                  costPerAcquisition: userData.marketingBudget?.costPerAcquisition || 0,
+                  dailySpendingLimit: userData.marketingBudget?.dailySpendingLimit || 0,
+                  marketingChannels: userData.marketingBudget?.marketingChannels || '',
+                  monthlyBudget: userData.marketingBudget?.monthlyBudget || 0,
+                  preferredPlatforms: userData.marketingBudget?.preferredPlatforms || '',
+                  notificationPreferences: Array.isArray(userData.marketingBudget?.notificationPreferences)
+                    ? userData.marketingBudget.notificationPreferences
+                    : [],
+                  roiTarget: userData.marketingBudget?.roiTarget || 0
+                }
               }
-            }}
+            }
           />
         </div>
       </div>

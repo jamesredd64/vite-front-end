@@ -11,7 +11,7 @@ import UserProfileView from "./pages/UserProfileView";
 import  Calendar from "./pages/Calendar";
 import DashboardHome from "./pages/Dashboard/Home";
 import React from "react";
-import { SignedOut } from "./pages/SignedOut";
+import SignedOut from "./pages/SignedOut";
 import Loader from './components/common/Loader';
 import { useMongoDbClient } from './services/mongoDbClient';
 import Marketing from "./pages/Dashboard/Marketing";
@@ -47,28 +47,7 @@ interface UserMetadata {
     dateOfBirth: string;
     gender: string;
     profilePictureUrl: string;
-    marketingBudget: {
-      adBudget: number;
-      costPerAcquisition: number;
-      dailySpendingLimit: number;
-      marketingChannels: string;
-      monthlyBudget: number;
-      preferredPlatforms: string;
-      notificationPreferences: string[];
-      roiTarget: number;
-      frequency: "daily" | "monthly" | "quarterly" | "yearly";
-    };
   };
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  isActive: boolean;
-  createdAt: string | Date;
-  updatedAt: string | Date;
   marketingBudget: {
     adBudget: number;
     costPerAcquisition: number;
@@ -79,7 +58,17 @@ interface UserMetadata {
     notificationPreferences: string[];
     roiTarget: number;
     frequency: "daily" | "monthly" | "quarterly" | "yearly";
+  };  
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
   };
+  isActive: boolean;
+  createdAt: string | Date;
+  updatedAt: string | Date;  
 }
 
 interface NavigationContextType {
@@ -170,37 +159,50 @@ function App() {
             auth0Id: user.sub,
             email: user.email || '',
             firstName: firstName,
+            phoneNumber: user.phoneNumber || '',
             lastName: lastName,
             profile: {
               dateOfBirth: '',
               gender: '',
               profilePictureUrl: user.picture || ''
-            }
+            },
+            marketingBudget: {
+              adBudget: user.marketingBudget?.adBudget ,
+              costPerAcquisition: user.marketingBudget?.costPerAcquisition ,
+              dailySpendingLimit: user.marketingBudget?.dailySpendingLimit ,
+              marketingChannels: user.marketingBudget?.marketingChannels ,
+              monthlyBudget: user.marketingBudget?.monthlyBudget ,
+              preferredPlatforms: user.marketingBudget?.preferredPlatforms ,
+              notificationPreferences:  user.marketingBudget?.notificationPreferences,
+              roiTarget: user.marketingBudget?.roiTarget,
+              frequency: user.marketingBudget?.frequency
+            }    
           };
 
           // Update MongoDB and local storage
-          const createdUser = await updateUser(user.sub, {
+          const createdUser = await updateUser(user.sub, {            
             email: newUserData.email,
             firstName: newUserData.firstName,
             lastName: newUserData.lastName,
+            phoneNumber: newUserData.phoneNumber,
             profile: {
               dateOfBirth: '',
               gender: '',
               profilePictureUrl: newUserData.profile.profilePictureUrl,
-              marketingBudget: {
-                adBudget: 0,
-                costPerAcquisition: 0,
-                dailySpendingLimit: 0,
-                marketingChannels: '',
-                monthlyBudget: 0,
-                preferredPlatforms: '',
-                notificationPreferences: [],
-                roiTarget: 0,
-                frequency: 'monthly'
-              }
-            }
+            },
+            marketingBudget: {
+              adBudget: 0,
+              costPerAcquisition: 0,
+              dailySpendingLimit: 0,
+              marketingChannels: '',
+              monthlyBudget: 0,
+              preferredPlatforms: '',
+              notificationPreferences: [],
+              roiTarget: 0,
+              frequency: 'monthly'
+            }              
           });
-          setUserMetadata(createdUser);
+          setUserMetadata(createdUser as UserMetadata);
           return;
         }
 
@@ -323,53 +325,31 @@ function App() {
         const userId = user.sub;  // Use the original Auth0 ID directly
         const userData = await updateUser(userId, {
           email: user?.email || '',
-          firstName: user?.name?.split(' ')[0] || '',
-          lastName: user?.name?.split(' ')[1] || '',
+          // firstName: user?.?,
+          // lastName: user?.name?.split(' ')[1] || '',
+          // phoneNumber: user.phone_number,                   
           profile: {
             dateOfBirth: '',
             gender: '',
             profilePictureUrl: user?.picture || '',
-            marketingBudget: {
-              adBudget: 0,
-              costPerAcquisition: 0,
-              dailySpendingLimit: 0,
-              marketingChannels: '',
-              monthlyBudget: 0,
-              preferredPlatforms: '',
-              notificationPreferences: [],
-              roiTarget: 0,
-              frequency: 'monthly'
-            }
+            
           },
-          // phoneNumber: '',
-          // dateOfBirth: '',
-          // gender: '',
-          // 
-          // adBudget: 0,
-          // costPerAcquisition: 0,
-          // dailySpendingLimit: 0,
-          // marketingChannels: '',
-          // monthlyBudget: 0,
-          // preferredPlatforms: '',
-          // notificationPreferences: [],
-          // roiTarget: 0,
-          // marketingBudget: {
-          //   amount: 0,
-          //   frequency: 'monthly',
-          //   adCosts: 0
-          // },
-          // address: {
-          //   street: '',
-          //   city: '',
-          //   state: '',
-          //   zipCode: '',
-          //   country: ''
-          // },
-          //auth0Id: user.sub
+          marketingBudget: {
+            adBudget: 0,
+            costPerAcquisition: 0,
+            dailySpendingLimit: 0,
+            marketingChannels: '',
+            monthlyBudget: 0,
+            preferredPlatforms: '',
+            notificationPreferences: [],
+            roiTarget: 0,
+            frequency: 'monthly'
+          }
+          
         });
 
         if (userData) {
-          setUserMetadata(userData);
+          setUserMetadata(userData as UserMetadata);
         }
       } catch (error) {
         console.error('Error updating user:', error);
@@ -379,6 +359,7 @@ function App() {
     if (isAuthenticated && user?.sub) {
       initializeUserData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user?.sub]);
 
   if (isLoading) {
@@ -398,7 +379,7 @@ function App() {
               <Route path="/signed-out" element={<SignedOut />} />
               {isAuthenticated ? (
                 <Route element={<AppLayout />}>
-                  <Route index path="/" element={<Navigate to="/marketing-overview" replace />} />              
+                  <Route index element={<Navigate to="/marketing-overview" replace />} />              
                   <Route path="/dashboard" element={<DashboardHome />} />
                   <Route path="/profile" element={<UserProfile/>} />                
                   <Route path="/calendar" element={<Calendar />} />
@@ -432,17 +413,14 @@ function App() {
                   <Route path="*" element={<NotFound />} />
                 </Route>
               ) : (
-                <Route path="*" element={<Navigate to="/signed-out" replace />} />
+                <>
+                  <Route path="/signed-out" element={<SignedOut />} />
+                  <Route path="*" element={<Navigate to="/signed-out" replace />} />
+                </>
               )}
             </Routes>
           </div>
         </div>
-        {/* {navigationState.isModalOpen && (
-          <UnsavedChangesModal
-            onConfirm={handleConfirmNavigation}
-            onCancel={handleCancelNavigation}
-          />
-        )} */}
       </div>
     </NavigationContext.Provider>
   );

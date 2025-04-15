@@ -36,8 +36,9 @@ interface MarketingBudget {
 
 interface UserMarketingCardProps {
   onUpdate: (newInfo: Partial<UserMetadata>) => void;
-  initialData: {
-    marketingBudget: MarketingBudget;
+  initialData: {    
+      marketingBudget: MarketingBudget;
+    
   };
 }
 
@@ -183,22 +184,22 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({
   useEffect(() => {
     const newFormData = {
       marketingBudget: {
-        frequency: initialData.marketingBudget.frequency || "monthly",
-        adBudget: Number(initialData.marketingBudget.adBudget) || 0,
+        frequency: initialData.marketingBudget.frequency ,
+        adBudget: Number(initialData.marketingBudget.adBudget) ,
         costPerAcquisition:
-          Number(initialData.marketingBudget.costPerAcquisition) || 0,
+          Number(initialData.marketingBudget.costPerAcquisition) ,
         dailySpendingLimit:
-          Number(initialData.marketingBudget.dailySpendingLimit) || 0,
-        marketingChannels: initialData.marketingBudget.marketingChannels || "",
-        monthlyBudget: Number(initialData.marketingBudget.monthlyBudget) || 0,
+          Number(initialData.marketingBudget.dailySpendingLimit) ,
+        marketingChannels: initialData.marketingBudget.marketingChannels ,
+        monthlyBudget: Number(initialData.marketingBudget.monthlyBudget),
         preferredPlatforms:
-          initialData.marketingBudget.preferredPlatforms || "",
+          initialData.marketingBudget.preferredPlatforms ,
         notificationPreferences: Array.isArray(
           initialData.marketingBudget.notificationPreferences
         )
           ? initialData.marketingBudget.notificationPreferences
           : [],
-        roiTarget: Number(initialData.marketingBudget.roiTarget) || 0,
+        roiTarget: Number(initialData.marketingBudget.roiTarget),
       },
     };
 

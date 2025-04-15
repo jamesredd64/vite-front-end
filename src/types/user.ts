@@ -8,17 +8,7 @@ interface UserMetadata {
     dateOfBirth: string | null;
     gender: string;
     profilePictureUrl: string;
-    marketingBudget: {
-      adBudget: number;
-      costPerAcquisition: number;
-      dailySpendingLimit: number;
-      marketingChannels: string;
-      monthlyBudget: number;
-      preferredPlatforms: string;
-      notificationPreferences: string[];
-      roiTarget: number;
-      frequency: "daily" | "monthly" | "quarterly" | "yearly";
-    }
+    
   };
   address: {
     street: string;

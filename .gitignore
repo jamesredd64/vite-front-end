@@ -103,3 +103,4 @@ build/
 .saved/UserProfiles-old-new.tsx
 .saved/test.css
 src/pages/DemoApp.tsx
+src/pages/oldProfile.tsx

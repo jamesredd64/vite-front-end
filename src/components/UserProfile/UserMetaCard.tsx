@@ -12,9 +12,12 @@ interface UserMetaCardProps {
   initialData: {
     email: string;
     firstName: string;
-    lastName: string;
-    name: string;
-    profilePictureUrl: string;
+    lastName: string;    
+    profile: {
+      dateOfBirth: string | null;
+      gender: string;
+      profilePictureUrl: string;
+    };
   };
 }
 
@@ -29,9 +32,12 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
     email: initialData.email || "",
     firstName: initialData.firstName || "",
     lastName: initialData.lastName || "",
-    name: initialData.name || "",
-    profilePictureUrl: initialData.profilePictureUrl || "",
-  });
+    profile: {
+      dateOfBirth: initialData.profile.dateOfBirth || "",
+      gender: initialData.profile.gender || "",
+      profilePictureUrl: initialData.profile.profilePictureUrl || user?.picture || "",
+    },    
+  });   
 
   useEffect(() => {
     if (
@@ -39,19 +45,21 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
       JSON.stringify({
         email: initialData.email || "",
         firstName: initialData.firstName || "",
-        lastName: initialData.lastName || "",
-        name: user?.name || "",
-        profilePictureUrl: initialData.profilePictureUrl || user?.picture || "",
+        lastName: initialData.lastName || "",       
+        profilePictureUrl: initialData.profile.profilePictureUrl || user?.picture || "",
       })
     ) {
       setFormData({
         email: initialData.email || "",
         firstName: initialData.firstName || "",
         lastName: initialData.lastName || "",
-        name: initialData.name || "",
-        profilePictureUrl: initialData.profilePictureUrl || user?.picture || "",
+        profile: {
+          ...formData.profile,
+          profilePictureUrl: initialData.profile.profilePictureUrl || user?.picture || ""
+        }
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData, user?.picture]);
 
   const handleInputChange = (field: string) => (
@@ -79,8 +87,8 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
         <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
           <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
             <img 
-              src={formData.profilePictureUrl} 
-              alt={formData.name || "User"} 
+              src={formData.profile.profilePictureUrl} 
+              alt={formData.firstName || "User"} 
               className="w-full h-full object-cover"
             />
           </div>
@@ -239,7 +247,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
                   <Label>Profile Picture URL</Label>
                   <Input
                     type="text"
-                    value={formData.profilePictureUrl}
+                    value={formData.profile.profilePictureUrl}
                     onChange={handleInputChange("profilePictureUrl")}
                   />
                 </div>

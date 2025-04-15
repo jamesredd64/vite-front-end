@@ -20,25 +20,7 @@ interface User {
     dateOfBirth: string | null;
     gender: string;
     profilePictureUrl: string;
-    marketingBudget: {
-      adBudget: number;
-      costPerAcquisition: number;
-      dailySpendingLimit: number;
-      marketingChannels: string;
-      monthlyBudget: number;
-      preferredPlatforms: string;
-      notificationPreferences: string[];
-      roiTarget: number;
-      frequency: "daily" | "monthly" | "quarterly" | "yearly";
-    }
-  };
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
+  },
   marketingBudget: {
     adBudget: number;
     costPerAcquisition: number;
@@ -49,7 +31,15 @@ interface User {
     notificationPreferences: string[];
     roiTarget: number;
     frequency: "daily" | "monthly" | "quarterly" | "yearly";
-  };
+  },   
+  
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };  
   isActive: boolean;
 }
 
@@ -70,22 +60,23 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
   const handleUpdate = (updates: Partial<UserMetadata>) => {
     if (!userData) return;
     
-    setUserData((prevData: User | null) => {
+    setUserData((prevData: User | null): User | null => {
       if (!prevData) return null;
       return {
         ...prevData,
         ...updates,
         marketingBudget: {
           ...prevData.marketingBudget,
-          monthlyBudget: updates.marketingBudget?.monthlyBudget || prevData.marketingBudget.monthlyBudget,
-          frequency: updates.marketingBudget?.frequency || prevData.marketingBudget.frequency,
-          adBudget: updates.marketingBudget?.adBudget || prevData.marketingBudget.adBudget,
-          costPerAcquisition: prevData.marketingBudget.costPerAcquisition,
-          dailySpendingLimit: prevData.marketingBudget.dailySpendingLimit,
-          marketingChannels: prevData.marketingBudget.marketingChannels,
-          preferredPlatforms: prevData.marketingBudget.preferredPlatforms,
-          notificationPreferences: prevData.marketingBudget.notificationPreferences,
-          roiTarget: prevData.marketingBudget.roiTarget
+          ...(updates.marketingBudget || {})
+          // monthlyBudget: updates.marketingBudget?.monthlyBudget || prevData.marketingBudget.monthlyBudget,
+          // frequency: updates.marketingBudget?.frequency || prevData.marketingBudget.frequency,
+          // adBudget: updates.marketingBudget?.adBudget || prevData.marketingBudget.adBudget,
+          // costPerAcquisition: prevData.marketingBudget.costPerAcquisition,
+          // dailySpendingLimit: prevData.marketingBudget.dailySpendingLimit,
+          // marketingChannels: prevData.marketingBudget.marketingChannels,
+          // preferredPlatforms: prevData.marketingBudget.preferredPlatforms,
+          // notificationPreferences: prevData.marketingBudget.notificationPreferences,
+          // roiTarget: prevData.marketingBudget.roiTarget
         }
       };
     });
@@ -98,28 +89,38 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
       if (!userData) return;
       
       await saveUserData(userId, {
-        ...userData,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        phoneNumber: userData.phoneNumber,
         profile: {
-          dateOfBirth: '',
-          gender: '',
-          profilePictureUrl: userData.profile?.profilePictureUrl || '',
-          marketingBudget: {
-            adBudget: userData.marketingBudget.adBudget,
-            costPerAcquisition: 0,
-            dailySpendingLimit: 0,
-            marketingChannels: '',
-            monthlyBudget: userData.marketingBudget.monthlyBudget,
-            preferredPlatforms: '',
-            notificationPreferences: [],
-            roiTarget: 0,
-            frequency: userData.marketingBudget.frequency
-          }
-        }
+          dateOfBirth: userData.profile.dateOfBirth || '',
+          gender: userData.profile.gender || '',
+          profilePictureUrl: userData.profile.profilePictureUrl || '',
+        },
+        address: {
+          street: userData.address.street || '',
+          city: userData.address.city || '',
+          state: userData.address.state || '',
+          zipCode: userData.address.zipCode || '',
+          country: userData.address.country || '',
+        },
+        marketingBudget: {
+          adBudget: userData.marketingBudget.adBudget,
+          costPerAcquisition: userData.marketingBudget.costPerAcquisition,
+          dailySpendingLimit: userData.marketingBudget.dailySpendingLimit,
+          marketingChannels: userData.marketingBudget.marketingChannels || '',
+          monthlyBudget: userData.marketingBudget.monthlyBudget,
+          preferredPlatforms: userData.marketingBudget.preferredPlatforms || '',
+          notificationPreferences: userData.marketingBudget.notificationPreferences || [],
+          roiTarget: userData.marketingBudget.roiTarget,
+          frequency: userData.marketingBudget.frequency
+        },
+        isActive: userData.isActive
       });
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error("Error saving changes:", error);
-      // Optionally show error notification
     }
   };
 
@@ -195,11 +196,14 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
           <UserMetaCard
             onUpdate={handleUpdate}
             initialData={{
-              email: userData.email,
-              firstName: userData.firstName,
-              lastName: userData.lastName,
-              name: `${userData.firstName} ${userData.lastName}`,
-              profilePictureUrl: userData.profile?.profilePictureUrl || ''
+              email: userData?.email || "",
+              firstName: userData?.firstName || "",
+              lastName: userData?.lastName || "",              
+              profile: {
+                dateOfBirth: userData?.profile?.dateOfBirth || "",
+                gender: userData?.profile?.gender || "",
+                profilePictureUrl: (userData?.profile?.profilePictureUrl || "") 
+              },              
             }}
           />
 

@@ -101,27 +101,26 @@ export const useMongoDbClient = () => {
       dateOfBirth?: string | null;
       gender?: string;
       profilePictureUrl?: string;
-      marketingBudget?: {
-        adBudget?: number;
-        costPerAcquisition?: number;
-        dailySpendingLimit?: number;
-        marketingChannels?: string;
-        monthlyBudget?: number;
-        preferredPlatforms?: string;
-        notificationPreferences?: string[];
-        roiTarget?: number;
-        frequency?: "daily" | "monthly" | "quarterly" | "yearly";
-      };
-    };
+    },
+    marketingBudget?: {
+      adBudget?: number;
+      costPerAcquisition?: number;
+      dailySpendingLimit?: number;
+      marketingChannels?: string;
+      monthlyBudget?: number;
+      preferredPlatforms?: string;
+      notificationPreferences?: string[];
+      roiTarget?: number;
+      frequency?: "daily" | "monthly" | "quarterly" | "yearly";
+    },
     address?: {
       street?: string;
       city?: string;
       state?: string;
       zipCode?: string;
       country?: string;
-    };
-    [key: string]: unknown;
-  }) => {
+    }
+  }): Promise<unknown> => {
     console.group('checkAndInsertUser Operation');
     try {
       const headers = await getAuthHeaders();
@@ -165,18 +164,18 @@ export const useMongoDbClient = () => {
       dateOfBirth?: string | null;
       gender?: string;
       profilePictureUrl?: string;
-      marketingBudget?: {
-        adBudget?: number;
-        costPerAcquisition?: number;
-        dailySpendingLimit?: number;
-        marketingChannels?: string;
-        monthlyBudget?: number;
-        preferredPlatforms?: string;
-        notificationPreferences?: string[];
-        roiTarget?: number;
-        frequency?: "daily" | "monthly" | "quarterly" | "yearly";
-      };
     };
+    marketingBudget?: {
+      adBudget?: number;
+      costPerAcquisition?: number;
+      dailySpendingLimit?: number;
+      marketingChannels?: string;
+      monthlyBudget?: number;
+      preferredPlatforms?: string;
+      notificationPreferences?: string[];
+      roiTarget?: number;
+      frequency?: "daily" | "monthly" | "quarterly" | "yearly";
+    };    
     address?: {
       street?: string;
       city?: string;
@@ -189,21 +188,37 @@ export const useMongoDbClient = () => {
     setError(null);
 
     try {
-      console.log('Attempting to update/create user:', userData);
+      console.group('mongoDbClient - updateUser');
+      console.log('Initial userData received:', userData);
+      console.log('Initial marketingBudget:', userData.marketingBudget);
+      
+      // First, get the existing user data
+      const existingUser = await getUserById(auth0Id);
+      console.log('Existing user data:', existingUser);
+      console.log('Existing marketingBudget:', existingUser?.marketingBudget);
+      
+      // Remove the merge since we're sending complete data
       const userDataWithAuth = {
         ...userData,
         auth0Id,
+        marketingBudget: userData.marketingBudget || {},  // Keep at root level
         profile: {
-          ...userData.profile,
-          profilePictureUrl: userData.profile?.profilePictureUrl || ''
+          ...(existingUser?.profile || {}),
+          ...(userData.profile || {}),
+          profilePictureUrl: userData.profile?.profilePictureUrl || existingUser?.profile?.profilePictureUrl || ''
         }
       };
-      console.log('Sending data to server:', JSON.stringify(userDataWithAuth));
+      
+      console.log('Final userData being sent to server:', userDataWithAuth);
+      console.log('Final marketingBudget being sent:', userDataWithAuth.marketingBudget);
+      
       const updatedUser = await checkAndInsertUser(auth0Id, userDataWithAuth);
-      console.log('User successfully handled:', updatedUser);
+      console.log('Response from server:', updatedUser);
+      console.groupEnd();
+      
       return updatedUser;
     } catch (err) {
-      console.error('Error handling user update/creation:', err);
+      console.error('Error in updateUser:', err);
       const apiError: ApiError = {
         message: err instanceof Error ? err.message : 'An unknown error occurred',
         status: err instanceof Error ? undefined : 500,
@@ -213,7 +228,7 @@ export const useMongoDbClient = () => {
     } finally {
       setLoading(false);
     }
-  }, [checkAndInsertUser]);
+  }, [checkAndInsertUser, getUserById]);
   
 
   const saveUserData = useCallback(async (auth0Id: string, userData: Partial<UserMetadata>) => {
@@ -221,13 +236,36 @@ export const useMongoDbClient = () => {
     setError(null);
 
     try {
+      console.group('mongoDbClient - saveUserData');
+      console.log('Initial userData:', userData);
+      console.log('Marketing budget to send:', userData.marketingBudget);
+      
+      // Get existing user data first
+      const existingUser = await getUserById(auth0Id);
+      
+      // Prepare the data to send, preserving existing marketing budget values
+      const dataToSend = {
+        ...userData,
+        marketingBudget: {
+          ...(existingUser?.marketingBudget || {}),
+          ...(userData.marketingBudget || {}),
+          // Explicitly set each field to prevent zeroing
+          adBudget: userData.marketingBudget?.adBudget ?? existingUser?.marketingBudget?.adBudget ?? 0,
+          costPerAcquisition: userData.marketingBudget?.costPerAcquisition ?? existingUser?.marketingBudget?.costPerAcquisition ?? 0,
+          dailySpendingLimit: userData.marketingBudget?.dailySpendingLimit ?? existingUser?.marketingBudget?.dailySpendingLimit ?? 0,
+          marketingChannels: userData.marketingBudget?.marketingChannels ?? existingUser?.marketingBudget?.marketingChannels ?? '',
+          monthlyBudget: userData.marketingBudget?.monthlyBudget ?? existingUser?.marketingBudget?.monthlyBudget ?? 0,
+          preferredPlatforms: userData.marketingBudget?.preferredPlatforms ?? existingUser?.marketingBudget?.preferredPlatforms ?? '',
+          notificationPreferences: userData.marketingBudget?.notificationPreferences ?? existingUser?.marketingBudget?.notificationPreferences ?? [],
+          roiTarget: userData.marketingBudget?.roiTarget ?? existingUser?.marketingBudget?.roiTarget ?? 0,
+          frequency: userData.marketingBudget?.frequency ?? existingUser?.marketingBudget?.frequency ?? 'monthly'
+        }
+      };
+
+      console.log('Data being sent to server:', dataToSend);
+      console.log('Marketing budget being sent:', dataToSend.marketingBudget);
+      
       const headers = await getAuthHeaders();
-      
-      // Add these debug logs here
-      console.log('Save URL:', `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`);
-      console.log('API_CONFIG:', API_CONFIG);
-      console.log('userData:', userData);
-      
       const response = await fetch(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`,
         {
@@ -236,7 +274,7 @@ export const useMongoDbClient = () => {
             ...headers,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(userData)
+          body: JSON.stringify(dataToSend)
         }
       );
 
@@ -244,11 +282,24 @@ export const useMongoDbClient = () => {
         throw new Error(`Failed to save user data. Status: ${response.status}`);
       }
 
-      const updatedUser = await response.json();
-      console.log('User data saved successfully:', updatedUser);
-      return updatedUser;
+      const serverResponse = await response.json();
+      
+      // Ensure we return the data we sent if the server response has zeroed values
+      const finalResponse = {
+        ...serverResponse,
+        marketingBudget: {
+          ...dataToSend.marketingBudget,
+          ...serverResponse.marketingBudget
+        }
+      };
+
+      console.log('Server response:', serverResponse);
+      console.log('Final response with preserved marketing budget:', finalResponse);
+      console.groupEnd();
+      
+      return finalResponse;
     } catch (err) {
-      console.error('Error saving user data:', err);
+      console.error('Error in saveUserData:', err);
       const apiError: ApiError = {
         message: err instanceof Error ? err.message : 'An unknown error occurred',
         status: err instanceof Error ? undefined : 500,
@@ -258,7 +309,7 @@ export const useMongoDbClient = () => {
     } finally {
       setLoading(false);
     }
-  }, [getAuthHeaders]);
+  }, [getAuthHeaders, getUserById]);
 
   const fetchWithTimeout = async (url: string, options: RequestInit) => {
     const controller = new AbortController();
@@ -417,186 +468,6 @@ export const useMongoDbClient = () => {
 }; 
   
 
-  //   for (let i = 0; i < retries; i++) {
-  //     try {
-  //       // Remove the API_BASE from the url parameter since we're adding it here
-  //       const response = await fetch(`${API_CONFIG.BASE_URL}${url}`, options);
-        
-  //       if (!response.ok) {
-  //         throw new Error(`HTTP error! status: ${response.status}`);
-  //       }
-
-  //       const contentType = response.headers.get("content-type");
-  //       if (!contentType || !contentType.includes("application/json")) {
-  //         throw new Error("Received non-JSON response from server");
-  //       }
-
-  //       return await response.json();
-  //     } catch (error) {
-  //       if (i === retries - 1) throw error;
-  //       await delay(RETRY_DELAY * Math.pow(2, i));
-  //     }
-  //   }
-  // };
-
-  // const updateUser = useCallback(async (userId: string, userData: Partial<UserMetadata>) => {
-  //   setLoading(true);
-  //   setError(null);
-    
-  //   try {
-  //     const headers = await getAuthHeaders();
-  //     // Remove API_BASE from the URL since fetchWithRetry adds it
-  //     const response = await fetchWithRetry(`/users/${userId}`, {
-  //       method: 'PUT',
-  //       headers: {
-  //         ...headers,
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(userData)
-  //     });
-
-  //     return response;
-  //   } catch (err) {
-  //     const apiError: ApiError = {
-  //       message: err instanceof Error ? err.message : 'An unknown error occurred',
-  //       status: err instanceof Error ? undefined : 500,
-  //     };
-  //     setError(apiError);
-  //     throw apiError;
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [getAuthHeaders]);
-
-  // const getUserByEmail = useCallback(async (email: string) => {
-  //   setLoading(true);
-  //   try {
-  //     setError(null);
-      
-  //     const headers = await getAuthHeaders();
-  //     const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_BY_EMAIL(email)}`, { headers });
-      
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-
-  //     const contentType = response.headers.get("content-type");
-  //     if (!contentType || !contentType.includes("application/json")) {
-  //       throw new Error("Received non-JSON response from server");
-  //     }
-
-  //     return await response.json();
-  //   } catch (err) {
-  //     console.error('Error in getUserByEmail:', err);
-  //     const apiError: ApiError = {
-  //       message: err instanceof Error ? err.message : 'An unknown error occurred',
-  //     };
-  //     setError(apiError);
-  //     throw apiError;
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [getAuthHeaders]);
-
-  // const createUser = useCallback(async (userData: Partial<UserMetadata>) => {
-  //   setLoading(true);
-  //   try {
-  //     setError(null);
-  //     const headers = await getAuthHeaders();
-  //     const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`, {
-  //       method: 'POST',
-  //       headers,
-  //       body: JSON.stringify(userData)
-  //     });
-      
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-      
-  //     const contentType = response.headers.get("content-type");
-  //     if (!contentType || !contentType.includes("application/json")) {
-  //       throw new Error("Received non-JSON response from server");
-  //     }
-      
-  //     return await response.json();
-  //   } catch (err) {
-  //     console.error('Error in createUser:', err);
-  //     const apiError: ApiError = {
-  //       message: err instanceof Error ? err.message : 'An unknown error occurred',
-  //     };
-  //     setError(apiError);
-  //     throw apiError;
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [getAuthHeaders]);
-
-
-  // const checkAndInsertUser = async (auth0Id: string, userData: Partial<UserMetadata>) => {
-  //   // Fetch API to check if the user exists
-  //   const headers = await getAuthHeaders();
   
-  //   const checkResponse = await fetch(`/users/${encodeURIComponent(auth0Id)}`, {
-  //     method: 'GET',
-  //     headers: {
-  //       ...headers,
-  //       'Content-Type': 'application/json',
-  //     },
-  //   });
-  
-  //   if (checkResponse.status === 200) {
-  //     // User exists, return the existing user data
-  //     const user = await checkResponse.json();
-  //     console.log('User exists:', user);
-  //     return user;
-  //   } else if (checkResponse.status === 404) {
-  //     // User does not exist, create a new one
-  //     console.log('User not found. Attempting to create a new user...');
-  
-  //     const createResponse = await fetch(`/users`, {
-  //       method: 'POST',
-  //       headers: {
-  //         ...headers,
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         auth0Id,
-  //         ...userData,
-  //       }),
-  //     });
-  
-  //     if (!createResponse.ok) {
-  //       throw new Error(`Failed to create user. Status: ${createResponse.status}`);
-  //     }
-  
-  //     const newUser = await createResponse.json();
-  //     console.log('User successfully created:', newUser);
-  //     return newUser;
-  //   } else {
-  //     throw new Error(`Unexpected status code: ${checkResponse.status}`);
-  //   }
-  // };
-  
-  // const updateUser = useCallback(async (auth0Id: string, userData: Partial<UserMetadata>) => {
-  //   setLoading(true);
-  //   setError(null);
-  
-  //   try {
-  //     // Call the function to check and insert/update the user
-  //     const updatedUser = await checkAndInsertUser(auth0Id, userData);
-  //     console.log('User successfully handled:', updatedUser);
-  //     return updatedUser;
-  //   } catch (err) {
-  //     console.error('Error handling user update/creation:', err);
-  //     const apiError: ApiError = {
-  //       message: err instanceof Error ? err.message : 'An unknown error occurred',
-  //       status: err instanceof Error ? undefined : 500,
-  //     };
-  //     setError(apiError);
-  //     throw apiError;
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [getAuthHeaders]);
   
 
