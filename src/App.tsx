@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 
 import { Routes, Route, useNavigate, Navigate, useParams } from "react-router-dom";
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth0} from '@auth0/auth0-react';
 import { useGlobalStorage } from './hooks/useGlobalStorage';
 import AppLayout from "./layout/AppLayout";
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -20,6 +20,7 @@ import CreateNotification from "./pages/CreateNotification";
 import CustomerDemographics from "./pages/Dashboard/CustomerDemographics";
 import Changelog from "./pages/Changelog/index";
 import UserManagement from "./pages/UserManagement";
+import { initSessionTimeout } from './utils/sessionTimeout';
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 
@@ -95,7 +96,7 @@ type NavigationState = {
 export const NavigationContext = React.createContext<NavigationContextType | undefined>(undefined);
 
 function App() {
-  const { isLoading, isAuthenticated, error: auth0Error, user } = useAuth0();
+  const { isLoading, isAuthenticated, getAccessTokenSilently, error: auth0Error, user } = useAuth0();
   const navigate = useNavigate();
   // const location = useLocation();
   const [userMetadata, setUserMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
@@ -103,6 +104,18 @@ function App() {
   const initializationAttempted = useRef(false);
   const params = useParams<{ userId: string }>();
   const userId = params.userId;
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const cleanup = initSessionTimeout({
+        logout: async () => {
+          await getAccessTokenSilently();
+          window.location.href = '/signed-out';
+        }
+      });
+      return cleanup;
+    }
+  }, [isAuthenticated, getAccessTokenSilently]);
 
   // Add new effect to fetch MongoDB user data early
   useEffect(() => {
