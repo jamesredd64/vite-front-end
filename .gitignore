@@ -105,3 +105,4 @@ src/pages/UserProfiles-old-new.tsx
 src/pages/TestPage.tsx
 src/pages/test.css
 # CHANGELOG.md
+src/pages/oldProfile.tsx
