@@ -26,9 +26,9 @@ import { initSessionTimeout } from './utils/sessionTimeout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
-import { AdminManagement } from './components/admin/AdminManagement';
-import { AdminCodeVerification } from "./components/admin/AdminCodeVerification";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+// import { AdminManagement } from './components/admin/AdminManagement';
+// import { AdminCodeVerification } from "./components/admin/AdminCodeVerification";
+// import { ProtectedRoute } from "./components/ProtectedRoute";
 
 
 
@@ -400,15 +400,15 @@ function App() {
                       <Navigate to="/dashboard" replace />
                     )
                   } />
-                  <Route path="/admin/verify-code" element={<AdminCodeVerification />} />
-                  <Route 
+                  {/* <Route path="/admin/verify-code" element={<AdminCodeVerification />} /> */}
+                  {/* <Route 
                     path="/admin/manage" 
                     element={
-                      <ProtectedRoute roles={['admin']}>
-                        <AdminManagement />
-                      </ProtectedRoute>
+                      // <ProtectedRoute roles={['admin']}>
+                      //   <AdminManagement />
+                      // </ProtectedRoute>
                     } 
-                  />
+                  /> */}
                   <Route path="*" element={<NotFound />} />
                 </Route>
               ) : (
