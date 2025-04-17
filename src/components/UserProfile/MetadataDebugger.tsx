@@ -1,6 +1,7 @@
 import { useGlobalStorage } from '../hooks/useGlobalStorage';
 
 interface UserMetadata {
+  phoneNumber: string;
   adBudget: number;
   costPerAcquisition: number;
   dailySpendingLimit: number;

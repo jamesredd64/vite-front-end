@@ -101,6 +101,7 @@ export const useMongoDbClient = () => {
       dateOfBirth?: string | null;
       gender?: string;
       profilePictureUrl?: string;
+      role?: string;
     },
     marketingBudget?: {
       adBudget?: number;
@@ -164,6 +165,7 @@ export const useMongoDbClient = () => {
       dateOfBirth?: string | null;
       gender?: string;
       profilePictureUrl?: string;
+      role?: 'admin' | 'user' | 'manager' | 'super-admin';
     };
     marketingBudget?: {
       adBudget?: number;
@@ -205,6 +207,7 @@ export const useMongoDbClient = () => {
         profile: {
           ...(existingUser?.profile || {}),
           ...(userData.profile || {}),
+          role: userData.profile?.role || existingUser?.profile?.role || 'user', // Always provide a role
           profilePictureUrl: userData.profile?.profilePictureUrl || existingUser?.profile?.profilePictureUrl || ''
         }
       };

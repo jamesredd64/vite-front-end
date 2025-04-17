@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import React, { useState, useEffect, useCallback } from "react";
 import UserMetadata from "../../types/user.js";
 import Button from "../ui/button/Button.js";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -6,20 +7,31 @@ import Input from "../form/input/InputField.js";
 import Label from "../form/Label.js";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
+import { useUserProfile } from "../../hooks/useUserProfile";
+import Radio from "../form/input/Radio";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
+import debounce from 'lodash/debounce';
 
 interface UserMetaCardProps {
   onUpdate: (newInfo: Partial<UserMetadata>) => void;
   initialData: {
     email: string;
     firstName: string;
-    lastName: string;    
+    lastName: string;
+    phoneNumber: string;
     profile: {
       dateOfBirth: string | null;
       gender: string;
       profilePictureUrl: string;
+      role: 'admin' | 'user' | 'manager' | 'super-admin';
     };
   };
 }
+
+const roleOptions = ["admin", "user", "manager", "super-admin"] as const;
+const genderOptions = ["male", "female", "prefer_not_to_say"] as const;
 
 export const UserMetaCard: React.FC<UserMetaCardProps> = ({
   onUpdate,
@@ -27,58 +39,199 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
 }) => {
   const { isOpen, openModal, closeModal } = useModal();
   const { user } = useAuth0();
+  const userProfile = useUserProfile();
 
   const [formData, setFormData] = useState({
     email: initialData.email || "",
     firstName: initialData.firstName || "",
     lastName: initialData.lastName || "",
+    phoneNumber: initialData.phoneNumber || "", // Added on 04/16/2025
     profile: {
       dateOfBirth: initialData.profile.dateOfBirth || "",
       gender: initialData.profile.gender || "",
       profilePictureUrl: initialData.profile.profilePictureUrl || user?.picture || "",
-    },    
-  });   
+      role: (initialData.profile.role as 'user' | 'admin' | 'manager' | 'super-admin') || 'user',
+    },
+  });
 
+  // Debounced update function
+  const debouncedUpdate = useCallback(
+    debounce((updates: Partial<typeof formData>) => {
+      onUpdate(updates);
+      userProfile.setHasUnsavedChanges(true);
+    }, 500),
+    [onUpdate, userProfile]
+  );
+
+  // Cleanup on unmount
   useEffect(() => {
-    if (
-      JSON.stringify(formData) !==
-      JSON.stringify({
-        email: initialData.email || "",
-        firstName: initialData.firstName || "",
-        lastName: initialData.lastName || "",       
-        profilePictureUrl: initialData.profile.profilePictureUrl || user?.picture || "",
-      })
-    ) {
-      setFormData({
-        email: initialData.email || "",
-        firstName: initialData.firstName || "",
-        lastName: initialData.lastName || "",
-        profile: {
-          ...formData.profile,
-          profilePictureUrl: initialData.profile.profilePictureUrl || user?.picture || ""
-        }
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialData, user?.picture]);
+    return () => {
+      debouncedUpdate.cancel();
+    };
+  }, [debouncedUpdate]);
+
+  // Calculate date ranges for the date picker
+  const today = new Date();
+  const maxDate = new Date(today.setFullYear(today.getFullYear() - 18)); // 18 years ago
+  const minDate = new Date(today.setFullYear(today.getFullYear() - 92)); // 110 years ago from max date
 
   const handleInputChange = (field: string) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
+    const newValue = e.target.value;
+    let updates: Partial<typeof formData>;
+    
+    if (field.startsWith('profile.')) {
+      const profileField = field.split('.')[1];
+      updates = {
+        ...formData,
+        profile: {
+          ...formData.profile,
+          [profileField]: newValue,
+        },
+      };
+    } else {
+      updates = {
+        ...formData,
+        [field]: newValue,
+      };
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      ...updates
+    }));
+    debouncedUpdate(updates);
+  };
+
+  // For immediate updates (like dropdowns, date picker)
+  const handleImmediateUpdate = (updates: Partial<typeof formData>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...updates,
+    }));
+    onUpdate(updates);
+    userProfile.setHasUnsavedChanges(true);
+  };
+
+  const handleRoleChange = (newRole: string) => {
+    handleImmediateUpdate({
+      ...formData,
+      profile: {
+        ...formData.profile,
+        role: newRole as typeof roleOptions[number],
+      },
+    });
+  };
+
+  const handleGenderChange = (newGender: string) => {
     setFormData((prev) => ({
       ...prev,
-      [field]: e.target.value,
+      profile: {
+        ...prev.profile,
+        gender: newGender,
+      },
     }));
+    
+    onUpdate({
+      ...formData,
+      profile: {
+        ...formData.profile,
+        gender: newGender,
+      },
+    });
+    userProfile.setHasUnsavedChanges(true);
+  };
+
+  const handleDateOfBirthChange = (date: Date | null) => {
+    if (date) {
+      const formattedDate = date.toISOString();
+      handleImmediateUpdate({
+        ...formData,
+        profile: {
+          ...formData.profile,
+          dateOfBirth: formattedDate,
+        },
+      });
+    }
   };
 
   const handleSave = async () => {
     try {
       if (!user?.sub) return;
-      onUpdate(formData);
+      onUpdate({
+        ...formData,
+        profile: {
+          ...formData.profile,
+          role: (formData.profile.role as 'user' | 'admin' | 'manager') || 'user'
+        }
+      });
       closeModal();
     } catch (error) {
       console.error("Error saving meta info:", error);
     }
+  };
+
+  // Helper function to format gender display
+  const formatGender = (gender: string) => {
+    return gender
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  // Helper function to format date for display
+  const formatDateForDisplay = (dateString: string | null) => {
+    if (!dateString) return 'Not Specified';
+    try {
+      return format(new Date(dateString), 'MMMM d, yyyy');
+    } catch {
+      return 'Invalid Date';
+    }
+  };
+
+  // Helper function to format phone number
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '');
+    
+    // Remove leading '1' if present for formatting
+    const normalizedDigits = digits.startsWith('1') ? digits.slice(1) : digits;
+    
+    // Only format if we have digits
+    if (normalizedDigits.length === 0) return '';
+    
+    // Format as (XXX) XXX-XXXX
+    if (normalizedDigits.length <= 3) {
+      return `(${normalizedDigits}`;
+    } else if (normalizedDigits.length <= 6) {
+      return `(${normalizedDigits.slice(0, 3)}) ${normalizedDigits.slice(3)}`;
+    } else {
+      return `(${normalizedDigits.slice(0, 3)}) ${normalizedDigits.slice(3, 6)}-${normalizedDigits.slice(6, 10)}`;
+    }
+  };
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    
+    // Limit to 10 digits (excluding the potential leading 1)
+    if (value.length > 10) {
+      value = value.slice(0, 10);
+    }
+    
+    // Add '1' prefix if not present
+    const fullNumber = value.length === 10 ? `1${value}` : value;
+    
+    const updates = {
+      ...formData,
+      phoneNumber: fullNumber,
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      ...updates
+    }));
+    debouncedUpdate(updates);
   };
 
   return (
@@ -96,10 +249,48 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
             <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
               {formData.firstName} {formData.lastName}
             </h4>
-            <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {formData.email}
-              </p>
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {formData.email}
+                </p>
+                {formData.phoneNumber && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      Phone:
+                    </span>
+                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-50 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300">
+                      {formatPhoneNumber(formData.phoneNumber)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    User Role:
+                  </span>
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400">
+                    {formData.profile.role}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Gender:
+                  </span>
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-50 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300">
+                    {formData.profile.gender ? formatGender(formData.profile.gender) : 'Not Specified'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Birth Date:
+                  </span>
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+                    {formatDateForDisplay(formData.profile.dateOfBirth)}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
           <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
@@ -249,6 +440,86 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
                     type="text"
                     value={formData.profile.profilePictureUrl}
                     onChange={handleInputChange("profilePictureUrl")}
+                  />
+                </div>
+
+                <div className="lg:col-span-2">
+                  <Label>Gender</Label>
+                  <div className="grid grid-cols-2 gap-4 mt-2 sm:grid-cols-3">
+                    {genderOptions.map((gender) => (
+                      <Radio
+                        key={gender}
+                        id={`gender-${gender}`}
+                        name="gender"
+                        value={gender}
+                        checked={formData.profile.gender === gender}
+                        onChange={handleGenderChange}
+                        label={formatGender(gender)}
+                        className="capitalize"
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-2">
+                  <Label>Role</Label>
+                  <div className="grid grid-cols-2 gap-4 mt-2 sm:grid-cols-4">
+                    {roleOptions.map((role) => (
+                      <Radio
+                        key={role}
+                        id={`role-${role}`}
+                        name="role"
+                        value={role}
+                        checked={formData.profile.role === role}
+                        onChange={handleRoleChange}
+                        label={role.charAt(0).toUpperCase() + role.slice(1)}
+                        className="capitalize"
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-2">
+                  <Label>Date of Birth</Label>
+                  <div className="relative">
+                    <DatePicker
+                      selected={formData.profile.dateOfBirth ? new Date(formData.profile.dateOfBirth) : null}
+                      onChange={handleDateOfBirthChange}
+                      dateFormat="MMMM d, yyyy"
+                      maxDate={maxDate}
+                      minDate={minDate}
+                      showYearDropdown
+                      scrollableYearDropdown
+                      yearDropdownItemNumber={110}
+                      placeholderText="Select your birth date"
+                      className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
+                    />
+                    <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Phone Number</Label>
+                  <Input
+                    type="tel"
+                    value={formData.phoneNumber ? formatPhoneNumber(formData.phoneNumber) : ''}
+                    onChange={handlePhoneNumberChange}
+                    placeholder="(555) 555-5555"
                   />
                 </div>
               </div>

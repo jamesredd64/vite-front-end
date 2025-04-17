@@ -7,6 +7,7 @@ import AppLayout from "./layout/AppLayout";
 import { useEffect, useRef, useState, useCallback } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfile from "./pages/ProfilePage";
+import ProfileView from "./pages/ProfileView";
 import UserProfileView from "./pages/UserProfileView";
 import  Calendar from "./pages/Calendar";
 import DashboardHome from "./pages/Dashboard/Home";
@@ -23,8 +24,14 @@ import UserManagement from "./pages/UserManagement";
 import { initSessionTimeout } from './utils/sessionTimeout';
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import ProtectedAdminRoute from './components/ProtectedAdminRoute';
+import { AdminManagement } from './components/admin/AdminManagement';
+import { AdminCodeVerification } from "./components/admin/AdminCodeVerification";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
-// import Mypage from "./pages/test";
+
+
 
 // import Marketing2 from './pages/Dashboard/Main/Marketing';
 // import Marketing from "./pages/Dashboard/Main/Marketing";
@@ -47,6 +54,7 @@ interface UserMetadata {
     dateOfBirth: string;
     gender: string;
     profilePictureUrl: string;
+    role: string;
   };
   marketingBudget: {
     adBudget: number;
@@ -149,11 +157,10 @@ function App() {
       try {
         const normalizedAuthId = user.sub;
         const mongoUser = await getUserById(normalizedAuthId);
-        
-        // If no existing MongoDB user data, initialize with Auth0 data
+
         if (!mongoUser) {
-          // Split name into first and last name if available
-          const [firstName = '', lastName = ''] = (user.name || '').split(' ');
+          const firstName = user.given_name || user.name?.split(' ')[0] || '';
+          const lastName = user.family_name || user.name?.split(' ')[1] || '';
           
           const newUserData = {
             auth0Id: user.sub,
@@ -167,84 +174,63 @@ function App() {
               profilePictureUrl: user.picture || ''
             },
             marketingBudget: {
-              adBudget: user.marketingBudget?.adBudget ,
-              costPerAcquisition: user.marketingBudget?.costPerAcquisition ,
-              dailySpendingLimit: user.marketingBudget?.dailySpendingLimit ,
-              marketingChannels: user.marketingBudget?.marketingChannels ,
-              monthlyBudget: user.marketingBudget?.monthlyBudget ,
-              preferredPlatforms: user.marketingBudget?.preferredPlatforms ,
-              notificationPreferences:  user.marketingBudget?.notificationPreferences,
-              roiTarget: user.marketingBudget?.roiTarget,
-              frequency: user.marketingBudget?.frequency
+              adBudget: user.marketingBudget?.adBudget || 0,
+              costPerAcquisition: user.marketingBudget?.costPerAcquisition || 0,
+              dailySpendingLimit: user.marketingBudget?.dailySpendingLimit || 0,
+              marketingChannels: user.marketingBudget?.marketingChannels || '',
+              monthlyBudget: user.marketingBudget?.monthlyBudget || 0,
+              preferredPlatforms: user.marketingBudget?.preferredPlatforms || '',
+              notificationPreferences: user.marketingBudget?.notificationPreferences || [],
+              roiTarget: user.marketingBudget?.roiTarget || 0,
+              frequency: user.marketingBudget?.frequency || 'monthly'
             }    
           };
 
           // Update MongoDB and local storage
-          const createdUser = await updateUser(user.sub, {            
-            email: newUserData.email,
-            firstName: newUserData.firstName,
-            lastName: newUserData.lastName,
-            phoneNumber: newUserData.phoneNumber,
-            profile: {
-              dateOfBirth: '',
-              gender: '',
-              profilePictureUrl: newUserData.profile.profilePictureUrl,
-            },
-            marketingBudget: {
-              adBudget: 0,
-              costPerAcquisition: 0,
-              dailySpendingLimit: 0,
-              marketingChannels: '',
-              monthlyBudget: 0,
-              preferredPlatforms: '',
-              notificationPreferences: [],
-              roiTarget: 0,
-              frequency: 'monthly'
-            }              
-          });
+          const createdUser = await updateUser(user.sub, newUserData);
           setUserMetadata(createdUser as UserMetadata);
           return;
         }
 
-        // Existing user logic
-        if (mongoUser?.profile?.profilePictureUrl) {
-          setUserMetadata(prevState => prevState ? {
-            ...prevState,
-            profile: {
-              ...prevState.profile,
-              profilePictureUrl: mongoUser.profile.profilePictureUrl
-            }
-          } : null);
-        } else if (user.picture) {
-          setUserMetadata(prevState => prevState ? {
-            ...prevState,
-            profile: {
-              ...prevState.profile,
-              profilePictureUrl: user.picture || ''
-            }
-          } : null);
+        // If user exists, update with any new Auth0 data while preserving existing data
+        initializationAttempted.current = true;
+
+        const updatedData = {
+          email: user.email || mongoUser.email,
+          firstName: mongoUser.firstName,
+          lastName: mongoUser.lastName,
+          phoneNumber: mongoUser.phoneNumber,
+          profile: {
+            dateOfBirth: mongoUser.profile.dateOfBirth || '',
+            gender: mongoUser.profile.gender || '',
+            profilePictureUrl: user.picture || mongoUser.profile.profilePictureUrl,
+            role: mongoUser.profile.role || '',
+          },
+          marketingBudget: {
+            adBudget: mongoUser.marketingBudget?.adBudget || 0,
+            costPerAcquisition: mongoUser.marketingBudget?.costPerAcquisition || 0,
+            dailySpendingLimit: mongoUser.marketingBudget?.dailySpendingLimit || 0,
+            marketingChannels: mongoUser.marketingBudget?.marketingChannels || '',
+            monthlyBudget: mongoUser.marketingBudget?.monthlyBudget || 0,
+            preferredPlatforms: mongoUser.marketingBudget?.preferredPlatforms || '',
+            notificationPreferences: mongoUser.marketingBudget?.notificationPreferences || [],
+            roiTarget: mongoUser.marketingBudget?.roiTarget || 0,
+            frequency: mongoUser.marketingBudget?.frequency || 'monthly'
+          }
+        };
+
+        const userData = await updateUser(user.sub, updatedData);
+        if (userData) {
+          setUserMetadata(userData as UserMetadata);
         }
       } catch (error) {
-        console.error('Error fetching MongoDB user data:', error);
-        // Initialize with Auth0 data on error
-        const [firstName = '', lastName = ''] = (user.name || '').split(' ');
-        setUserMetadata({
-          auth0Id: user.sub,
-          email: user.email || '',
-          firstName: firstName,
-          lastName: lastName,
-          profile: {
-            dateOfBirth: '',
-            gender: '',
-            profilePictureUrl: user.picture || ''
-          }
-        } as UserMetadata);
+        console.error('Error updating user:', error);
       }
     };
 
     fetchMongoUserData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, user?.sub, user?.picture, user?.email, user?.name, getUserById, updateUser]);
+  }, [isAuthenticated, user, getUserById, updateUser]);
 
   // Update your existing profile picture effect to avoid conflicts
   useEffect(() => {
@@ -278,6 +264,9 @@ function App() {
     }
     return true; // Allow navigation
   }, [hasUnsavedChanges]);
+
+  console.log('MongoDB user role:', userMetadata?.profile?.role);
+  console.log('MongoDB user data:', userMetadata);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleConfirmNavigation = () => {
@@ -379,12 +368,14 @@ function App() {
               <Route path="/signed-out" element={<SignedOut />} />
               {isAuthenticated ? (
                 <Route element={<AppLayout />}>
-                  <Route index element={<Navigate to="/marketing-overview" replace />} />              
+                  <Route index element={<Navigate to="/profile" replace />} />              
                   <Route path="/dashboard" element={<DashboardHome />} />
-                  <Route path="/profile" element={<UserProfile/>} />                
+                  <Route path="/profile" element={<UserProfile />} />     
+                  <Route path="/profile-view" element={<ProfileView/>} />  
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/marketing" element={<Marketing />} />
-                  <Route path="notifications/create" element={<CreateNotification />} />
+                  {/* <Route path="/edit-user" element={<EditUserModal />} /> */}
+                  <Route path="/notifications/create" element={<CreateNotification />} />
                   <Route path="/marketing-overview" element={<MarketingOverview />} />
                   <Route path="/customer-demographics" element={<CustomerDemographics />} />
                   <Route path="/changelog" element={<Changelog />} />
@@ -409,7 +400,15 @@ function App() {
                       <Navigate to="/dashboard" replace />
                     )
                   } />
-
+                  <Route path="/admin/verify-code" element={<AdminCodeVerification />} />
+                  <Route 
+                    path="/admin/manage" 
+                    element={
+                      <ProtectedRoute roles={['admin']}>
+                        <AdminManagement />
+                      </ProtectedRoute>
+                    } 
+                  />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               ) : (

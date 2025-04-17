@@ -105,7 +105,7 @@ function Invoke-StashOperations {
     Write-Host "Stash options:"
     Write-Host "1: Stash current changes"    
     Write-Host "2: List stashes"
-    Write-Host "3: Apply latest stash"    
+    Write-Host "3: Apply stash"    
     Write-Host "4: Pop latest stash"
     Write-Host "5: Drop stash"    
     Write-Host "6: Cancel"
@@ -121,12 +121,19 @@ function Invoke-StashOperations {
             }
         }        
         '2' { git stash list }
-        '3' { git stash apply }        
+        '3' { 
+            git stash list
+            $stashIndex = Read-Host "Enter stash index to apply"
+            # Fix: Properly format the stash reference
+            $stashRef = "stash@{$stashIndex}"
+            & git stash apply "$stashRef"
+        }        
         '4' { git stash pop }
         '5' {            
             git stash list
             $stashIndex = Read-Host "Enter stash index to drop"            
-            git stash drop stash@{$stashIndex}
+            $stashRef = "stash@{$stashIndex}"
+            & git stash drop "$stashRef"
         }    
     }
 }

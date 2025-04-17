@@ -1,11 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { UserMetadata } from '../../types/user';
+import  UserMetadata  from '../../types/user';
 
 interface UserProfileState {
   profile: UserMetadata | null;
   pendingChanges: Partial<UserMetadata>;
   isLoading: boolean;
   error: string | null;
+  hasUnsavedChanges: boolean;
 }
 
 const initialState: UserProfileState = {
@@ -13,6 +14,7 @@ const initialState: UserProfileState = {
   pendingChanges: {},
   isLoading: false,
   error: null,
+  hasUnsavedChanges: false,
 };
 
 const userProfileSlice = createSlice({
@@ -35,6 +37,9 @@ const userProfileSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    setHasUnsavedChanges: (state, action: PayloadAction<boolean>) => {
+      state.hasUnsavedChanges = action.payload;
+    },
     resetChanges: (state) => {
       state.pendingChanges = {};
     },
@@ -55,6 +60,7 @@ export const {
   updateProfile,
   setLoading,
   setError,
+  setHasUnsavedChanges,
   resetChanges,
   saveChanges,
 } = userProfileSlice.actions;

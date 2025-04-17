@@ -4,9 +4,10 @@ import { Table, TableHeader, TableBody, TableRow, TableCell } from "../component
 import Switch from "../components/form/switch/Switch";
 import NotificationModal from "../components/modals/NotificationModal";
 // import { useNavigate } from "react-router-dom";
-import UserProfileView from './UserProfileView';
+// import UserProfileView from './UserProfileView';
 import { useGlobalStorage } from "../hooks/useGlobalStorage";
 import UserMetadata from "../types/user";
+import ProfilePage from "./ProfilePage";
 
 
 interface TabProps {
@@ -66,7 +67,7 @@ export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('card');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -95,7 +96,42 @@ export default function UserManagement() {
         }
 
         const data = await response.json();
-        setUsers(data);
+        
+        // Type guard to ensure data is an array
+        if (!Array.isArray(data)) {
+          throw new Error('Expected array of users from API');
+        }
+        
+        // Ensure the data is properly structured with type safety
+        const formattedUsers: Array<{
+          auth0Id: string;
+          profile: {
+            dateOfBirth: string | null;
+            gender: string;
+            profilePictureUrl: string;
+            role: string;
+          };
+          firstName: string;
+          lastName: string;
+          email: string;
+          phoneNumber: string;
+          isActive: boolean;
+        }> = data.map((user: Partial<User>) => ({
+          auth0Id: user.auth0Id || '',
+          profile: {
+            dateOfBirth: user.profile?.dateOfBirth || null,
+            gender: user.profile?.gender || '',
+            profilePictureUrl: user.profile?.profilePictureUrl || '',
+            role: user.profile?.role || 'User'
+          },
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          email: user.email || '',
+          phoneNumber: user.phoneNumber || '',
+          isActive: typeof user.isActive === 'boolean' ? user.isActive : true
+        }));
+
+        setUsers(formattedUsers as User[]);
       } catch (error) {
         console.error("Error fetching users:", error);
         setError(error instanceof Error ? error : new Error("Unknown error"));
@@ -104,8 +140,11 @@ export default function UserManagement() {
       }
     };
 
-    fetchUsers();
-  }, []);
+    // Only fetch if we're not already loading
+    if (loading) {
+      fetchUsers();
+    }
+  }, [loading]); // Add loading as dependency
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
@@ -121,6 +160,9 @@ export default function UserManagement() {
       }
     });
   }, [users, activeTab, selectedUserId]);
+
+  // Add console.log to debug filtered users
+  console.log('Filtered users:', filteredUsers);
 
   if (loading) {
     return (
@@ -311,23 +353,23 @@ export default function UserManagement() {
 
   return (
     <div className="relative font-normal font-sans z-[1] bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300">
-      <div className="p-4 md:p-6 2xl:p-10">
-        <div className="mb-6">
+      <div className="p-2 md:p-6 2xl:p-4">
+        <div className="mb-2">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                 User Management
-              </h2>
+              </h4>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Manage and view all users in the system
               </p>
             </div>
             <div className="flex gap-4">
               <button
-                onClick={() => setViewMode(viewMode === 'card' ? 'table' : 'card')}
+                onClick={() => setViewMode(viewMode === 'table' ? 'card' : 'table')}
                 className="px-4 py-2 text-sm font-medium text-brand-500 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/[0.12] dark:text-brand-400 dark:hover:bg-brand-500/[0.18]"
               >
-                Switch to {viewMode === 'card' ? 'Table' : 'Card'} View
+                Switch to {viewMode === 'table' ? 'Card' : 'Table'} View
               </button>
               <button
                 onClick={() => setShowNotificationModal(true)}
@@ -435,7 +477,7 @@ export default function UserManagement() {
             ))}
           </div>
         ) : viewMode === 'profile' && selectedUserId ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="rounded-lg">
             <div className="flex justify-between items-center mb-6">
               <button
                 onClick={() => {
@@ -447,13 +489,7 @@ export default function UserManagement() {
                 Back to List
               </button>
             </div>
-            <UserProfileView 
-              userId={selectedUserId}
-              onClose={() => {
-                setViewMode('card');
-                setSelectedUserId(null);
-              }}
-            />
+            <ProfilePage userId={selectedUserId} />
           </div>
         ) : (
           renderTableView()
@@ -478,11 +514,6 @@ export default function UserManagement() {
     </div>
   );
 }
-
-
-
-
-
 
 
 

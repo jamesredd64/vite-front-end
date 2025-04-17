@@ -7,7 +7,7 @@ import PageMeta from "../components/common/PageMeta";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import { useMongoDbClient } from "../services/mongoDbClient";
 import { UnsavedChangesNotification } from "../components/UnsavedChangesNotification";
-import  UserMetadata  from "../types/user";
+import UserMetadata from "../types/user";
 
 interface User {
   _id: string;
@@ -20,7 +20,8 @@ interface User {
     dateOfBirth: string | null;
     gender: string;
     profilePictureUrl: string;
-  },
+    role: string;
+  };
   marketingBudget: {
     adBudget: number;
     costPerAcquisition: number;
@@ -31,15 +32,14 @@ interface User {
     notificationPreferences: string[];
     roiTarget: number;
     frequency: "daily" | "monthly" | "quarterly" | "yearly";
-  },   
-  
+  };
   address: {
     street: string;
     city: string;
     state: string;
     zipCode: string;
     country: string;
-  };  
+  };
   isActive: boolean;
 }
 
@@ -47,7 +47,7 @@ interface UserProfileViewProps {
   userId: string;
   onClose: () => void;
 }
-
+console.log('UserProfileView.tsx is being executed');
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function UserProfileView({ userId, onClose }: UserProfileViewProps) {
   const [userData, setUserData] = useState<User | null>(null);
@@ -55,39 +55,69 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
   const [error, setError] = useState<Error | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { saveUserData } = useMongoDbClient();
+  const [saveStatus, setSaveStatus] = useState<{ message: string; isError: boolean } | null>(null);
 
-  // Handler for updating user data
+  // Define default values
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const defaultMarketingBudget = {
+    adBudget: 0,
+    costPerAcquisition: 0,
+    dailySpendingLimit: 0,
+    marketingChannels: '',
+    monthlyBudget: 0,
+    preferredPlatforms: '',
+    notificationPreferences: [] as string[],
+    roiTarget: 0,
+    frequency: 'monthly' as const
+  };
+
+  const defaultAddress = {
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: ''
+  };
+
   const handleUpdate = (updates: Partial<UserMetadata>) => {
     if (!userData) return;
-    
-    setUserData((prevData: User | null): User | null => {
+
+    setUserData((prevData: User | null) => {
       if (!prevData) return null;
-      return {
+      
+      const newData: User = {
         ...prevData,
-        ...updates,
+        email: updates.email || prevData.email,
+        firstName: updates.firstName || prevData.firstName,
+        lastName: updates.lastName || prevData.lastName,
+        phoneNumber: updates.phoneNumber || prevData.phoneNumber,
+        address: {
+          ...prevData.address,
+          ...(updates.address || {})
+        },
+        profile: {
+          ...prevData.profile,
+          dateOfBirth: updates.profile?.dateOfBirth || prevData.profile.dateOfBirth,
+          gender: updates.profile?.gender || prevData.profile.gender,
+          profilePictureUrl: updates.profile?.profilePictureUrl || prevData.profile.profilePictureUrl,
+          role: updates.profile?.role || prevData.profile.role,
+        },
         marketingBudget: {
           ...prevData.marketingBudget,
           ...(updates.marketingBudget || {})
-          // monthlyBudget: updates.marketingBudget?.monthlyBudget || prevData.marketingBudget.monthlyBudget,
-          // frequency: updates.marketingBudget?.frequency || prevData.marketingBudget.frequency,
-          // adBudget: updates.marketingBudget?.adBudget || prevData.marketingBudget.adBudget,
-          // costPerAcquisition: prevData.marketingBudget.costPerAcquisition,
-          // dailySpendingLimit: prevData.marketingBudget.dailySpendingLimit,
-          // marketingChannels: prevData.marketingBudget.marketingChannels,
-          // preferredPlatforms: prevData.marketingBudget.preferredPlatforms,
-          // notificationPreferences: prevData.marketingBudget.notificationPreferences,
-          // roiTarget: prevData.marketingBudget.roiTarget
-        }
+        },
+        isActive: prevData.isActive
       };
+
+      setHasUnsavedChanges(true);
+      return newData;
     });
-    setHasUnsavedChanges(true);
   };
 
-  // Handler for saving changes
   const handleSaveChanges = async () => {
+    if (!userData) return;
+
     try {
-      if (!userData) return;
-      
       await saveUserData(userId, {
         email: userData.email,
         firstName: userData.firstName,
@@ -95,39 +125,28 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
         phoneNumber: userData.phoneNumber,
         profile: {
           dateOfBirth: userData.profile.dateOfBirth || '',
-          gender: userData.profile.gender || '',
-          profilePictureUrl: userData.profile.profilePictureUrl || '',
+          gender: userData.profile.gender,
+          profilePictureUrl: userData.profile.profilePictureUrl,
+          role: (userData.profile.role as 'user' | 'admin' | 'manager')
         },
-        address: {
-          street: userData.address.street || '',
-          city: userData.address.city || '',
-          state: userData.address.state || '',
-          zipCode: userData.address.zipCode || '',
-          country: userData.address.country || '',
-        },
-        marketingBudget: {
-          adBudget: userData.marketingBudget.adBudget,
-          costPerAcquisition: userData.marketingBudget.costPerAcquisition,
-          dailySpendingLimit: userData.marketingBudget.dailySpendingLimit,
-          marketingChannels: userData.marketingBudget.marketingChannels || '',
-          monthlyBudget: userData.marketingBudget.monthlyBudget,
-          preferredPlatforms: userData.marketingBudget.preferredPlatforms || '',
-          notificationPreferences: userData.marketingBudget.notificationPreferences || [],
-          roiTarget: userData.marketingBudget.roiTarget,
-          frequency: userData.marketingBudget.frequency
-        },
+        address: userData.address,
+        marketingBudget: userData.marketingBudget,
         isActive: userData.isActive
       });
+      
       setHasUnsavedChanges(false);
+      setSaveStatus({ message: "Changes saved successfully", isError: false });
     } catch (error) {
       console.error("Error saving changes:", error);
+      setSaveStatus({
+        message: error instanceof Error ? error.message : "Failed to save changes",
+        isError: true
+      });
     }
   };
 
-  // Handler for discarding changes
-  const handleDiscardChanges = () => {
-    // Reload the original data
-    fetchUserData();
+  const handleDiscardChanges = async () => {
+    await fetchUserData();
     setHasUnsavedChanges(false);
   };
 
@@ -168,6 +187,16 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
     }
   }, [userId]);
 
+  useEffect(() => {
+    if (!saveStatus) return;
+    
+    const timeoutId = setTimeout(() => {
+      setSaveStatus(null);
+    }, 5000);
+
+    return () => clearTimeout(timeoutId);
+  }, [saveStatus]);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -185,32 +214,48 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
       <PageBreadcrumb pageTitle="User Profile" />
       
       <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800/50 lg:p-6">
-        {hasUnsavedChanges && (
-          <UnsavedChangesNotification
-            onSave={handleSaveChanges}
-            onDiscard={handleDiscardChanges}
-          />
-        )}
-        
         <div className="flex flex-col gap-5">
+          {/* UnsavedChanges notification */}
+          <div className={`${hasUnsavedChanges ? 'block' : 'hidden'}`}>
+            <UnsavedChangesNotification
+              onSave={handleSaveChanges}
+              onDiscard={handleDiscardChanges}
+            />
+          </div>
+
+          {/* Save Status Message Container */}
+          <div className="h-1 flex items-center justify-center">
+            {saveStatus && (
+              <span
+                className={`text-center ${
+                  saveStatus.isError ? "text-red-500" : "text-green-500"
+                }`}
+              >
+                {saveStatus.message}
+              </span>
+            )}
+          </div>
+
+          {/* Remove any extra divs or containers here - render cards directly */}
           <UserMetaCard
             onUpdate={handleUpdate}
             initialData={{
-              email: userData?.email || "",
-              firstName: userData?.firstName || "",
-              lastName: userData?.lastName || "",              
+              email: userData.email,
+              firstName: userData.firstName,
+              lastName: userData.lastName,
               profile: {
-                dateOfBirth: userData?.profile?.dateOfBirth || "",
-                gender: userData?.profile?.gender || "",
-                profilePictureUrl: (userData?.profile?.profilePictureUrl || "") 
-              },              
+                dateOfBirth: userData.profile.dateOfBirth || "",
+                gender: userData.profile.gender,
+                profilePictureUrl: userData.profile.profilePictureUrl,
+                role: userData.profile.role
+              },
             }}
           />
 
           <UserAddressCard
             onUpdate={(updates: unknown) => handleUpdate(updates as Partial<UserMetadata>)}
             initialData={{
-              address: userData.address
+              address: userData.address || defaultAddress,
             }}
           />
 
@@ -218,15 +263,17 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
             onUpdate={handleUpdate}
             initialData={{
               marketingBudget: {
-                frequency: userData.marketingBudget.frequency || "monthly",
-                adBudget: 0,
-                costPerAcquisition: 0,
-                dailySpendingLimit: 0,
-                marketingChannels: "",
-                monthlyBudget: 0,
-                preferredPlatforms: "",
-                notificationPreferences: [],
-                roiTarget: 0
+                frequency: userData.marketingBudget.frequency || 'monthly',
+                adBudget: userData.marketingBudget.adBudget || 0,
+                costPerAcquisition: userData.marketingBudget.costPerAcquisition || 0,
+                dailySpendingLimit: userData.marketingBudget.dailySpendingLimit || 0,
+                marketingChannels: userData.marketingBudget.marketingChannels || '',
+                monthlyBudget: userData.marketingBudget.monthlyBudget || 0,
+                preferredPlatforms: userData.marketingBudget.preferredPlatforms || '',
+                notificationPreferences: Array.isArray(userData.marketingBudget.notificationPreferences)
+                  ? userData.marketingBudget.notificationPreferences
+                  : [],
+                roiTarget: userData.marketingBudget.roiTarget || 0
               }
             }}
           />
@@ -235,14 +282,4 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
 

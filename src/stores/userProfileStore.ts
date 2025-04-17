@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { create } from 'zustand';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { UserMetadata } from '../types/user';
+import  UserMetadata  from '../types/user';
 import { 
   setProfile, 
   updateProfile, 

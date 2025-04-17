@@ -49,8 +49,8 @@ const Input: FC<InputProps> = ({
     if (isCurrency) {
       let value = e.target.value;
       
-      // Remove all non-numeric characters except decimal point
-      value = value.replace(/[^\d.]/g, '');
+      // Remove all non-numeric characters except decimal point and commas
+      value = value.replace(/[^\d.,]/g, '');
       
       // Handle multiple decimal points
       const decimalPoints = value.match(/\./g)?.length || 0;
@@ -59,12 +59,15 @@ const Input: FC<InputProps> = ({
         value = parts[0] + '.' + parts.slice(1).join('');
       }
 
+      // Remove commas and convert to number for validation
+      const numericValue = parseFloat(value.replace(/,/g, ''));
+      
       // Create a new event with the cleaned value
       const newEvent = {
         ...e,
         target: {
           ...e.target,
-          value: value
+          value: isNaN(numericValue) ? '' : value
         }
       };
       
@@ -74,12 +77,18 @@ const Input: FC<InputProps> = ({
     }
   };
 
-  // Format the display value for currency only when the input is not focused
+  // Format the display value for currency when the input loses focus
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     if (isCurrency && e.target.value) {
-      const numValue = parseFloat(e.target.value);
+      // Remove existing commas and convert to number
+      const numValue = parseFloat(e.target.value.replace(/,/g, ''));
       if (!isNaN(numValue)) {
-        const formattedValue = numValue.toFixed(2);
+        // Format with commas and fixed decimal places
+        const formattedValue = new Intl.NumberFormat('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(numValue);
+
         const newEvent = {
           ...e,
           target: {
@@ -93,7 +102,11 @@ const Input: FC<InputProps> = ({
   };
 
   // For currency inputs, display the raw value while typing
-  const displayValue = value !== undefined && value !== '' ? value : '';
+  const displayValue = value !== undefined && value !== '' 
+    ? (isCurrency && typeof value === 'string' 
+      ? value 
+      : value)
+    : '';
 
   if (disabled) {
     inputClasses += ` text-gray-500 border-gray-300 opacity-40 bg-gray-100 cursor-not-allowed dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 opacity-40`;

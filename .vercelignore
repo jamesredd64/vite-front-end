@@ -49,3 +49,17 @@ Thumbs.db
 
 # Important: DO NOT ignore config directory
 !config/
+
+.saved/UserProfiles-old.tsx
+.saved/UserProfiles-old-new.tsx
+.saved/test.css
+src/pages/DemoApp.tsx
+src/pages/oldProfile.tsx
+scripts/migrate-roles.js
+src/console.log.md
+src/components/ProtectedAdminRoute.tsx
+src/components/ProtectedRoute.tsx
+src/components/admin/AdminCodeVerification.tsx
+src/components/admin/AdminManagement.tsx
+src/models/AdminCode.ts
+src/pages/ProfilesPage.tsx

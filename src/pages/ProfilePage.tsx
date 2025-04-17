@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 // import { useNavigate } from "react-router-dom";
 import { UserMetaCard } from "../components/UserProfile/UserMetaCard";
@@ -11,6 +11,7 @@ import PageMeta from "../components/common/PageMeta";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import UserMetadata from "../types/user";
 // import { useUnsavedChanges } from "../hooks/useUnsavedChanges";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useNavigation } from "../hooks/useNavigation";
 // import deepEqual from 'fast-deep-equal';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -22,7 +23,7 @@ const logger = (message: string, data?: unknown) => {
     console.log(message, data);
   }
 };
-
+console.log('ProfilePage.tsx is being executed at high level');
 interface UserData {
   auth0Id: string;
   email: string;
@@ -33,6 +34,7 @@ interface UserData {
     dateOfBirth: string | null;
     gender: string;
     profilePictureUrl: string;
+    role: string;
   };
   address: {
     street: string;
@@ -57,37 +59,30 @@ interface UserData {
   updatedAt?: Date;
 }
 
-type ViewMode = 'table' | 'card' | 'profile';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-// const [viewMode, setViewMode] = useState<ViewMode>('table');
+type ViewMode = 'table' | 'card' | 'profile';
 
-interface UserProfileProps {
-  auth0Id?: string;  // Made optional with '?'
+
+interface ProfilePageProps {
+  userId?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
-  // const navigate = useNavigate();
+const UserProfile: React.FC<ProfilePageProps> = ({ userId }) => {
   const { user, isAuthenticated, isLoading: auth0Loading } = useAuth0();
   const { getUserById, saveUserData } = useMongoDbClient();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { handleNavigation } = useNavigation();
+  const auth0Id = userId || user?.sub;
   
-  // Add viewMode state inside component
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  // const { handleNavigation } = useNavigation();
+  
+  // const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [initialUserData, setInitialUserData] = useState<UserData | null>(null);
   const [saveStatus, setSaveStatus] = useState<{ message: string; isError: boolean } | null>(null);
 
-  // Update both states together
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const updateUnsavedChanges = (value: boolean) => {
-    setHasUnsavedChanges(value);
-  };
-
-  // Define default marketing budget matching schema defaults
+  // Define default values outside of the component or use useMemo
   const defaultMarketingBudget = {
     adBudget: 0,
     costPerAcquisition: 0,
@@ -99,8 +94,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
     roiTarget: 0,
     frequency: 'monthly' as const
   };
-
-  // Define default address
+  console.log('UserProfile is being executed from inside');
   const defaultAddress = {
     street: '',
     city: '',
@@ -109,7 +103,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
     country: ''
   };
 
-  // Initialize state with schema-matching defaults
   const [userData, setUserData] = useState<UserData>({
     auth0Id: "",
     email: "",
@@ -119,21 +112,131 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
     profile: {
       dateOfBirth: null,
       gender: "",
-      profilePictureUrl: "",          
+      profilePictureUrl: "",      
+      role: ""
     },    
-    address: {
-      ...defaultAddress
-    },
-    marketingBudget: {
-      ...defaultMarketingBudget
-    },
+    address: { ...defaultAddress },
+    marketingBudget: { ...defaultMarketingBudget },
     isActive: true
   });
-  const [isLoading, setIsLoading] = useState(true);
 
-  
-    
-  
+  // Single source of truth for change detection
+  const detectChanges = useCallback(() => {
+    if (!initialUserData || !userData) return false;
+
+    const sanitizeData = (data: UserData) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = data;
+      return rest;
+    };
+
+    const initial = sanitizeData(initialUserData);
+    const current = sanitizeData(userData);
+
+    return JSON.stringify(initial) !== JSON.stringify(current);
+  }, [initialUserData, userData]);
+
+  // Single effect for change detection
+  useEffect(() => {
+    if (isInitialLoad) return;
+
+    const hasChanges = detectChanges();
+    if (hasChanges !== hasUnsavedChanges) {
+      setHasUnsavedChanges(hasChanges);
+    }
+  }, [userData, isInitialLoad, detectChanges, hasUnsavedChanges]);
+
+  // Effect for initial data fetch
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchUserData = async () => {
+      if (!isAuthenticated || auth0Loading || (!auth0Id && !user?.sub)) {
+        setIsLoading(false);
+        setIsInitialLoad(false);
+        return;
+      }
+
+      const userIdToFetch = auth0Id || user?.sub;
+      
+      try {
+        const fetchedUserData = await getUserById(userIdToFetch!);
+        if (!isMounted) return;
+        
+        if (!fetchedUserData) {
+          const defaultUserData: UserData = {
+            auth0Id: userIdToFetch!,
+            email: user?.email || '',
+            firstName: '',
+            lastName: '',
+            phoneNumber: '',
+            profile: {
+              dateOfBirth: null,
+              gender: '',
+              profilePictureUrl: user?.picture || '',
+              role: 'user'
+            },
+            address: { ...defaultAddress },
+            marketingBudget: { ...defaultMarketingBudget },
+            isActive: true
+          };
+          setUserData(defaultUserData);
+          setInitialUserData(defaultUserData);
+        } else {
+          const restructuredData: UserData = {
+            auth0Id: fetchedUserData.auth0Id,
+            email: fetchedUserData.email || '',
+            firstName: fetchedUserData.firstName || '',
+            lastName: fetchedUserData.lastName || '',
+            phoneNumber: fetchedUserData.phoneNumber || '',
+            profile: {
+              dateOfBirth: fetchedUserData.profile?.dateOfBirth || null,
+              gender: fetchedUserData.profile?.gender || '',
+              profilePictureUrl: fetchedUserData.profile?.profilePictureUrl || user?.picture || '',
+              role: fetchedUserData.profile?.role || 'user'
+            },
+            address: {
+              ...defaultAddress,
+              ...fetchedUserData.address
+            },
+            marketingBudget: {
+              ...defaultMarketingBudget,
+              ...fetchedUserData.marketingBudget
+            },
+            isActive: fetchedUserData.isActive ?? true
+          };
+          setUserData(restructuredData);
+          setInitialUserData(restructuredData);
+        }
+      } catch (error) {
+        if (!isMounted) return;
+        console.error('Error fetching user data:', error);
+        setSaveStatus({
+          message: error instanceof Error ? error.message : 'Failed to fetch user data',
+          isError: true
+        });
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+          setIsInitialLoad(false);
+        }
+      }
+    };
+
+    fetchUserData();
+    return () => {
+      isMounted = false;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, auth0Loading, user?.sub, auth0Id]);
+
+  // Effect for save status cleanup
+  useEffect(() => {
+    if (!saveStatus) return;
+    const timeoutId = setTimeout(() => setSaveStatus(null), 5000);
+    return () => clearTimeout(timeoutId);
+  }, [saveStatus]);
+
   // Navigation handler
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // const onNavigate = async (path: string) => {
@@ -178,31 +281,35 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
 
   // Improved change detection using fast-deep-equal
   useEffect(() => {
-    if (isInitialLoad) {
-      logger('Skipping change detection during initial load');
+    if (isInitialLoad || !initialUserData || !userData) {
       return;
     }
 
-    if (!initialUserData || !userData) {
-      logger('Missing data for change detection');
-      return;
+    // Create shallow copies of the objects, excluding dynamic properties
+    const compareInitial = {
+      ...initialUserData,
+      createdAt: undefined,
+      updatedAt: undefined
+    };
+    
+    const compareCurrent = {
+      ...userData,
+      createdAt: undefined,
+      updatedAt: undefined
+    };
+
+    // Use stable stringification for comparison
+    const initialStr = JSON.stringify(compareInitial, Object.keys(compareInitial).sort());
+    const currentStr = JSON.stringify(compareCurrent, Object.keys(compareCurrent).sort());
+    
+    if (initialStr !== currentStr && !hasUnsavedChanges) {
+      setHasUnsavedChanges(true);
+    } else if (initialStr === currentStr && hasUnsavedChanges) {
+      setHasUnsavedChanges(false);
     }
 
-    const hasChanges = JSON.stringify(initialUserData) !== JSON.stringify(userData);
-    console.log('Checking for changes:', {
-      isInitialLoad,
-      initialData: initialUserData,
-      currentData: userData,
-      hasChanges
-    });
-    setHasUnsavedChanges(hasChanges);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData, initialUserData, isInitialLoad]);
-
-
-  //   const hasChanges = !deepEqual(initialUserData, userData);
-  //   logger('Change detection:', { hasChanges, userData, initialUserData });
-  //   setHasUnsavedChanges(hasChanges);
-  // }, [userData, initialUserData, isInitialLoad]);
 
   // Clear save status after 5 seconds
   useEffect(() => {
@@ -219,52 +326,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
     };
   }, [saveStatus]);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const userIdToFetch = auth0Id || (isAuthenticated && user?.sub);
-
-      if (userIdToFetch) {
-        try {
-          const fetchedUserData = await getUserById(userIdToFetch);
-          // Restructure the data to ensure marketingBudget is only under profile
-          const restructuredData: UserData = {
-            auth0Id: fetchedUserData.auth0Id,
-            email: fetchedUserData.email,
-            firstName: fetchedUserData.firstName,
-            lastName: fetchedUserData.lastName,
-            phoneNumber: fetchedUserData.phoneNumber,            
-            isActive: fetchedUserData.isActive,
-            profile: {
-              dateOfBirth: fetchedUserData.profile?.dateOfBirth || '',
-              gender: fetchedUserData.profile?.gender || '',
-              profilePictureUrl: fetchedUserData.profile?.profilePictureUrl || '',
-            },
-            marketingBudget: {
-              ...defaultMarketingBudget
-            },
-            address: {
-              ...defaultAddress
-            }
-          };
-          
-          setUserData(restructuredData);
-          setInitialUserData(restructuredData);
-          console.log('Initial user data loaded:', restructuredData);
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        } finally {
-          setIsLoading(false);
-          setTimeout(() => {
-            setIsInitialLoad(false);
-            setHasUnsavedChanges(false);
-          }, 500);
-        }
-      }
-    };
-
-    fetchUserData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, user, getUserById, auth0Id]);
+  // Removed duplicate useEffect for fetching data
 
   const handleUpdate = (updates: Partial<UserMetadata>) => {
     console.log('handleUpdate called with:', updates);
@@ -283,9 +345,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
         },
         profile: {
           ...prevData.profile,
-          dateOfBirth: updates.profile?.dateOfBirth || prevData.profile.dateOfBirth,
-          gender: updates.profile?.gender || prevData.profile.gender,
-          profilePictureUrl: updates.profile?.profilePictureUrl || prevData.profile.profilePictureUrl,          
+          dateOfBirth: updates.profile?.dateOfBirth ?? prevData.profile.dateOfBirth,
+          gender: updates.profile?.gender ?? prevData.profile.gender,
+          profilePictureUrl: updates.profile?.profilePictureUrl ?? prevData.profile.profilePictureUrl,
+          role: updates.profile?.role ?? prevData.profile.role
         },
         marketingBudget: {
           ...prevData.marketingBudget,
@@ -298,6 +361,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
       console.log('New data:', newData);
       return newData;
     });
+    
+    setHasUnsavedChanges(true);
   };
 
   const handleSubmit = async (event: { preventDefault: () => void }) => {
@@ -313,26 +378,28 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
         lastName: userData.lastName,
         phoneNumber: userData.phoneNumber,
         profile: {
-          profilePictureUrl: auth0Id ? userData.profile.profilePictureUrl : (user?.picture || userData?.profile.profilePictureUrl),
-          dateOfBirth: userData.profile.dateOfBirth || "",
-          gender: userData.profile.gender || "",          
+          profilePictureUrl: auth0Id ? userData.profile.profilePictureUrl : (user?.picture || userData.profile.profilePictureUrl),
+          dateOfBirth: userData.profile.dateOfBirth || '',
+          gender: userData.profile.gender,
+          role: (userData.profile.role as 'user' | 'admin' | 'manager') || 'user'
         },
-        marketingBudget: {
-          ...userData.marketingBudget
-        }
+        address: userData.address,
+        marketingBudget: userData.marketingBudget,
+        isActive: userData.isActive
       };
       
-      console.log('Transformed data being sent to updateUser:', transformedData);
+      console.log('Transformed data being sent to saveUserData:', transformedData);
       console.log('Marketing budget being sent:', transformedData.marketingBudget);
       console.groupEnd();
 
       await saveUserData(userData.auth0Id, transformedData);
       setSaveStatus({ message: "Changes Saved Successfully", isError: false });
       setHasUnsavedChanges(false);
+      setInitialUserData(userData); // Update initial data after successful save
     } catch (error) {
       console.error("Error saving user data:", error);
       setSaveStatus({
-        message: "Something went wrong, please try again",
+        message: error instanceof Error ? error.message : "Something went wrong, please try again",
         isError: true,
       });
     }
@@ -379,14 +446,17 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
           <UserMetaCard
             onUpdate={(newInfo: Partial<UserMetadata>) => {
               handleUpdate({
+                email: newInfo?.email || "",
                 firstName: newInfo.firstName || userData.firstName || user?.name,
                 lastName: newInfo.lastName || userData.lastName,
+                phoneNumber: newInfo?.lastName || "",   
                 profile: {
                   ...userData.profile,
                   dateOfBirth: newInfo.profile?.dateOfBirth || userData.profile.dateOfBirth || '',
                   gender: newInfo.profile?.gender || userData.profile.gender || '',
                   profilePictureUrl: newInfo.profile?.profilePictureUrl || userData.profile.profilePictureUrl || (user?.picture || ''),
-                  
+                  // Explicitly handle role updates
+                  role: (newInfo.profile?.role as 'user' | 'admin' | 'manager') || userData.profile.role || 'user'
                 },
                 marketingBudget: {
                   ...userData.marketingBudget,
@@ -398,11 +468,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ auth0Id }) => {
             initialData={{
               email: userData?.email || "",
               firstName: userData?.firstName || "",
-              lastName: userData?.lastName || "",              
+              lastName: userData?.lastName || "",       
+              phoneNumber: userData?.lastName || "",   
               profile: {
                 dateOfBirth: userData?.profile?.dateOfBirth || "",
                 gender: userData?.profile?.gender || "",
-                profilePictureUrl: auth0Id ? (userData?.profile?.profilePictureUrl || "") : (user?.picture || userData?.profile?.profilePictureUrl || "")
+                profilePictureUrl: auth0Id ? (userData?.profile?.profilePictureUrl || "") : (user?.picture || userData?.profile?.profilePictureUrl || ""),
+                role: (userData?.profile?.role as 'user' | 'admin' | 'manager' | 'super-admin') || 'user'
               },              
             }}
           />

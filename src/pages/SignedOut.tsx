@@ -1,10 +1,12 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { VERSION } from '../config/version';
 
 const SignedOut = () => {
   const { loginWithRedirect, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
+  const buildDate = new Date(VERSION.buildDate).toLocaleDateString();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -59,6 +61,19 @@ const SignedOut = () => {
           >
             Sign In
           </button>
+        </div>
+
+        {/* Copyright and Version */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            &copy; {new Date().getFullYear()} Stagholme Inc. All rights reserved.
+          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            Version {VERSION.number} 
+            {VERSION.isVercel && ' • Vercel'} 
+            {VERSION.environment !== 'production' && ` • ${VERSION.environment}`}
+            {' • '}{buildDate}
+          </p>
         </div>
       </div>
     </div>
