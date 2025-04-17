@@ -11,9 +11,10 @@ import UserMetadata from "../types/user";
 
 interface ProfileViewProps {
   userId?: string;
+  onClose?: () => void;
 }
 
-const ProfileView: React.FC<ProfileViewProps> = ({ userId }) => {
+const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
   const { user, isAuthenticated, isLoading: auth0Loading } = useAuth0();
   const { getUserById, saveUserData } = useMongoDbClient();
   const auth0Id = userId || user?.sub;
@@ -130,14 +131,17 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId }) => {
         profile: updates.profile
       };
 
-      await saveUserData(userData.auth0Id, metaUpdates);
+      await saveUserData(userData.auth0Id, metaUpdates, 'meta');
       setUserData(prev => prev ? {
         ...prev,
         email: metaUpdates.email ?? prev.email,
         firstName: metaUpdates.firstName ?? prev.firstName,
         lastName: metaUpdates.lastName ?? prev.lastName,
         phoneNumber: metaUpdates.phoneNumber ?? prev.phoneNumber,
-        profile: metaUpdates.profile ?? prev.profile
+        profile: metaUpdates.profile ? {
+          ...prev.profile,
+          ...metaUpdates.profile
+        } : prev.profile
       } : null);
       setSaveStatus({ message: "Profile information saved", isError: false });
     } catch (error) {
@@ -159,8 +163,11 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId }) => {
     if (!userData?.auth0Id) return;
 
     try {
-      await saveUserData(userData.auth0Id, { address: updates.address });
-      setUserData(prev => prev ? { ...prev, address: { ...prev.address, ...(updates.address || {}) } } : null);
+      await saveUserData(userData.auth0Id, { address: updates.address }, 'address');
+      setUserData(prev => prev ? {
+        ...prev,
+        address: { ...prev.address, ...(updates.address || {}) }
+      } : null);
       setSaveStatus({ message: "Address saved", isError: false });
     } catch (error) {
       console.error("Error saving address:", error);
@@ -181,8 +188,11 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId }) => {
     if (!userData?.auth0Id) return;
 
     try {
-      await saveUserData(userData.auth0Id, { marketingBudget: updates.marketingBudget });
-      setUserData(prev => prev ? { ...prev, marketingBudget: { ...prev.marketingBudget, ...updates.marketingBudget } } : null);
+      await saveUserData(userData.auth0Id, { marketingBudget: updates.marketingBudget }, 'marketing');
+      setUserData(prev => prev ? {
+        ...prev,
+        marketingBudget: { ...prev.marketingBudget, ...updates.marketingBudget }
+      } : null);
       setSaveStatus({ message: "Marketing preferences saved", isError: false });
     } catch (error) {
       console.error("Error saving marketing preferences:", error);
@@ -239,64 +249,78 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId }) => {
   }
 
   return (
-    // Suspense component handles loading state while components are being loaded lazily
-    <Suspense fallback={<Loader size="large" />}>
-      {/* Main container with styling for light/dark themes */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800/50 lg:p-6">
-        {/* Meta information for SEO and page title */}
-        <PageMeta title="Profile View" description="View and edit your profile" />
-        <PageBreadcrumb pageTitle="Profile View" />
+    <div className="relative font-normal font-sans z-[1] bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300">
+      <div className="p-2 md:p-6 2xl:p-4">
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="mb-4 px-3 py-1 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            Back to List
+          </button>
+        )}
+        <Suspense fallback={<Loader size="large" />}>
+          {/* Main container with styling for light/dark themes */}
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800/50 lg:p-6">
+            {/* Meta information for SEO and page title */}
+            <PageMeta title="Profile View" description="View and edit your profile" />
+            <PageBreadcrumb pageTitle="Profile View" />
 
-        {/* Container for profile sections with vertical spacing */}
-        <div className="space-y-6">
-          {/* Conditional render of status message for save operations */}
-          {saveStatus && (
-            <div 
-              className={`p-4 rounded ${
-                // Dynamic styling based on error state
-                saveStatus.isError 
-                  ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400' 
-                  : 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
-              }`}
-            >
-              {saveStatus.message}
+            {/* Container for profile sections with vertical spacing */}
+            <div className="space-y-6">
+              {/* Conditional render of status message for save operations */}
+              {saveStatus && (
+                <div 
+                  className={`p-4 rounded ${
+                    // Dynamic styling based on error state
+                    saveStatus.isError 
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400' 
+                      : 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
+                  }`}
+                >
+                  {saveStatus.message}
+                </div>
+              )}
+
+              {/* User metadata section (basic info) */}
+              <UserMetaCard
+                onUpdate={handleMetaUpdate}
+                initialData={{
+                  email: userData.email,
+                  firstName: userData.firstName,
+                  lastName: userData.lastName,
+                  phoneNumber: userData.phoneNumber,
+                  profile: userData.profile
+                }}
+              />
+
+              {/* User address section */}
+              <UserAddressCard
+                onUpdate={(data: unknown) => handleAddressUpdate(data as Partial<UserMetadata>)}
+                initialData={{
+                  address: userData.address
+                }}
+              />
+
+              {/* User marketing preferences section */}
+              <UserMarketingCard
+                onUpdate={handleMarketingUpdate}
+                initialData={{
+                  marketingBudget: userData.marketingBudget
+                }}
+              />
             </div>
-          )}
-
-          {/* User metadata section (basic info) */}
-          <UserMetaCard
-            onUpdate={handleMetaUpdate}
-            initialData={{
-              email: userData.email,
-              firstName: userData.firstName,
-              lastName: userData.lastName,
-              phoneNumber: userData.phoneNumber,
-              profile: userData.profile
-            }}
-          />
-
-          {/* User address section */}
-          <UserAddressCard
-            onUpdate={(data: unknown) => handleAddressUpdate(data as Partial<UserMetadata>)}
-            initialData={{
-              address: userData.address
-            }}
-          />
-
-          {/* User marketing preferences section */}
-          <UserMarketingCard
-            onUpdate={handleMarketingUpdate}
-            initialData={{
-              marketingBudget: userData.marketingBudget
-            }}
-          />
-        </div>
+          </div>
+        </Suspense>
       </div>
-    </Suspense>
+    </div>
   );
 };
 
 export default ProfileView;
+
+
+
 
 
 

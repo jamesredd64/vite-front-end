@@ -234,85 +234,34 @@ export const useMongoDbClient = () => {
   }, [checkAndInsertUser, getUserById]);
   
 
-  const saveUserData = useCallback(async (auth0Id: string, userData: Partial<UserMetadata>) => {
-    setLoading(true);
-    setError(null);
-
+  const saveUserData = async (auth0Id: string, data: Partial<UserMetadata>, section?: 'meta' | 'address' | 'marketing') => {
     try {
-      console.group('mongoDbClient - saveUserData');
-      console.log('Initial userData:', userData);
-      console.log('Marketing budget to send:', userData.marketingBudget);
-      
-      // Get existing user data first
-      const existingUser = await getUserById(auth0Id);
-      
-      // Prepare the data to send, preserving existing marketing budget values
-      const dataToSend = {
-        ...userData,
-        marketingBudget: {
-          ...(existingUser?.marketingBudget || {}),
-          ...(userData.marketingBudget || {}),
-          // Explicitly set each field to prevent zeroing
-          adBudget: userData.marketingBudget?.adBudget ?? existingUser?.marketingBudget?.adBudget ?? 0,
-          costPerAcquisition: userData.marketingBudget?.costPerAcquisition ?? existingUser?.marketingBudget?.costPerAcquisition ?? 0,
-          dailySpendingLimit: userData.marketingBudget?.dailySpendingLimit ?? existingUser?.marketingBudget?.dailySpendingLimit ?? 0,
-          marketingChannels: userData.marketingBudget?.marketingChannels ?? existingUser?.marketingBudget?.marketingChannels ?? '',
-          monthlyBudget: userData.marketingBudget?.monthlyBudget ?? existingUser?.marketingBudget?.monthlyBudget ?? 0,
-          preferredPlatforms: userData.marketingBudget?.preferredPlatforms ?? existingUser?.marketingBudget?.preferredPlatforms ?? '',
-          notificationPreferences: userData.marketingBudget?.notificationPreferences ?? existingUser?.marketingBudget?.notificationPreferences ?? [],
-          roiTarget: userData.marketingBudget?.roiTarget ?? existingUser?.marketingBudget?.roiTarget ?? 0,
-          frequency: userData.marketingBudget?.frequency ?? existingUser?.marketingBudget?.frequency ?? 'monthly'
-        }
-      };
+      let endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`;
+      if (section) {
+        endpoint += `?section=${section}`;
+      }
 
-      console.log('Data being sent to server:', dataToSend);
-      console.log('Marketing budget being sent:', dataToSend.marketingBudget);
-      
       const headers = await getAuthHeaders();
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`,
-        {
-          method: 'PUT',
-          headers: {
-            ...headers,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(dataToSend)
-        }
-      );
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to save user data. Status: ${response.status}`);
       }
 
       const serverResponse = await response.json();
-      
-      // Ensure we return the data we sent if the server response has zeroed values
-      const finalResponse = {
-        ...serverResponse,
-        marketingBudget: {
-          ...dataToSend.marketingBudget,
-          ...serverResponse.marketingBudget
-        }
-      };
-
-      console.log('Server response:', serverResponse);
-      console.log('Final response with preserved marketing budget:', finalResponse);
-      console.groupEnd();
-      
-      return finalResponse;
-    } catch (err) {
-      console.error('Error in saveUserData:', err);
-      const apiError: ApiError = {
-        message: err instanceof Error ? err.message : 'An unknown error occurred',
-        status: err instanceof Error ? undefined : 500,
-      };
-      setError(apiError);
-      throw apiError;
-    } finally {
-      setLoading(false);
+      return serverResponse;
+    } catch (error) {
+      console.error('Error in saveUserData:', error);
+      throw error;
     }
-  }, [getAuthHeaders, getUserById]);
+  };
 
   const fetchWithTimeout = async (url: string, options: RequestInit) => {
     const controller = new AbortController();

@@ -7,8 +7,7 @@ import NotificationModal from "../components/modals/NotificationModal";
 // import UserProfileView from './UserProfileView';
 import { useGlobalStorage } from "../hooks/useGlobalStorage";
 import UserMetadata from "../types/user";
-import ProfilePage from "./ProfilePage";
-
+import ProfileView from './ProfileView';
 
 interface TabProps {
   label: string;
@@ -489,7 +488,13 @@ export default function UserManagement() {
                 Back to List
               </button>
             </div>
-            <ProfilePage userId={selectedUserId} />
+            <ProfileView 
+              userId={selectedUserId}
+              onClose={() => {
+                setViewMode('card');
+                setSelectedUserId(null);
+              }}
+            />
           </div>
         ) : (
           renderTableView()
