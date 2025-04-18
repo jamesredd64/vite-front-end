@@ -6,7 +6,6 @@ import { useGlobalStorage } from './hooks/useGlobalStorage';
 import AppLayout from "./layout/AppLayout";
 import { useEffect, useRef, useState, useCallback } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
-// import UserProfile from "./pages/ProfilePage";
 import ProfileView from "./pages/ProfileView";
 import UserProfileView from "../.saved/UserProfileView";
 import  Calendar from "./pages/Calendar";
