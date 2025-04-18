@@ -1,10 +1,10 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import React from 'react';
-// import { getImageUrl } from '../config/images.config';
+import { VERSION } from '../config/version';
 
 export const SignedOut = () => {
   const { loginWithRedirect } = useAuth0();
-  // const { theme } = useTheme();
+  const buildDate = new Date(VERSION.buildDate).toLocaleDateString();
 
   return (
     <div className="min-h-screen w-full bg-white dark:bg-gray-900">
@@ -68,9 +68,17 @@ export const SignedOut = () => {
             </button>
           </div>
 
-          <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-            &copy; {new Date().getFullYear()} Stagholme Inc. All rights reserved.
-          </p>
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              &copy; {new Date().getFullYear()} Stagholme Inc. All rights reserved.
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              Version {VERSION.number} 
+              {VERSION.isVercel && ' • Vercel'} 
+              {VERSION.environment !== 'production' && ` • ${VERSION.environment}`}
+              {' • '}{buildDate}
+            </p>
+          </div>
         </div>
       </div>
     </div>

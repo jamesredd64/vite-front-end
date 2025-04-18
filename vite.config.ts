@@ -7,7 +7,6 @@ export default defineConfig({
     react(),
     svgr({
       svgrOptions: {
-        // SVGR options here
         icon: true,
         svgo: true,
       },
@@ -31,7 +30,7 @@ export default defineConfig({
     cors: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
+      'Access-Control-Allow-Methods': 'GET,OPTIONS,PATCH,DELETE,POST,PUT, OPTIONS',
       'Access-Control-Allow-Headers': 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
     }
   }

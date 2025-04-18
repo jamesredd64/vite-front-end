@@ -20,9 +20,12 @@ export const corsMiddleware = cors({
     'Content-Type',
     'Date',
     'X-Api-Version',
-    'Authorization'
+    'Authorization',
+    'Origin',
+    'Cache-Control',
+    'Pragma'
   ],
   credentials: true,
-  maxAge: 86400 // 24 hours
+  maxAge: 86400
 });
 

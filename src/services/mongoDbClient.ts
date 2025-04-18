@@ -8,7 +8,6 @@ import { CalendarEvent, CalendarApiResponse } from '../types/calendar.types';
 // const RETRY_DELAY = 1000;
 const TIMEOUT = 5000; // 5 seconds timeout
 
-
 interface ApiError {
   message: string;
   status?: number;
