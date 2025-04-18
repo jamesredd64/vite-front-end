@@ -1,10 +1,18 @@
 import { defineConfig } from 'vite';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import react from '@vitejs/plugin-react';
-// import svgr from "vite-plugin-svgr";
+import svgr from 'vite-plugin-svgr';
 
 export default defineConfig({
-  
+  plugins: [
+    react(),
+    svgr({
+      svgrOptions: {
+        // SVGR options here
+        icon: true,
+        svgo: true,
+      },
+    }),
+  ],
   build: {
     outDir: 'dist',
     sourcemap: true,
@@ -18,7 +26,6 @@ export default defineConfig({
       }
     }
   },
-  
   server: {
     port: 3000,
     cors: true,
