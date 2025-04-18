@@ -8,6 +8,7 @@ import NotificationModal from "../components/modals/NotificationModal";
 import { useGlobalStorage } from "../hooks/useGlobalStorage";
 import UserMetadata from "../types/user";
 import ProfileView from './ProfileView';
+import Loader from '../components/common/Loader';
 
 interface TabProps {
   label: string;
@@ -164,11 +165,7 @@ export default function UserManagement() {
   console.log('Filtered users:', filteredUsers);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-primary"></div>
-      </div>
-    );
+    return <Loader size="large" />;
   }
 
   if (error) {
@@ -202,7 +199,7 @@ export default function UserManagement() {
   };
 
   const renderTabs = () => (
-    <div className="flex gap-2 mb-6">
+    <div className="flex gap-2 mb-4">
       <Tab
         label="All Users"
         isActive={activeTab === 'all'}
@@ -290,7 +287,7 @@ export default function UserManagement() {
                   </div>
                 </TableCell>
                 <TableCell className="py-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
                     <div className="h-[50px] w-[50px] overflow-hidden rounded-full">
                       {user.profile?.profilePictureUrl ? (
                         <img
@@ -352,34 +349,46 @@ export default function UserManagement() {
 
   return (
     <div className="relative font-normal font-sans z-[1] bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300">
-      <div className="p-2 md:p-6 2xl:p-4">
-        <div className="mb-2">
+      <div className="p-1 md:p-1 2xl:p-1">
+        {" "}
+        {/* Further reduced padding */}
+        <div className="mb-1">
+          {" "}
+          {/* Changed from mb-1 to mb-2 to double the space */}
           <div className="flex justify-between items-center">
             <div>
               <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                 User Management
               </h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm mb-2 p-4 text-gray-500 dark:text-gray-400">
                 Manage and view all users in the system
               </p>
             </div>
             <div className="flex gap-4">
               <button
-                onClick={() => setViewMode(viewMode === 'table' ? 'card' : 'table')}
+                onClick={() =>
+                  setViewMode(viewMode === "table" ? "card" : "table")
+                }
                 className="px-4 py-2 text-sm font-medium text-brand-500 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/[0.12] dark:text-brand-400 dark:hover:bg-brand-500/[0.18]"
               >
-                Switch to {viewMode === 'table' ? 'Card' : 'Table'} View
+                Switch to {viewMode === "table" ? "Card" : "Table"} View
               </button>
               <button
                 onClick={() => setShowNotificationModal(true)}
                 disabled={selectedUsers.length === 0}
                 className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2
-                  ${selectedUsers.length === 0 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-primary text-white hover:bg-primary-dark'
+                  ${
+                    selectedUsers.length === 0
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-primary text-white hover:bg-primary-dark"
                   }`}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
                   <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
                 </svg>
                 Send Notification ({selectedUsers.length})
@@ -387,130 +396,129 @@ export default function UserManagement() {
             </div>
           </div>
         </div>
-
         {renderTabs()}
+        <div className="mt-1">
+          {" "}
+          {/* Further reduced top margin */}
+          {viewMode === "card" ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+              {" "}
+              {/* Further reduced gap */}
+              {filteredUsers.map((user) => (
+                <div
+                  key={user.auth0Id}
+                  className="border-[0.5px] mb-5 border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      {user.profile?.profilePictureUrl ? (
+                        <img
+                          src={user.profile.profilePictureUrl}
+                          alt={`${user.firstName} ${user.lastName}`}
+                          className="h-full w-full object-cover rounded-full"
+                        />
+                      ) : (
+                        <span className="text-xl font-bold text-gray-600">
+                          {user.firstName.charAt(0)}
+                          {user.lastName.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-black dark:text-white">
+                        {user.firstName} {user.lastName}
+                      </h3>
+                      <p className="text-sm text-gray-500">{user.email}</p>
+                    </div>
+                  </div>
 
-        {viewMode === 'card' ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-            {filteredUsers.map((user) => (
-              <div
-                key={user.auth0Id}
-                className="border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                    {user.profile?.profilePictureUrl ? (
-                      <img
-                        src={user.profile.profilePictureUrl}
-                        alt={`${user.firstName} ${user.lastName}`}
-                        className="h-full w-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <span className="text-xl font-bold text-gray-600">
-                        {user.firstName.charAt(0)}
-                        {user.lastName.charAt(0)}
+                  <div className="mt-4 flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Phone</span>
+                      <span className="text-sm font-medium text-black dark:text-white">
+                        {user.phoneNumber || "N/A"}
                       </span>
-                    )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">
+                        Date of Birth
+                      </span>
+                      <span className="text-sm font-medium text-black dark:text-white">
+                        {user.profile?.dateOfBirth
+                          ? new Date(
+                              user.profile.dateOfBirth
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Gender</span>
+                      <span className="text-sm font-medium text-black dark:text-white">
+                        {user.profile?.gender || "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Role</span>
+                      <span className="text-sm font-medium text-black dark:text-white">
+                        {user.profile?.role || "User"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Status</span>
+                      <span
+                        className={`text-sm font-medium ${
+                          user.isActive === true
+                            ? "text-success"
+                            : "text-danger"
+                        }`}
+                      >
+                        {user.isActive === true ? "Active" : "Inactive"}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-black dark:text-white">
-                      {user.firstName} {user.lastName}
-                    </h3>
-                    <p className="text-sm text-gray-500">{user.email}</p>
-                  </div>
-                </div>
 
-                <div className="mt-4 flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">Phone</span>
-                    <span className="text-sm font-medium text-black dark:text-white">
-                      {user.phoneNumber || "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">Date of Birth</span>
-                    <span className="text-sm font-medium text-black dark:text-white">
-                      {user.profile?.dateOfBirth
-                        ? new Date(user.profile.dateOfBirth).toLocaleDateString()
-                        : "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">Gender</span>
-                    <span className="text-sm font-medium text-black dark:text-white">
-                      {user.profile?.gender || "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">Role</span>
-                    <span className="text-sm font-medium text-black dark:text-white">
-                      {user.profile?.role || "User"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">Status</span>
-                    <span
-                      className={`text-sm font-medium ${
-                        user.isActive === true
-                          ? "text-success"
-                          : "text-danger"
-                      }`}
+                  <div className="mt-4 flex justify-end space-x-2">
+                    {/* <button className="px-3 py-1 text-sm text-primary hover:text-primary-dark border border-primary rounded-md hover:bg-primary hover:text-white transition-colors">
+                      Edit
+                    </button> */}
+                    <button
+                      onClick={() => handleViewDetails(user.auth0Id)}
+                      className="px-3 py-1 text-sm text-primary hover:text-primary-dark border-[0.5px] border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
                     >
-                      {user.isActive === true ? "Active" : "Inactive"}
-                    </span>
+                      View Details
+                    </button>
                   </div>
                 </div>
-
-                <div className="mt-4 flex justify-end space-x-2">
-                  {/* <button className="px-3 py-1 text-sm text-primary hover:text-primary-dark border border-primary rounded-md hover:bg-primary hover:text-white transition-colors">
-                    Edit
-                  </button> */}
-                  <button 
-                    onClick={() => handleViewDetails(user.auth0Id)}
-                    className="px-3 py-1 text-sm text-primary hover:text-primary-dark border border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : viewMode === 'profile' && selectedUserId ? (
-          <div className="rounded-lg">
-            <div className="flex justify-between items-center mb-6">
-              <button
-                onClick={() => {
-                  setViewMode('card');
+              ))}
+            </div>
+          ) : viewMode === "profile" && selectedUserId ? (
+            <div className="rounded-lg mt-1">
+              {" "}
+              {/* Further reduced top margin */}
+              <ProfileView
+                userId={selectedUserId}
+                onClose={() => {
+                  setViewMode("card");
                   setSelectedUserId(null);
                 }}
-                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                Back to List
-              </button>
+              />
             </div>
-            <ProfileView 
-              userId={selectedUserId}
-              onClose={() => {
-                setViewMode('card');
-                setSelectedUserId(null);
-              }}
-            />
-          </div>
-        ) : (
-          renderTableView()
-        )}
+          ) : (
+            renderTableView()
+          )}
+        </div>
       </div>
 
       <NotificationModal
         isOpen={showNotificationModal}
         onClose={() => setShowNotificationModal(false)}
         selectedUsers={selectedUsers}
-        users={users.map(user => ({
+        users={users.map((user) => ({
           ...user,
           profile: {
             ...user.profile,
-            status: user.isActive ? 'active' : 'inactive'
-          }
+            status: user.isActive ? "active" : "inactive",
+          },
         }))}
         onNotificationSent={handleNotificationSent}
         // userProfilePic={users[0]?.profile?.profilePictureUrl}

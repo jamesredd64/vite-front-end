@@ -250,18 +250,18 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
 
   return (
     <div className="relative font-normal font-sans z-[1] bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300">
-      <div className="p-2 md:p-6 2xl:p-4">
+      <div className="p-1 md:p-1 2xl:p-1">
         {onClose && (
           <button
             onClick={onClose}
-            className="mb-4 px-3 py-1 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+            className="mb-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-800 transition-colors"
           >
-            Back to List
+            {/* Back to List */}
           </button>
         )}
         <Suspense fallback={<Loader size="large" />}>
           {/* Main container with styling for light/dark themes */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800/50 lg:p-6">
+          <div className="rounded-md border border-gray-200 bg-white p-1 dark:border-gray-800 dark:bg-gray-800/50 lg:p-1">
             {/* Meta information for SEO and page title */}
             <PageMeta title="Profile View" description="View and edit your profile" />
             <PageBreadcrumb pageTitle="Profile View" />

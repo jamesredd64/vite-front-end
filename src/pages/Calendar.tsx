@@ -17,6 +17,7 @@ import "flatpickr/dist/themes/light.css";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Instance as FlatpickrInstance } from "flatpickr/dist/types/instance";
 import { DateTimePickerProps } from "react-flatpickr";
+import Loader from "../components/common/Loader";
 
 // Create a wrapper component
 const DatePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
@@ -245,7 +246,7 @@ const Calendar: React.FC = () => {
 
   // Show loading state
   if (isLoading) {
-    return <div>Loading calendar...</div>;
+    return <Loader size="large" />;
   }
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {

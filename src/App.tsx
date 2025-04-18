@@ -22,6 +22,9 @@ import CustomerDemographics from "./pages/Dashboard/CustomerDemographics";
 import Changelog from "./pages/Changelog/index";
 import UserManagement from "./pages/UserManagement";
 import { initSessionTimeout } from './utils/sessionTimeout';
+import { IdleTimeoutHandler } from "./components/IdleTimeoutHandler";
+
+
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -361,6 +364,7 @@ function App() {
 
   return (
     <NavigationContext.Provider value={{ handleNavigation, hasUnsavedChanges, setHasUnsavedChanges }}>
+      <IdleTimeoutHandler />
       <div className="dark:bg-boxdark-2 dark:text-bodydark min-h-screen">
         <div className="flex h-screen overflow-hidden">
           <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
@@ -368,7 +372,7 @@ function App() {
               <Route path="/signed-out" element={<SignedOut />} />
               {isAuthenticated ? (
                 <Route element={<AppLayout />}>
-                  <Route index element={<Navigate to="/profile" replace />} />              
+                  <Route index element={<Navigate to="/profile-view" replace />} />              
                   <Route path="/dashboard" element={<DashboardHome />} />
                   <Route path="/profile" element={<UserProfile />} />     
                   <Route path="/profile-view" element={<ProfileView/>} />  
