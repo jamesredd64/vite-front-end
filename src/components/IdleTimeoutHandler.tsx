@@ -70,20 +70,58 @@ export const IdleTimeoutHandler: React.FC = () => {
     if (!isAuthenticated || !isWarning) return null;
 
     return (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50">
-            <p className="font-semibold">Session Timeout Warning</p>
-            <p className="text-sm">
-                Your session will expire in {Math.ceil(WARNING_DURATION / 60000)} minutes due to inactivity.
-            </p>
-            <button
-                onClick={() => {
-                    activate();
-                    setIsWarning(false);
-                }}
-                className="mt-2 bg-white text-red-500 px-4 py-1 rounded hover:bg-red-100"
-            >
-                Continue Session
-            </button>
+        <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-[9999]">
+            <div 
+                className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm"
+                onClick={() => setIsWarning(false)}
+            />
+            <div className="relative z-[10000] w-full max-w-md mx-auto p-4">
+                <div className="relative bg-white dark:bg-gray-900 rounded-3xl shadow-2xl">
+                    <div className="p-6 sm:p-8">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="mb-4 p-3 bg-warning-50 dark:bg-warning-500/15 rounded-full">
+                                <svg 
+                                    className="w-6 h-6 text-warning-500 dark:text-warning-400" 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={2} 
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
+                                    />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white/90 mb-2">
+                                Session Timeout Warning
+                            </h3>
+                            <p className="text-gray-500 dark:text-gray-400 mb-6">
+                                Your session will expire in {Math.ceil(WARNING_DURATION / 60000)} minutes due to inactivity. 
+                                Any unsaved changes will be lost.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        activate();
+                                        setIsWarning(false);
+                                    }}
+                                    className="inline-flex items-center justify-center rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                                >
+                                    Continue Session
+                                </button>
+                                <button
+                                    onClick={handleOnIdle}
+                                    className="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700/70 dark:focus:ring-offset-gray-900"
+                                >
+                                    Logout Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
