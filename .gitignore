@@ -112,3 +112,4 @@ src/components/admin/AdminCodeVerification.tsx
 src/components/admin/AdminManagement.tsx
 src/models/AdminCode.ts
 src/pages/ProfilesPage.tsx
+src/components/common/WifiLoader.tsx
