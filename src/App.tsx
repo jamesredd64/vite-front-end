@@ -102,6 +102,7 @@ function App() {
   const { updateUser, getUserById } = useMongoDbClient();
   const initializationAttempted = useRef(false);
   const params = useParams<{ userId: string }>();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const userId = params.userId;
 
   useEffect(() => {
@@ -267,8 +268,8 @@ function App() {
     return true; // Allow navigation
   }, [hasUnsavedChanges]);
 
-  console.log('MongoDB user role:', userMetadata?.profile?.role);
-  console.log('MongoDB user data:', userMetadata);
+  // console.log('MongoDB user role:', userMetadata?.profile?.role);
+  // console.log('MongoDB user data:', userMetadata);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleConfirmNavigation = () => {

@@ -24,7 +24,43 @@ export const useMongoDbClient = () => {
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
   const requestInProgress = useRef<boolean>(false);
-  // const [userMetadata, setUserMetadata] = useState<UserMetadata | null>(null);
+  
+  // Enhanced request cache with type safety
+  interface CacheEntry<T> {
+    promise: Promise<T>;
+    timestamp: number;
+  }
+  
+  const requestCache = useRef<Map<string, CacheEntry<unknown>>>(new Map());
+  const CACHE_TIMEOUT = 5000; // 5 seconds cache timeout
+
+  // Utility function for cache management
+  const getCachedRequest = <T>(cacheKey: string): Promise<T> | null => {
+    const cached = requestCache.current.get(cacheKey);
+    if (!cached) return null;
+
+    const now = Date.now();
+    if (now - cached.timestamp > CACHE_TIMEOUT) {
+      requestCache.current.delete(cacheKey);
+      return null;
+    }
+
+    return cached.promise as Promise<T>;
+  };
+
+  const setCachedRequest = <T>(cacheKey: string, promise: Promise<T>) => {
+    requestCache.current.set(cacheKey, {
+      promise,
+      timestamp: Date.now()
+    });
+
+    // Cleanup cache entry after completion or error
+    promise.finally(() => {
+      setTimeout(() => {
+        requestCache.current.delete(cacheKey);
+      }, CACHE_TIMEOUT);
+    });
+  };
 
   const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const token = await getAccessTokenSilently({
@@ -43,52 +79,46 @@ export const useMongoDbClient = () => {
   }, [getAccessTokenSilently]);
 
   const getUserById = useCallback(async (auth0Id: string) => {
-    // Don't make API calls if not authenticated
     if (!isAuthenticated) {
-      console.debug('Skipping API call - user not authenticated');
+      // console.debug('Skipping API call - user not authenticated');
       return null;
     }
 
-    console.group('getUserById Operation');
-    try {
-      const headers = await getAuthHeaders();
-      const normalizedId = normalizeAuthId(auth0Id);
-      const encodedAuth0Id = encodeURIComponent(normalizedId);
-      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_BY_ID(encodedAuth0Id)}`;
-      
-      console.log('Original auth0Id:', auth0Id);
-      console.log('Normalized auth0Id:', normalizedId);
-      console.log('Fetching from URL:', url);
-      console.log('Headers:', headers);
-  
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          ...headers,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include'
-      });
-  
-      console.log('Response status:', response.status);
-  
-      // Handle 204 No Content
-      if (response.status === 204) {
-        console.log('No user found');
-        return null;
-      }
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
-      const result = await response.json();
-      console.log('User data received:', result);
-      return result;
-    } catch (error) {
-      console.error('Error in getUserById:', error);
-      return null;
+    const cacheKey = `getUserById-${auth0Id}`;
+    const cachedRequest = getCachedRequest(cacheKey);
+    if (cachedRequest) {
+      // console.debug('Returning cached user data for:', auth0Id);
+      return cachedRequest;
     }
+
+    const requestPromise = (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const normalizedId = normalizeAuthId(auth0Id);
+        const encodedAuth0Id = encodeURIComponent(normalizedId);
+        const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_BY_ID(encodedAuth0Id)}`;
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
+        });
+
+        if (response.status === 204) return null;
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        return await response.json();
+      } catch (error) {
+        console.error('Error in getUserById:', error);
+        throw error;
+      }
+    })();
+
+    setCachedRequest(cacheKey, requestPromise);
+    return requestPromise;
   }, [isAuthenticated, getAuthHeaders]);
 
   const checkAndInsertUser = useCallback(async (userId: string, userData: {
@@ -121,38 +151,46 @@ export const useMongoDbClient = () => {
       country?: string;
     }
   }): Promise<unknown> => {
-    console.group('checkAndInsertUser Operation');
-    try {
-      const headers = await getAuthHeaders();
-      
-      const createUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`;
-      console.log('Creating user at:', createUrl);
-      
-      const newUserData = {
-        ...userData,
-        auth0Id: userId,  // Store the original Auth0 ID without modification
-        createdAt: new Date().toISOString()
-      };
-      console.log('New user payload:', JSON.stringify(newUserData, null, 2));
-
-      const createResponse = await fetch(createUrl, {
-        method: 'POST',
-        headers: {
-          ...headers,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newUserData)
-      });
-
-      if (!createResponse.ok) {
-        throw new Error(`Failed to create user. Status: ${createResponse.status}`);
-      }
-
-      return await createResponse.json();
-    } catch (error) {
-      console.error('Error in checkAndInsertUser:', error);
-      throw error;
+    const cacheKey = `checkAndInsertUser-${userId}-${JSON.stringify(userData)}`;
+    const cachedRequest = getCachedRequest(cacheKey);
+    if (cachedRequest) {
+      console.debug('Returning cached insert/update request for:', userId);
+      return cachedRequest;
     }
+
+    const requestPromise = (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const createUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`;
+        
+        const newUserData = {
+          ...userData,
+          auth0Id: userId,
+          createdAt: new Date().toISOString()
+        };
+
+        const createResponse = await fetch(createUrl, {
+          method: 'POST',
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newUserData)
+        });
+
+        if (!createResponse.ok) {
+          throw new Error(`Failed to create user. Status: ${createResponse.status}`);
+        }
+
+        return await createResponse.json();
+      } catch (error) {
+        console.error('Error in checkAndInsertUser:', error);
+        throw error;
+      }
+    })();
+
+    setCachedRequest(cacheKey, requestPromise);
+    return requestPromise;
   }, [getAuthHeaders]);
   
   const updateUser = useCallback(async (auth0Id: string, userData: {
@@ -314,51 +352,66 @@ export const useMongoDbClient = () => {
   }, [getAccessTokenSilently]);
 
   const fetchCalendarEvents = useCallback(async (userId: string): Promise<CalendarEvent[]> => {
-    const normalizedId = normalizeAuthId(userId);
-    
-    try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_CALENDAR_EVENTS(normalizedId)}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch events');
-      }
-      const data = await response.json();
-      return Array.isArray(data) ? data : data?.events || [];
-    } catch (error) {
-      console.error('Error fetching calendar events:', error);
-      return [];
+    const cacheKey = `fetchCalendarEvents-${userId}`;
+    const cachedRequest = getCachedRequest<CalendarEvent[]>(cacheKey);
+    if (cachedRequest) {
+      console.debug('Returning cached calendar events for:', userId);
+      return cachedRequest;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    const requestPromise = (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const normalizedId = normalizeAuthId(userId);
+        
+        const response = await fetch(
+          `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_CALENDAR_EVENTS(normalizedId)}`,
+          { headers }
+        );
+        
+        if (!response.ok) throw new Error('Failed to fetch events');
+        
+        const data = await response.json();
+        return Array.isArray(data) ? data : data?.events || [];
+      } catch (error) {
+        console.error('Error fetching calendar events:', error);
+        return [];
+      }
+    })();
+
+    setCachedRequest(cacheKey, requestPromise);
+    return requestPromise;
   }, [getAuthHeaders]);
 
   const createCalendarEvent = useCallback(async (eventData: Omit<CalendarEvent, 'id'>): Promise<CalendarEvent> => {
-    const dbEventData = {
-      ...eventData,
-      auth0Id: eventData.auth0Id
-    };
+    const cacheKey = `createCalendarEvent-${JSON.stringify(eventData)}`;
+    const cachedRequest = getCachedRequest<CalendarEvent>(cacheKey);
+    if (cachedRequest) {
+      console.debug('Returning cached create event request');
+      return cachedRequest;
+    }
 
-    try {
+    const requestPromise = (async () => {
+      const headers = await getAuthHeaders();
       const response = await fetch(
         `${API_CONFIG.BASE_URL}/calendar`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dbEventData)
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...eventData, auth0Id: eventData.auth0Id })
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
       const data: CalendarApiResponse = await response.json();
-      if (!data.event) {
-        throw new Error('No event data returned');
-      }
+      if (!data.event) throw new Error('No event data returned');
       return data.event;
-    } catch (error) {
-      throw error instanceof Error ? error : new Error('Failed to create event');
-    }
-  }, []);
+    })();
+
+    setCachedRequest(cacheKey, requestPromise);
+    return requestPromise;
+  }, [getAuthHeaders]);
 
   const updateCalendarEvent = useCallback(async (eventId: string, eventData: Partial<CalendarEvent>): Promise<CalendarEvent> => {
     try {

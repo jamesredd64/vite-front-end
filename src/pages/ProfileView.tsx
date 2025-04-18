@@ -57,53 +57,99 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
      * 
      * @returns {Promise<void>} A promise that resolves when the user data has been fetched and the state updated.
      */
+    // const fetchUserData = async () => {
+    //   if (!isAuthenticated || auth0Loading || !auth0Id) {
+    //     if (isMounted) setIsLoading(false);
+    //     return;
+    //   }
+
+    //   try {
+    //     const fetchedUserData = await getUserById(auth0Id);
+    //     if (!isMounted) return;
+
+    //     if (fetchedUserData) {
+    //       const restructuredData: UserMetadata = {
+    //         auth0Id: fetchedUserData.auth0Id,
+    //         email: fetchedUserData.email || '',
+    //         firstName: fetchedUserData.firstName || '',
+    //         lastName: fetchedUserData.lastName || '',
+    //         phoneNumber: fetchedUserData.phoneNumber || '',
+    //         profile: {
+    //           dateOfBirth: fetchedUserData.profile?.dateOfBirth || null,
+    //           gender: fetchedUserData.profile?.gender || '',
+    //           profilePictureUrl: fetchedUserData.profile?.profilePictureUrl || user?.picture || '',
+    //           role: fetchedUserData.profile?.role || 'user'
+    //         },
+    //         address: {
+    //           ...defaultAddress,
+    //           ...fetchedUserData.address
+    //         },
+    //         marketingBudget: {
+    //           ...defaultMarketingBudget,
+    //           ...fetchedUserData.marketingBudget
+    //         },
+    //         isActive: fetchedUserData.isActive ?? true
+    //       };
+    //       setUserData(restructuredData);
+    //     }
+    //   } catch (error) {
+    //     if (!isMounted) return;
+    //     console.error("Error fetching user data:", error);
+    //     setSaveStatus({
+    //       message: "Failed to load user data",
+    //       isError: true
+    //     });
+    //   } finally {
+    //     if (isMounted) setIsLoading(false);
+    //   }
+    // };
     const fetchUserData = async () => {
       if (!isAuthenticated || auth0Loading || !auth0Id) {
         if (isMounted) setIsLoading(false);
         return;
       }
-
+    
       try {
+        console.time("fetchUserData"); // Benchmarking load time
+    
         const fetchedUserData = await getUserById(auth0Id);
-        if (!isMounted) return;
-
-        if (fetchedUserData) {
-          const restructuredData: UserMetadata = {
-            auth0Id: fetchedUserData.auth0Id,
-            email: fetchedUserData.email || '',
-            firstName: fetchedUserData.firstName || '',
-            lastName: fetchedUserData.lastName || '',
-            phoneNumber: fetchedUserData.phoneNumber || '',
-            profile: {
-              dateOfBirth: fetchedUserData.profile?.dateOfBirth || null,
-              gender: fetchedUserData.profile?.gender || '',
-              profilePictureUrl: fetchedUserData.profile?.profilePictureUrl || user?.picture || '',
-              role: fetchedUserData.profile?.role || 'user'
-            },
-            address: {
-              ...defaultAddress,
-              ...fetchedUserData.address
-            },
-            marketingBudget: {
-              ...defaultMarketingBudget,
-              ...fetchedUserData.marketingBudget
-            },
-            isActive: fetchedUserData.isActive ?? true
-          };
-          setUserData(restructuredData);
-        }
+        if (!isMounted || !fetchedUserData) return;
+    
+        // Optimize default values using useMemo
+        const profilePictureUrl = fetchedUserData.profile?.profilePictureUrl || user?.picture || '';
+        
+        const restructuredData: UserMetadata = {
+          ...fetchedUserData,
+          email: fetchedUserData.email || '',
+          firstName: fetchedUserData.firstName || '',
+          lastName: fetchedUserData.lastName || '',
+          phoneNumber: fetchedUserData.phoneNumber || '',
+          profile: {
+            ...fetchedUserData.profile,
+            profilePictureUrl,
+            role: fetchedUserData.profile?.role || 'user'
+          },
+          address: { ...defaultAddress, ...fetchedUserData.address },
+          marketingBudget: { ...defaultMarketingBudget, ...fetchedUserData.marketingBudget },
+          isActive: fetchedUserData.isActive ?? true
+        };
+    
+        setUserData(restructuredData);
+    
       } catch (error) {
-        if (!isMounted) return;
         console.error("Error fetching user data:", error);
-        setSaveStatus({
-          message: "Failed to load user data",
-          isError: true
-        });
+        if (isMounted) {
+          setSaveStatus({
+            message: "Failed to load user data",
+            isError: true
+          });
+        }
       } finally {
         if (isMounted) setIsLoading(false);
+        console.timeEnd("fetchUserData"); // Log execution time
       }
     };
-
+    
     fetchUserData();
     return () => {
       isMounted = false;

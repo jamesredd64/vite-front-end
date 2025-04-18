@@ -1,6 +1,7 @@
 import { API_CONFIG } from '../config/api.config';
 
 interface CalendarEvent {
+  id?: string;
   title: string;
   start: Date | string;
   end: Date | string;
@@ -8,9 +9,30 @@ interface CalendarEvent {
   auth0Id: string;
   color?: string;
   allDay?: boolean;
+  extendedProps?: {
+    calendar?: 'primary' | 'success' | 'danger' | 'warning';
+    description?: string;
+    location?: string;
+  };
 }
 
+const isDuplicateEvent = (event1: CalendarEvent, event2: CalendarEvent): boolean => {
+  const isSameTitle = event1.title === event2.title;
+  const isSameStart = new Date(event1.start).getTime() === new Date(event2.start).getTime();
+  const isSameUser = event1.auth0Id === event2.auth0Id;
+  
+  return isSameTitle && isSameStart && isSameUser;
+};
+
 export const createCalendarEvent = async (eventData: CalendarEvent) => {
+  // First fetch existing events to check for duplicates
+  const existingEvents = await fetchCalendarEvents(eventData.auth0Id);
+  
+  const duplicate = existingEvents.find(event => isDuplicateEvent(event, eventData));
+  if (duplicate) {
+    throw new Error('An event with the same title and start time already exists');
+  }
+
   const response = await fetch(`${API_CONFIG.BASE_URL}/calendar/events`, {
     method: 'POST',
     headers: {
@@ -29,6 +51,18 @@ export const createCalendarEvent = async (eventData: CalendarEvent) => {
 };
 
 export const updateCalendarEvent = async (eventId: string, eventData: CalendarEvent) => {
+  // Fetch existing events to check for duplicates
+  const existingEvents = await fetchCalendarEvents(eventData.auth0Id);
+  
+  const duplicate = existingEvents.find(event => 
+    event.id !== eventId && // Exclude the current event being updated
+    isDuplicateEvent(event, eventData)
+  );
+  
+  if (duplicate) {
+    throw new Error('Update would create a duplicate event');
+  }
+
   const response = await fetch(`${API_CONFIG.BASE_URL}/calendar/events/${eventId}`, {
     method: 'PUT',
     headers: {
@@ -68,12 +102,42 @@ export const fetchCalendarEvents = async (auth0Id: string) => {
     
     const data = await response.json();
     console.log('Fetched calendar events:', data);
-    return data;
+
+    // Deduplicate events
+    const events = Array.isArray(data) ? data : [];
+    const uniqueEvents = events.reduce<CalendarEvent[]>((acc, current) => {
+      const isDuplicate = acc.some(event => isDuplicateEvent(event, current));
+      
+      if (!isDuplicate) {
+        acc.push(current);
+      } else {
+        console.debug('Filtered out duplicate event:', current);
+      }
+      
+      return acc;
+    }, []);
+
+    return uniqueEvents;
   } catch (error) {
     console.error('Error fetching calendar events:', error);
     return [];
   }
 };
 
+export const deleteCalendarEvent = async (eventId: string) => {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/calendar/events/${eventId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    mode: 'cors'
+  });
 
+  if (!response.ok) {
+    throw new Error('Failed to delete event');
+  }
+
+  return response.json();
+};
 

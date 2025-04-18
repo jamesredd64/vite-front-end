@@ -206,44 +206,8 @@ const Calendar: React.FC = () => {
     loadEvents();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.sub, setEvents]);
-  
 
-  // useEffect(() => {
-  //   const loadEvents = async () => {
-  //     if (!user?.sub) {
-  //       console.log("No user ID available");
-  //       setIsLoading(false);
-  //       return;
-  //     }
-
-  //     try {
-  //       console.log("Loading events for user:", user.sub);
-  //       const fetchedEvents = await fetchCalendarEvents(user.sub);
-  //       console.log("Successfully fetched events:", fetchedEvents);
-
-  //       const eventsArray = Array.isArray(fetchedEvents) ? fetchedEvents : [];
-
-  //       setEvents(
-  //         eventsArray.map((event) => ({
-  //           ...event,
-  //           id: event.id || "",
-  //           extendedProps: {
-  //             calendar: event.extendedProps?.calendar || "primary",
-  //           },
-  //         }))
-  //       );
-  //     } catch (err) {
-  //       console.error("Failed to fetch calendar events:", err);
-  //       setError(err instanceof Error ? err.message : "Failed to load events");
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   loadEvents();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [user?.sub, setEvents]);
-
+ 
   // Show loading state
   if (isLoading) {
     return <Loader size="large" />;
