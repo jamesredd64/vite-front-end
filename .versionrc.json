@@ -20,7 +20,7 @@
       "type": "json"
     },
     {
-      "filename": "src/config/version.ts",
+      "filename": "src/config/version.js",
       "updater": "scripts/version-updater.js"
     }
   ]

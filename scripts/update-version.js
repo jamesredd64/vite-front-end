@@ -3,24 +3,24 @@ const path = require('path');
 
 const updateVersion = () => {
   try {
-    const versionPath = path.join(process.cwd(), 'src/config/version.ts');
+    const versionPath = path.join(process.cwd(), 'config/version.js');
     const packagePath = path.join(process.cwd(), 'package.json');
     
     // Read package.json version
     const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
     const newVersion = packageJson.version;
     
-    // Update version.ts
+    // Update version.js
     const content = fs.readFileSync(versionPath, 'utf8');
     const newContent = content.replace(
-      /number: '\d+\.\d+\.\d+'/,
-      `number: '${newVersion}'`
+      /number: ['"](\d+\.\d+\.\d+)['"],/,
+      `number: '${newVersion}',`
     );
     
     fs.writeFileSync(versionPath, newContent, 'utf8');
-    console.log('Version updated successfully:', newVersion);
+    console.log('Backend version updated successfully:', newVersion);
   } catch (error) {
-    console.error('Error updating version:', error);
+    console.error('Error updating backend version:', error);
     process.exit(1);
   }
 };

@@ -1,9 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('Starting version update script...');
-console.log('Current directory:', process.cwd());
-
 const updateVersion = () => {
   try {
     const versionPath = path.join(process.cwd(), 'src/config/version.ts');
