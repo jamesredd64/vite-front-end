@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import react from '@vitejs/plugin-react';
 // import svgr from "vite-plugin-svgr";
 

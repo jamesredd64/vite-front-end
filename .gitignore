@@ -117,3 +117,4 @@ src/components/common/WifiLoader.tsx
 # Add these lines to your .gitignore
 package-lock.json
 yarn.lock
+vite.config.ts
