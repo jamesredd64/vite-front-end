@@ -18,6 +18,8 @@ import MarketingOverview from "./pages/MarketingOverview";
 import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 import CustomerDemographics from "./pages/Dashboard/CustomerDemographics";
 import Changelog from "./pages/Changelog/index";
+import { IdleTimeoutHandler } from "./components/IdleTimeoutHandler";
+import { EmailForm } from './components/EmailForm';
 
 // import Marketing2 from './pages/Dashboard/Main/Marketing';
 // import Marketing from "./pages/Dashboard/Main/Marketing";
@@ -217,6 +219,7 @@ function App() {
       setHasUnsavedChanges 
     }}>
       <div className="dark:bg-boxdark-2 dark:text-bodydark min-h-screen">
+        <IdleTimeoutHandler />
         <div className="flex h-screen overflow-hidden">
           <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
             <Routes>        
@@ -230,6 +233,7 @@ function App() {
                   <Route path="/marketing" element={<Marketing />} />
                   <Route path="/marketing-overview" element={<MarketingOverview />} />
                   <Route path="/customer-demographics" element={<CustomerDemographics />} />
+                  <Route path="/email" element={<EmailForm />} />
                   <Route path="/changelog" element={<Changelog />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>

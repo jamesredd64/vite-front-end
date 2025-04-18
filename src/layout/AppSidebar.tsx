@@ -11,6 +11,7 @@ import {
   GridIcon,
   HorizontaLDots, 
   UserCircleIcon,
+  EmailIcon,
 } from "../icons";
 
 type NavItem = {
@@ -36,6 +37,7 @@ const navItems: NavItem[] = [
       { name: "Ecommerce", path: "/dashboard", pro: false },
       { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview /> },
       { name: "User Profile", path: "/profile", pro: false, icon: <UserCircleIcon /> },
+      { name: "Email", path: "/email", pro: false, icon: <EmailIcon /> },
       // { name: "Changelog", path: "/changelog", pro: false, icon: (
       //   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       //     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 

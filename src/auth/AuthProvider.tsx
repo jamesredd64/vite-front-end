@@ -14,6 +14,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       cacheLocation="localstorage"
       useRefreshTokens={true}
       skipRedirectCallback={window.location.pathname === '/signed-out'}
+      sessionCheckExpiryDays={1}
     >
       {children}
     </Auth0Provider>

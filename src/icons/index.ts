@@ -109,3 +109,4 @@ export {
   ChevronUpIcon,
   ChatIcon,
 };
+export * from './EmailIcon';
