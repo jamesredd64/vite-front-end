@@ -25,7 +25,7 @@ import { initSessionTimeout } from './utils/sessionTimeout';
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import ProtectedAdminRoute from './components/ProtectedAdminRoute';
+// import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 // import { AdminManagement } from './components/admin/AdminManagement';
 // import { AdminCodeVerification } from "./components/admin/AdminCodeVerification";
 // import { ProtectedRoute } from "./components/ProtectedRoute";
