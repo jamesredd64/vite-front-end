@@ -6,9 +6,9 @@ import { useGlobalStorage } from './hooks/useGlobalStorage';
 import AppLayout from "./layout/AppLayout";
 import { useEffect, useRef, useState, useCallback } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
-import UserProfile from "./pages/ProfilePage";
+// import UserProfile from "./pages/ProfilePage";
 import ProfileView from "./pages/ProfileView";
-import UserProfileView from "./pages/UserProfileView";
+import UserProfileView from "../.saved/UserProfileView";
 import  Calendar from "./pages/Calendar";
 import DashboardHome from "./pages/Dashboard/Home";
 import React from "react";
@@ -374,7 +374,7 @@ function App() {
                 <Route element={<AppLayout />}>
                   <Route index element={<Navigate to="/profile-view" replace />} />              
                   <Route path="/dashboard" element={<DashboardHome />} />
-                  <Route path="/profile" element={<UserProfile />} />     
+                  {/* <Route path="/profile" element={<UserProfile />} />      */}
                   <Route path="/profile-view" element={<ProfileView/>} />  
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/marketing" element={<Marketing />} />

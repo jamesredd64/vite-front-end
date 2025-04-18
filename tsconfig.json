@@ -12,7 +12,7 @@
     "noEmit": true,
     "outDir": "./dist"
   },
-  "include": ["src", ".saved/UserProfiles-old.tsx", ".saved/UserProfiles-old-new.tsx", ".saved/TestPage.tsx", ".saved/test.tsx"],
+  "include": ["src", ".saved/UserProfiles-old.tsx", ".saved/UserProfiles-old-new.tsx", ".saved/TestPage.tsx", ".saved/test.tsx", ".saved/UserProfileView.tsx", ".saved/ProfilePage.tsx", ".saved/oldProfile.tsx"],
   "exclude": ["src/**/*.js", "src/**/*.jsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
