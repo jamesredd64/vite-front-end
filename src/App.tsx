@@ -7,7 +7,7 @@ import AppLayout from "./layout/AppLayout";
 import { useEffect, useRef, useState, useCallback } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
 import ProfileView from "./pages/ProfileView";
-import UserProfileView from "../.saved/UserProfileView";
+// import UserProfileView from "./pages/UserProfileView";
 import  Calendar from "./pages/Calendar";
 import DashboardHome from "./pages/Dashboard/Home";
 import React from "react";
@@ -372,18 +372,16 @@ function App() {
               {isAuthenticated ? (
                 <Route element={<AppLayout />}>
                   <Route index element={<Navigate to="/profile-view" replace />} />              
-                  <Route path="/dashboard" element={<DashboardHome />} />
-                  {/* <Route path="/profile" element={<UserProfile />} />      */}
+                  <Route path="/dashboard" element={<DashboardHome />} />                 
                   <Route path="/profile-view" element={<ProfileView/>} />  
                   <Route path="/calendar" element={<Calendar />} />
-                  <Route path="/marketing" element={<Marketing />} />
-                  {/* <Route path="/edit-user" element={<EditUserModal />} /> */}
+                  <Route path="/marketing" element={<Marketing />} />                 
                   <Route path="/notifications/create" element={<CreateNotification />} />
                   <Route path="/marketing-overview" element={<MarketingOverview />} />
                   <Route path="/customer-demographics" element={<CustomerDemographics />} />
                   <Route path="/changelog" element={<Changelog />} />
                   <Route path="/users" element={<UserManagement />} />
-                  <Route 
+                  {/* <Route 
                     path="/user-profile/:userId" 
                     element={
                       <UserProfileView 
@@ -391,7 +389,7 @@ function App() {
                         onClose={() => navigate(-1)} 
                       />
                     } 
-                  />
+                  /> */}
                   {/* Admin Routes */}
                   <Route path="/admin/*" element={
                     isAdmin() ? (
