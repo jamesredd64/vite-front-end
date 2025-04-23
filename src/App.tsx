@@ -22,7 +22,7 @@ import Changelog from "./pages/Changelog/index";
 import UserManagement from "./pages/UserManagement";
 import { initSessionTimeout } from './utils/sessionTimeout';
 import { IdleTimeoutHandler } from "./components/IdleTimeoutHandler";
-
+import EventInvitation from "./pages/EventInvitation";
 
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
@@ -382,6 +382,7 @@ function App() {
                   <Route path="/customer-demographics" element={<CustomerDemographics />} />
                   <Route path="/changelog" element={<Changelog />} />
                   <Route path="/users" element={<UserManagement />} />
+                  <Route path="/invite" element={<EventInvitation />} />
                   {/* <Route 
                     path="/user-profile/:userId" 
                     element={
