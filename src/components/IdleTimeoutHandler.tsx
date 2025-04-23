@@ -2,8 +2,8 @@ import { useIdleTimer } from 'react-idle-timer';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 
-const TIMEOUT_DURATION = 10 * 60 * 1000; // 10 minutes
-const WARNING_DURATION = 5 * 60 * 1000;  // Show warning 5 minutes before timeout
+const TIMEOUT_DURATION = 20 * 60 * 1000; // 20 minutes
+const WARNING_DURATION = 5 * 60 * 1000;  // Show warning 5 minutes before timeoutS
 
 export const IdleTimeoutHandler: React.FC = () => {
     const { logout, isAuthenticated } = useAuth0();
