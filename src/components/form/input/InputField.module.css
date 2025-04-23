@@ -1,0 +1,8 @@
+.datetimeInput::-webkit-calendar-picker-indicator {
+  background-color: transparent;
+  filter: invert(1);
+}
+
+:global(.dark) .datetimeInput {
+  color-scheme: dark;
+}
