@@ -1,17 +1,23 @@
 import { SidebarProvider, useSidebar } from "../context/SidebarContext";
+import { useGlobalStorage } from '../hooks/useGlobalStorage';
+import { UserMetadata } from '../types/user';
 import { Outlet } from "react-router";
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
 import AppFooter from "./AppFooter";
+// import AdminSidebar from "./AdminSidebar";
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+  const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
+
+  const isAdminUser = userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
 
   return (
     <div className="min-h-screen xl:flex">
       <div>
-        <AppSidebar />
+        {isAdminUser ? <AppSidebar /> : <AppSidebar />}
         <Backdrop />
       </div>
       <div

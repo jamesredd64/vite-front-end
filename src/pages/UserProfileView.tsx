@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { API_CONFIG } from "../config/api.config";
 import { UserMetaCard } from "../components/UserProfile/UserMetaCard";
@@ -8,6 +10,9 @@ import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import { useMongoDbClient } from "../services/mongoDbClient";
 import { UnsavedChangesNotification } from "../components/UnsavedChangesNotification";
 import UserMetadata from "../types/user";
+import { useAdmin } from '../hooks/useAdmin';
+import { useNavigate } from 'react-router-dom';
+
 
 interface User {
   _id: string;
@@ -56,6 +61,7 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { saveUserData } = useMongoDbClient();
   const [saveStatus, setSaveStatus] = useState<{ message: string; isError: boolean } | null>(null);
+  const navigate = useNavigate();
 
   // Define default values
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -70,6 +76,9 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
     roiTarget: 0,
     frequency: 'monthly' as const
   };
+
+
+
 
   const defaultAddress = {
     street: '',
@@ -196,6 +205,11 @@ export default function UserProfileView({ userId, onClose }: UserProfileViewProp
 
     return () => clearTimeout(timeoutId);
   }, [saveStatus]);
+
+  if (!useAdmin) {
+    // navigate('/dashboard', { replace: true });
+    // return null;
+  }
 
   if (loading) {
     return <div>Loading...</div>;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import MarketingOverview from "../pages/MarketingOverview";
@@ -5,6 +6,7 @@ import { useSidebar } from "../context/SidebarContext";
 import { useNavigation } from "../hooks/useNavigation";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useAdmin } from '../hooks/useAdmin';
+// const [userMetadata, setUserMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
 
 // Assume these icons are imported from an icon library
 import {
@@ -36,20 +38,26 @@ type NavItem = {
   requiresAdmin?: boolean;
 };
 
+// Add this function to check if user is admin
+// const isAdmin = () => {
+//   return userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
+// };
+
+
 const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
     subItems: [   
-      { name: "Attendee Demographics", path: "/customer-demographics", pro: false, requiresAdmin: false },
-      { name: "Calendar", path: "/calendar", pro: false, icon: <CalenderIcon /> },
-      { name: "Ecommerce", path: "/dashboard", pro: false, requiresAdmin: false },          
+      { name: "Attendee Demographics", path: "/customer-demographics", pro: false, requiresAdmin: true },
+      { name: "Calendar", path: "/calendar", pro: false, icon: <CalenderIcon /> , requiresAdmin: true},
+      { name: "Ecommerce", path: "/dashboard", pro: false, requiresAdmin: true },          
       // { name: "Edit User", path: "/edit-user", pro: false, icon: <UserCircleIcon />, requiresAdmin: false },
-      { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview />, requiresAdmin: false },
-      { name: "User Management", path: "/users", pro: false, icon: <UserCircleIcon />, requiresAdmin: false },
+      { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview />, requiresAdmin: true },
+      { name: "User Management", path: "/users", pro: false, icon: <UserCircleIcon />, requiresAdmin: true },
       // { name: "User Profile", path: "/profile", pro: false, icon: <UserCircleIcon /> },
       { name: "User Profile", path: "/profile-view", pro: false, icon: <TaskIcon /> },
-      { name: "Event Invitation", path: "/invite", pro: false, icon: <TaskIcon /> },
+      { name: "Event Invitation", path: "/invite", pro: false, icon: <TaskIcon /> , requiresAdmin: true},
 
       
     ],

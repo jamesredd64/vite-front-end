@@ -32,9 +32,9 @@ export default function UserDropdown() {
   // Fixed profile picture logic to handle undefined paths safely
   const profilePicture = useMemo(() => {
     if (user?.picture) return user.picture;
-    if (userMetadata?.profilePictureUrl) return userMetadata.profilePictureUrl;
+    if (userMetadata?.profile.profilePictureUrl) return userMetadata.profile.profilePictureUrl;
     return "/icons/default-avatar.png";
-  }, [user?.picture, userMetadata?.profilePictureUrl]);
+  }, [user?.picture, userMetadata?.profile.profilePictureUrl]);
 
   const toggleDropdown = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -118,9 +118,9 @@ export default function UserDropdown() {
         <ul className="flex flex-col pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
           <li>
             <DropdownItem
-              onItemClick={closeDropdown}
+              onClick={closeDropdown}
               tag="a"
-              to="/profile"
+              to="/profile-view"
               className="flex items-center gap-3 px-3 py-2 font-bold text-gray-800 rounded-lg group text-theme-sm hover:bg-gray-200 hover:text-gray-700 dark:text-gray-800 dark:hover:bg-white/5 dark:hover:text-gray-500"
             >
               <UserIcon className="w-6 h-6 fill-gray-500 group-hover:fill-gray-200 dark:fill-gray-400 dark:group-hover:fill-gray-200 !important" />

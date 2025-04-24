@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
 
-import { Routes, Route, useNavigate, Navigate, useParams } from "react-router-dom";
-import { useAuth0} from '@auth0/auth0-react';
+import { Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useAdmin } from './hooks/useAdmin';
 import { useGlobalStorage } from './hooks/useGlobalStorage';
 import AppLayout from "./layout/AppLayout";
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -23,6 +25,7 @@ import UserManagement from "./pages/UserManagement";
 import { initSessionTimeout } from './utils/sessionTimeout';
 import { IdleTimeoutHandler } from "./components/IdleTimeoutHandler";
 import EventInvitation from "./pages/EventInvitation";
+import Users from './pages/admin/Users';
 
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
@@ -293,7 +296,7 @@ function App() {
 
   // Add this function to check if user is admin
   const isAdmin = () => {
-    return user && user['https://your-namespace/roles']?.includes('admin');
+    return userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
   };
 
   // Handle authentication state changes
@@ -380,45 +383,39 @@ function App() {
                   <Route path="/notifications/create" element={<CreateNotification />} />
                   <Route path="/marketing-overview" element={<MarketingOverview />} />
                   <Route path="/customer-demographics" element={<CustomerDemographics />} />
-                  <Route path="/changelog" element={<Changelog />} />
-                  <Route path="/users" element={<UserManagement />} />
-                  <Route path="/invite" element={<EventInvitation />} />
-                  {/* <Route 
-                    path="/user-profile/:userId" 
-                    element={
-                      <UserProfileView 
-                        userId={userId || ''}
-                        onClose={() => navigate(-1)} 
-                      />
-                    } 
-                  /> */}
+                  <Route path="/changelog" element={<Changelog />} />                  
+                  <Route path="/invite" element={<EventInvitation />} />                 
                   {/* Admin Routes */}
-                  <Route path="/admin/*" element={
-                    isAdmin() ? (
-                      <Routes>
-                        {/* <Route path="notifications/create" element={<CreateNotification />} /> */}
-                        {/* Add more admin routes here */}
-                      </Routes>
-                    ) : (
-                      <Navigate to="/dashboard" replace />
-                    )
-                  } />
-                  {/* <Route path="/admin/verify-code" element={<AdminCodeVerification />} /> */}
-                  {/* <Route 
-                    path="/admin/manage" 
-                    element={
-                      // <ProtectedRoute roles={['admin']}>
-                      //   <AdminManagement />
-                      // </ProtectedRoute>
-                    } 
-                  /> */}
-                  <Route path="*" element={<NotFound />} />
+                  <Route
+                    path="/my/users/*"
+                    element={(() => {
+                      console.log('Checking admin access...');
+                      const adminStatus = isAdmin();
+                      console.log('Is admin?', adminStatus);
+                      
+                      if (!adminStatus) {
+                        return <Navigate to="/dashboard" replace />;
+                      }
+                      
+                      return (
+                        <Routes>
+                          <Route path="/" element={<UserManagement />} />
+                        </Routes>
+                      );
+                    })()}
+                  />
+                  {/* Catch-all route - should be last */}
+                  <Route 
+                    path="*" 
+                    element={<Navigate to="/dashboard" replace />} 
+                  />
                 </Route>
               ) : (
                 <>
                   <Route path="/signed-out" element={<SignedOut />} />
                   <Route path="*" element={<Navigate to="/signed-out" replace />} />
                 </>
+                
               )}
             </Routes>
           </div>

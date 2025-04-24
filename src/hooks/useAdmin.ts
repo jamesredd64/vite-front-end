@@ -5,7 +5,9 @@ export const useAdmin = () => {
   const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
 
   const isAdmin = (): boolean => {
-    return userMetadata?.profile?.role === 'admin';
+    // Add console.log for debugging
+    console.log('Current user role:', userMetadata?.profile?.role);
+    return userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
   };
 
   return { isAdmin };
