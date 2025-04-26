@@ -50,15 +50,16 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Dashboard",
     subItems: [   
-      { name: "Attendee Demographics", path: "/customer-demographics", pro: false, requiresAdmin: true },
-      { name: "Calendar", path: "/calendar", pro: false, icon: <CalenderIcon /> , requiresAdmin: true},          
-      // { name: "Edit User", path: "/edit-user", pro: false, icon: <UserCircleIcon />, requiresAdmin: false },
-      { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview />, requiresAdmin: true },
-      { name: "User Management", path: "/user-admin", pro: false, icon: <UserCircleIcon />, requiresAdmin: true },
+      // { name: "Attendee Demographics", path: "/customer-demographics", pro: false, requiresAdmin: true },
+      // { name: "Calendar", path: "/calendar", pro: false, icon: <CalenderIcon /> , requiresAdmin: true},          
+      // // { name: "Edit User", path: "/edit-user", pro: false, icon: <UserCircleIcon />, requiresAdmin: false },
+      // { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview />, requiresAdmin: true },
+      // { name: "User Management", path: "/user-admin", pro: false, icon: <UserCircleIcon />, requiresAdmin: true },
       // { name: "User Profile", path: "/profile", pro: false, icon: <UserCircleIcon /> },
+      { name: "Welcome", path: "/welcome-new", pro: false, requiresAdmin: false },      
       { name: "User Profile", path: "/profile-view", pro: false, icon: <TaskIcon /> },
-      { name: "Event Invitation", path: "/invite", pro: false, icon: <TaskIcon />, requiresAdmin: true },
-      { name: "Ecommerce", path: "/dashboard", pro: false, requiresAdmin: false },      
+      // { name: "Event Invitation", path: "/invite", pro: false, icon: <TaskIcon />, requiresAdmin: true },
+      // { name: "Ecommerce", path: "/dashboard", pro: false, requiresAdmin: false },      
 
       
     ],

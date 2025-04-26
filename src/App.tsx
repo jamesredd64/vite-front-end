@@ -27,6 +27,8 @@ import { initSessionTimeout } from './utils/sessionTimeout';
 import { IdleTimeoutHandler } from "./components/IdleTimeoutHandler";
 import EventInvitation from "./pages/EventInvitation";
 import UserAdmin from './pages/admin/Users';
+// Add this to your imports
+import NewUserWelcome from './pages/NewUserWelcome';
 
 
 
@@ -380,9 +382,10 @@ function App() {
                 <>
                   {/* Main routes with AppLayout */}
                   <Route element={<AppLayout />}>
-                    <Route index element={<Navigate to="/dashboard" replace />} />              
-                    <Route path="/dashboard" element={<DashboardHome />} />          
+                    <Route index element={<Navigate to="/welcome-new" replace />} />              
+                    {/* <Route path="/dashboard" element={<DashboardHome />} />           */}
                     <Route path="profile-view" element={<ProfileView />} />
+                    <Route path="/welcome-new" element={<NewUserWelcome />} />                    
                     {/* <Route path="/calendar" element={<Calendar />} />
                     <Route path="/marketing" element={<Marketing />} />                 
                     {/* <Route path="/notifications/create" element={<CreateNotification />} /> */}
