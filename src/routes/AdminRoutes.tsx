@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import AdminLayout from '../layouts/AdminLayout';
+import AdminLayout from '../layout/AdminLayout';
 import Users from '../pages/admin/Users';
 import CreateNotification from '../pages/CreateNotification';
 

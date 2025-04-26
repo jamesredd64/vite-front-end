@@ -89,6 +89,7 @@ const Calendar: React.FC = () => {
   const { isOpen, openModal, closeModal } = useModal();
   const location = useLocation();
   // const navigate = useNavigate();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const datePickerOptions = {
     dateFormat: "Y-m-d",
@@ -174,20 +175,25 @@ const Calendar: React.FC = () => {
 
   useEffect(() => {
     const loadEvents = async () => {
+      // Don't fetch if we already have events and user hasn't changed
+      if (events.length > 0 && isInitialized) {
+        return;
+      }
+
       if (!user?.sub) {
         setIsLoading(false);
         return;
       }
-  
+
       try {
+        setIsLoading(true);
         const fetchedEvents = await fetchCalendarEvents(user.sub);
-  
         const eventsArray = Array.isArray(fetchedEvents) ? fetchedEvents : [];
-  
+
         setEvents(
           eventsArray.map((event) => ({
             ...event,
-            id: event.id || crypto.randomUUID(), // Ensure id is always defined
+            id: event.id || crypto.randomUUID(),
             title: event.title,
             start: new Date(event.start).toISOString(),
             end: new Date(event.end).toISOString(),
@@ -196,16 +202,17 @@ const Calendar: React.FC = () => {
             },
           }))
         );
+        setIsInitialized(true);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load events");
       } finally {
         setIsLoading(false);
       }
     };
-  
+
     loadEvents();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.sub, setEvents]);
+  // Add isInitialized to dependency array
+  }, [user?.sub, setEvents, events.length, isInitialized, fetchCalendarEvents]);
 
  
   // Show loading state

@@ -3,6 +3,7 @@ export interface UserProfile {
   gender: string;
   profilePictureUrl: string;
   role: 'admin' | 'user' | 'manager' | 'super-admin';
+  timezone: string;
   phoneNumber: string;
   marketingBudget: {
     adBudget: number;
@@ -38,6 +39,7 @@ export interface UserMetadata {
     gender: string;
     profilePictureUrl: string;
     role: 'admin' | 'user' | 'manager' | 'super-admin';
+    timezone: string;
   };
   marketingBudget: {
     adBudget: number;

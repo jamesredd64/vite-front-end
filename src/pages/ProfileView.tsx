@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect, useMemo } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { UserMetaCard } from "../components/UserProfile/UserMetaCard";
 import { UserAddressCard } from "../components/UserProfile/UserAddressCard";
@@ -104,57 +105,92 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
     //   }
     // };
     const fetchUserData = async () => {
-      if (!isAuthenticated || auth0Loading || !auth0Id) {
+      if (!isAuthenticated || !auth0Id) {
         if (isMounted) setIsLoading(false);
         return;
       }
-    
+
       try {
-        console.time("fetchUserData"); // Benchmarking load time
-    
+        // First try to get the user
         const fetchedUserData = await getUserById(auth0Id);
-        if (!isMounted || !fetchedUserData) return;
-    
-        // Optimize default values using useMemo
-        const profilePictureUrl = fetchedUserData.profile?.profilePictureUrl || user?.picture || '';
         
-        const restructuredData: UserMetadata = {
-          ...fetchedUserData,
-          email: fetchedUserData.email || '',
-          firstName: fetchedUserData.firstName || '',
-          lastName: fetchedUserData.lastName || '',
-          phoneNumber: fetchedUserData.phoneNumber || '',
-          profile: {
-            ...fetchedUserData.profile,
-            profilePictureUrl,
-            role: fetchedUserData.profile?.role || 'user'
-          },
-          address: { ...defaultAddress, ...fetchedUserData.address },
-          marketingBudget: { ...defaultMarketingBudget, ...fetchedUserData.marketingBudget },
-          isActive: fetchedUserData.isActive ?? true
-        };
-    
-        setUserData(restructuredData);
-    
+        // If user doesn't exist, create a new one
+        if (!fetchedUserData && isMounted) {
+          console.log('User not found, creating new user...');
+          
+          // Create new user with default data
+          const newUserData = {
+            auth0Id,
+            email: user?.email || '',
+            firstName: user?.given_name || user?.name?.split(' ')[0] || '',
+            lastName: user?.family_name || user?.name?.split(' ')[1] || '',
+            phoneNumber: '',
+            profile: {
+              dateOfBirth: '',
+              gender: '',
+              profilePictureUrl: user?.picture || '',
+              role: 'user' as const,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            },
+            marketingBudget: defaultMarketingBudget,
+            address: defaultAddress,
+            isActive: true
+          };
+
+          try {
+            // Use POST instead of PUT for new user creation
+            const createdUser = await saveUserData(auth0Id, newUserData, undefined);
+            if (isMounted) {
+              setUserData(createdUser);
+              setSaveStatus({
+                message: "Profile created successfully",
+                isError: false
+              });
+            }
+          } catch (createError) {
+            console.error("Error creating new user:", createError);
+            if (isMounted) {
+              setSaveStatus({
+                message: createError instanceof Error ? createError.message : "Failed to create user profile",
+                isError: true
+              });
+            }
+          }
+          return;
+        }
+
+        // If user exists, update the state with fetched data
+        if (isMounted && fetchedUserData) {
+          setUserData({
+            ...fetchedUserData,
+            profile: {
+              ...fetchedUserData.profile,
+              profilePictureUrl: user?.picture || fetchedUserData.profile.profilePictureUrl
+            },
+            address: { ...defaultAddress, ...fetchedUserData.address },
+            marketingBudget: { ...defaultMarketingBudget, ...fetchedUserData.marketingBudget },
+          });
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
         if (isMounted) {
           setSaveStatus({
-            message: "Failed to load user data",
+            message: error instanceof Error ? error.message : "Failed to load user data",
             isError: true
           });
         }
       } finally {
         if (isMounted) setIsLoading(false);
-        console.timeEnd("fetchUserData"); // Log execution time
       }
     };
-    
+
     fetchUserData();
+
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, auth0Loading, auth0Id, getUserById, user?.picture, defaultAddress, defaultMarketingBudget]);
+  }, [isAuthenticated, auth0Id, user]);
+  // }, [isAuthenticated, auth0Loading, auth0Id, getUserById, user?.picture, defaultAddress, defaultMarketingBudget]);
 
   // Optimized update handlers with better error handling
   /**
@@ -271,7 +307,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
    *          application is in a loading state.
    */
   if (isLoading || auth0Loading) {
-    return <Loader size="large" />;
+    return <Loader size="medium" />;
   }
 
   /**
@@ -305,7 +341,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
             {/* Back to List */}
           </button>
         )}
-        <Suspense fallback={<Loader size="large" />}>
+        
           {/* Main container with styling for light/dark themes */}
           <div className="rounded-md border border-gray-200 bg-white p-1 dark:border-gray-800 dark:bg-gray-800/50 lg:p-1">
             {/* Meta information for SEO and page title */}
@@ -357,7 +393,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
               />
             </div>
           </div>
-        </Suspense>
+        
       </div>
     </div>
   );

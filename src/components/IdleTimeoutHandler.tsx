@@ -8,13 +8,22 @@ const WARNING_DURATION = 5 * 60 * 1000;  // Show warning 5 minutes before timeou
 export const IdleTimeoutHandler: React.FC = () => {
     const { logout, isAuthenticated } = useAuth0();
     const [isWarning, setIsWarning] = useState(false);
+    // const savedTheme = localStorage.getItem('theme');
 
     const handleOnIdle = () => {
         if (!isAuthenticated) return;
 
-        // Clear any stored data
-        localStorage.clear();
-        sessionStorage.clear();
+        //const savedTheme = localStorage.getItem('theme');
+    //   const userRole = localStorage.getItem('userRole');
+      
+      // Clear specific items instead of everything
+      for (const key of Object.keys(localStorage)) {
+        if (key !== 'theme' && key !== 'userRole') {
+          localStorage.removeItem(key);
+        }
+      }
+      sessionStorage.clear();
+        
 
         // Preserve theme preference if needed
         const savedTheme = localStorage.getItem('theme');

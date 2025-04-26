@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { API_CONFIG } from "../config/api.config";
 import { Table, TableHeader, TableBody, TableRow, TableCell } from "../components/ui/table";
 import Switch from "../components/form/switch/Switch";
 import NotificationModal from "../components/modals/NotificationModal";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 // import UserProfileView from './UserProfileView';
 import { useGlobalStorage } from "../hooks/useGlobalStorage";
 import UserMetadata from "../types/user";
@@ -62,23 +63,28 @@ interface NotificationModalProps {
 type ViewMode = 'table' | 'card' | 'profile';
 
 export default function UserManagement() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'inactive' | 'current'>('all');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  // const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
-  // userProfilePic={userMetadata?.profile?.profilePictureUrl}
+  const isInitialMount = useRef(true);
 
-  const handleNotificationSent = () => {
+  // Define handleNotificationSent before using it in useMemo
+  const handleNotificationSent = useCallback(() => {
     setSelectedUsers([]);  // Reset selected users
-  };
+  }, []); // Empty dependency array since it only uses setState
 
+  // Fetch users only once on mount
   useEffect(() => {
+    let mounted = true;
+
     const fetchUsers = async () => {
       try {
         const response = await fetch(
@@ -96,58 +102,71 @@ export default function UserManagement() {
         }
 
         const data = await response.json();
-        
-        // Type guard to ensure data is an array
-        if (!Array.isArray(data)) {
-          throw new Error('Expected array of users from API');
-        }
-        
-        // Ensure the data is properly structured with type safety
-        const formattedUsers: Array<{
-          auth0Id: string;
-          profile: {
-            dateOfBirth: string | null;
-            gender: string;
-            profilePictureUrl: string;
-            role: string;
-          };
-          firstName: string;
-          lastName: string;
-          email: string;
-          phoneNumber: string;
-          isActive: boolean;
-        }> = data.map((user: Partial<User>) => ({
-          auth0Id: user.auth0Id || '',
-          profile: {
-            dateOfBirth: user.profile?.dateOfBirth || null,
-            gender: user.profile?.gender || '',
-            profilePictureUrl: user.profile?.profilePictureUrl || '',
-            role: user.profile?.role || 'User'
-          },
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          email: user.email || '',
-          phoneNumber: user.phoneNumber || '',
-          isActive: typeof user.isActive === 'boolean' ? user.isActive : true
-        }));
 
-        setUsers(formattedUsers as User[]);
+        if (Array.isArray(data) && mounted) {
+          const formattedUsers = data.map((user: Partial<User>) => ({
+            auth0Id: user.auth0Id || "",
+            profile: {
+              dateOfBirth: user.profile?.dateOfBirth || null,
+              gender: user.profile?.gender || "",
+              profilePictureUrl: user.profile?.profilePictureUrl || "",
+              role: user.profile?.role || "User",
+            },
+            firstName: user.firstName || "",
+            lastName: user.lastName || "",
+            email: user.email || "",
+            phoneNumber: user.phoneNumber || "",
+            isActive: typeof user.isActive === "boolean" ? user.isActive : true,
+          }));
+          setUsers(formattedUsers as User[]);
+        }
       } catch (error) {
-        console.error("Error fetching users:", error);
-        setError(error instanceof Error ? error : new Error("Unknown error"));
+        if (mounted) {
+          console.error("Error fetching users:", error);
+          setError(error instanceof Error ? error : new Error("Unknown error"));
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
-    // Only fetch if we're not already loading
-    if (loading) {
-      fetchUsers();
-    }
-  }, [loading]); // Add loading as dependency
+    fetchUsers();
 
+    return () => {
+      mounted = false;
+    };
+  }, []); // Empty dependency array for mount-only execution
+
+    // Add effect to handle navigation state
+    useEffect(() => {
+      const state = location.state as { userId?: string; viewMode?: ViewMode } | null;
+      if (state?.userId) {
+        setSelectedUserId(state.userId);
+        console.log('Selected user ID changed to:', selectedUserId);
+        
+        // setViewMode(state.viewMode || 'profile');
+      }
+    }, [location.state]);
+  
+  // Memoize filtered users
   const filteredUsers = useMemo(() => {
-    return users.filter(user => {
+    // Skip filtering on initial mount
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return users;
+    }
+
+    // Return empty array if users is not valid
+    if (!Array.isArray(users) || users.length === 0) {
+      return [];
+    }
+    
+    // Filter valid users
+    const validUsers = users.filter(user => {
+      if (!user || typeof user !== 'object') return false;
+      
       switch (activeTab) {
         case 'active':
           return user.isActive === true;
@@ -159,10 +178,30 @@ export default function UserManagement() {
           return true;
       }
     });
+
+    // Log only if we have actual users (avoid empty array logs)
+    if (process.env.NODE_ENV === 'development' && validUsers.length > 0) {
+      console.log('Filtered users:', validUsers);
+    }
+
+    return validUsers;
   }, [users, activeTab, selectedUserId]);
 
-  // Add console.log to debug filtered users
-  console.log('Filtered users:', filteredUsers);
+  // Memoize notification modal props to prevent unnecessary re-renders
+  const notificationModalProps = useMemo(() => ({
+    isOpen: showNotificationModal,
+    onClose: () => setShowNotificationModal(false),
+    selectedUsers,
+    users: users.map((user) => ({
+      ...user,
+      profile: {
+        ...user.profile,
+        status: user.isActive ? "active" : "inactive",
+      },
+    })),
+    onNotificationSent: handleNotificationSent,
+    userProfilePic: userMetadata?.profile?.profilePictureUrl
+  }), [showNotificationModal, selectedUsers, users, userMetadata?.profile?.profilePictureUrl, handleNotificationSent]);
 
   if (loading) {
     return <Loader size="large" />;
@@ -179,22 +218,25 @@ export default function UserManagement() {
   }
 
   const handleViewDetails = (userId: string) => {
-    console.log('Viewing details for user:', userId);  // Add logging for debugging
     setSelectedUserId(userId);
-    setViewMode('profile');
-    setActiveTab('current');
+    // Comment out view mode changes
+    // setViewMode("profile");
+    // Use navigate with state instead of modifying URL directly
+    navigate(`${location.pathname}`, {
+      state: { userId /*, viewMode: "profile" */ },
+      replace: true // Use replace to avoid adding to history stack
+    });
   };
 
+
+
   const handleTabChange = (tab: 'all' | 'active' | 'inactive' | 'current') => {
-    console.log('Tab changed to:', tab);
-    console.log('Total users before filtering:', users.length);
-    
-    // Reset view mode to card/table when switching away from current tab
     if (tab !== 'current') {
-      setViewMode('card'); // or 'table' depending on your default view
+      // Comment out view mode changes
+      // setViewMode('table');
+      console.log('Selected user ID changed to:', selectedUserId);
       setSelectedUserId(null);
     }
-    
     setActiveTab(tab);
   };
 
@@ -365,6 +407,7 @@ export default function UserManagement() {
               </p>
             </div>
             <div className="flex gap-4">
+              {/* Comment out view mode switch button
               <button
                 onClick={() =>
                   setViewMode(viewMode === "table" ? "card" : "table")
@@ -373,6 +416,7 @@ export default function UserManagement() {
               >
                 Switch to {viewMode === "table" ? "Card" : "Table"} View
               </button>
+              */}
               <button
                 onClick={() => setShowNotificationModal(true)}
                 disabled={selectedUsers.length === 0}
@@ -400,112 +444,7 @@ export default function UserManagement() {
         <div className="mt-1">
           {" "}
           {/* Further reduced top margin */}
-          {viewMode === "card" ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-              {" "}
-              {/* Further reduced gap */}
-              {filteredUsers.map((user) => (
-                <div
-                  key={user.auth0Id}
-                  className="border-[0.5px] mb-5 border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                      {user.profile?.profilePictureUrl ? (
-                        <img
-                          src={user.profile.profilePictureUrl}
-                          alt={`${user.firstName} ${user.lastName}`}
-                          className="h-full w-full object-cover rounded-full"
-                        />
-                      ) : (
-                        <span className="text-xl font-bold text-gray-600">
-                          {user.firstName.charAt(0)}
-                          {user.lastName.charAt(0)}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-black dark:text-white">
-                        {user.firstName} {user.lastName}
-                      </h3>
-                      <p className="text-sm text-gray-500">{user.email}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">Phone</span>
-                      <span className="text-sm font-medium text-black dark:text-white">
-                        {user.phoneNumber || "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">
-                        Date of Birth
-                      </span>
-                      <span className="text-sm font-medium text-black dark:text-white">
-                        {user.profile?.dateOfBirth
-                          ? new Date(
-                              user.profile.dateOfBirth
-                            ).toLocaleDateString()
-                          : "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">Gender</span>
-                      <span className="text-sm font-medium text-black dark:text-white">
-                        {user.profile?.gender || "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">Role</span>
-                      <span className="text-sm font-medium text-black dark:text-white">
-                        {user.profile?.role || "User"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">Status</span>
-                      <span
-                        className={`text-sm font-medium ${
-                          user.isActive === true
-                            ? "text-success"
-                            : "text-danger"
-                        }`}
-                      >
-                        {user.isActive === true ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex justify-end space-x-2">
-                    {/* <button className="px-3 py-1 text-sm text-primary hover:text-primary-dark border border-primary rounded-md hover:bg-primary hover:text-white transition-colors">
-                      Edit
-                    </button> */}
-                    <button
-                      onClick={() => handleViewDetails(user.auth0Id)}
-                      className="px-3 py-1 text-sm text-primary hover:text-primary-dark border-[0.5px] border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : viewMode === "profile" && selectedUserId ? (
-            <div className="rounded-lg mt-1">
-              {" "}
-              {/* Further reduced top margin */}
-              <ProfileView
-                userId={selectedUserId}
-                onClose={() => {
-                  setViewMode("card");
-                  setSelectedUserId(null);
-                }}
-              />
-            </div>
-          ) : (
-            renderTableView()
-          )}
+          {renderTableView()}
         </div>
       </div>
 

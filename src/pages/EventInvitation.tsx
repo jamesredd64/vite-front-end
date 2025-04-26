@@ -139,9 +139,12 @@ const EventInvitation: React.FC = () => {
 
   const handleDateChange = (date: Date | null, field: 'start' | 'end' | 'scheduledTime') => {
     if (date) {
+      // Keep the exact local time selected by user without UTC conversion
       setFormData(prev => ({
         ...prev,
-        [field]: date.toISOString().slice(0, 16) // Format to match datetime-local format
+        [field]: date.toLocaleString('en-US', { 
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone 
+        })
       }));
     }
   };
@@ -176,57 +179,73 @@ const EventInvitation: React.FC = () => {
     }
 
     try {
-      // Verify we have a logged-in user and selected users
-      // if (!user?.email || selectedUsers.length === 0) {
-      //   alert('Please ensure you are logged in and have selected attendees');
-      //   return;
-      // }
+      // Send invitation to each selected user or all active users if none selected
+      const eventDetails = {
+        startTime: new Date(formData.start),
+        endTime: new Date(formData.end),
+        summary: formData.title,
+        description: formData.description,
+        location: formData.location,
+        organizer: {
+          name: user?.name || user?.email?.split('@')[0] || 'Unknown User',
+          email: user?.email
+        },
+        selectedUsers: selectedUsers.length > 0 ? selectedUsers.map(attendee => ({
+          name: attendee.name,
+          email: attendee.email
+        })) : [] // Empty array signals to backend to use all active users
+      };
 
-      // Send invitation to each selected user
-      await Promise.all(selectedUsers.map(async (attendee) => {
-        const eventDetails = {
-          startTime: new Date(formData.start),
-          endTime: new Date(formData.end),
-          summary: formData.title,
-          description: formData.description,
-          location: formData.location,
-          organizer: {
-            name: user?.name || user?.email?.split('@')[0] || 'Unknown User',
-            email: user?.email
-          },
-          to: {
-            name: attendee.name,
-            email: attendee.email
-          }
-        };
+      const mailOptions = {
+        from: user?.email || 'noreply@yourdomain.com',
+        to: selectedUsers.map(user => user.email).join(','),
+        subject: formData.title,
+        text: 'Please find the calendar event attached.',
+        html: '<p>Please find the calendar event attached. Click to add to your calendar.</p>',
+        icalEvent: {
+          filename: 'invitation.ics',
+          method: 'REQUEST',
+          content: selectedUsers.map(user => generateICalEvent({
+            ...eventDetails,
+            to: {
+              name: user.name,
+              email: user.email
+            }
+          })).join('\n')
+        }
+      };
 
-        const mailOptions = {
-          from: user?.email || 'noreply@yourdomain.com', // Add a default fallback email
-          to: attendee.email,
-          subject: formData.title,
-          text: 'Please find the calendar event attached.',
-          html: '<p>Please find the calendar event attached. Click to add to your calendar.</p>',
-          icalEvent: {
-            filename: 'invitation.ics',
-            method: 'REQUEST',
-            content: generateICalEvent(eventDetails)
-          }
-        };
-
-        await EmailService.sendEventInvitation({
-          ...eventDetails,
-          organizer: {
-            name: user?.name || user?.email?.split('@')[0] || 'Unknown User',
-            email: user?.email || ''
-          }
-        }, mailOptions);
-      }));
+      await EmailService.sendEventInvitation({
+        ...eventDetails,
+        to: {
+          name: selectedUsers[0]?.name || 'Recipient',
+          email: selectedUsers[0]?.email || ''
+        },
+        organizer: {
+          name: user?.name || user?.email?.split('@')[0] || 'Unknown User',
+          email: user?.email || 'noreply@yourdomain.com'  // Provide default value
+        }
+      }, mailOptions);
 
       setStatusMessage({
         type: 'success',
         title: 'Success',
         message: 'Invitations sent successfully!'
       });
+
+      // Clear form after successful send
+      setFormData({
+        title: '',
+        start: '',
+        end: '',
+        allDay: false,
+        calendar: 'primary',
+        description: '',
+        location: '',
+        sendLater: false,
+        scheduledTime: ''
+      });
+      setSelectedUsers([]);
     } catch (error) {
       console.error('Error sending invitations:', error);
       setStatusMessage({
@@ -253,7 +272,7 @@ const EventInvitation: React.FC = () => {
           location: formData.location,
           organizer: {
             name: user.name || user.email?.split('@')[0] || 'Unknown User',
-            email: user.email
+            email: user.email || 'noreply@yourdomain.com'
           }
         },
         scheduledTime: new Date(formData.scheduledTime || ''),
@@ -394,17 +413,17 @@ const EventInvitation: React.FC = () => {
                     selected={formData.start ? new Date(formData.start) : null}
                     onChange={(date) => handleDateChange(date, 'start')}
                     showTimeSelect
-                    dateFormat="MMMM d, yyyy h:mm aa"
-                    placeholderText="Select date and time (e.g., January 1, 2024 2:30 PM)"
+                    dateFormat="MMMM d, yyyy h:mm aa" // This format shows 12-hour time with AM/PM
+                    placeholderText="Select date and time"
+                    timeFormat="h:mm aa" // Changed from "HH:mm" to "h:mm aa"
+                    timeIntervals={15}
+                    timeCaption="Time"
+                  
                     className="w-full rounded-lg border-[1.5px] border-gray-200 bg-transparent px-5 py-3 outline-none transition 
                       focus:border-brand-500 active:border-brand-500 
                       disabled:cursor-default disabled:bg-gray-50
                       dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-500
                       placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                    calendarClassName="!font-sans"
-                    timeClassName={(time: Date) => "dark:text-white"}
-                    timeIntervals={15}
-                    timeCaption="Time"
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                     <svg
@@ -433,18 +452,18 @@ const EventInvitation: React.FC = () => {
                     selected={formData.end ? new Date(formData.end) : null}
                     onChange={(date) => handleDateChange(date, 'end')}
                     showTimeSelect
-                    dateFormat="MMMM d, yyyy h:mm aa"
-                    placeholderText="Select date and time (e.g., January 1, 2024 3:30 PM)"
+                    dateFormat="MMMM d, yyyy h:mm aa" // This format shows 12-hour time with AM/PM
+                    placeholderText="Select date and time"
+                    timeFormat="h:mm aa" // Changed from "HH:mm" to "h:mm aa"
+                    timeIntervals={15}
+                    timeCaption="Time"
+                    
+                    minDate={formData.start ? new Date(formData.start) : undefined}
                     className="w-full rounded-lg border-[1.5px] border-gray-200 bg-transparent px-5 py-3 outline-none transition 
                       focus:border-brand-500 active:border-brand-500 
                       disabled:cursor-default disabled:bg-gray-50
                       dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-500
                       placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                    calendarClassName="!font-sans"
-                    timeClassName={(time: Date) => "dark:text-white"}
-                    timeIntervals={15}
-                    timeCaption="Time"
-                    minDate={formData.start ? new Date(formData.start) : undefined}
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                     <svg
@@ -626,17 +645,17 @@ const EventInvitation: React.FC = () => {
                       onChange={(date) => handleDateChange(date, 'scheduledTime')}
                       showTimeSelect
                       dateFormat="MMMM d, yyyy h:mm aa"
-                      placeholderText="Select send date and time (e.g., January 1, 2024 9:00 AM)"
+                      placeholderText="Select send date and time"
+                      timeFormat="h:mm aa"
+                      timeIntervals={15}
+                      timeCaption="Time"
+                      
                       minDate={new Date()}
                       className="w-full rounded-lg border-[1.5px] border-gray-200 bg-transparent px-5 py-3 outline-none transition 
                         focus:border-brand-500 active:border-brand-500 
                         disabled:cursor-default disabled:bg-gray-50
                         dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-500
                         placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                      calendarClassName="!font-sans"
-                      timeClassName={(time: Date) => "dark:text-white"}
-                      timeIntervals={15}
-                      timeCaption="Time"
                     />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <svg

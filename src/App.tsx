@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
 
-import { Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useParams, Outlet } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useAdmin } from './hooks/useAdmin';
 import { useGlobalStorage } from './hooks/useGlobalStorage';
 import AppLayout from "./layout/AppLayout";
+import AdminLayout from "./layout/AdminLayout";
 import { useEffect, useRef, useState, useCallback } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
 import ProfileView from "./pages/ProfileView";
@@ -25,7 +26,9 @@ import UserManagement from "./pages/UserManagement";
 import { initSessionTimeout } from './utils/sessionTimeout';
 import { IdleTimeoutHandler } from "./components/IdleTimeoutHandler";
 import EventInvitation from "./pages/EventInvitation";
-import Users from './pages/admin/Users';
+import UserAdmin from './pages/admin/Users';
+
+
 
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
@@ -374,48 +377,52 @@ function App() {
             <Routes>        
               <Route path="/signed-out" element={<SignedOut />} />
               {isAuthenticated ? (
-                <Route element={<AppLayout />}>
-                  <Route index element={<Navigate to="/profile-view" replace />} />              
-                  <Route path="/dashboard" element={<DashboardHome />} />                 
-                  <Route path="/profile-view" element={<ProfileView/>} />  
-                  <Route path="/calendar" element={<Calendar />} />
-                  <Route path="/marketing" element={<Marketing />} />                 
-                  <Route path="/notifications/create" element={<CreateNotification />} />
-                  <Route path="/marketing-overview" element={<MarketingOverview />} />
-                  <Route path="/customer-demographics" element={<CustomerDemographics />} />
-                  <Route path="/changelog" element={<Changelog />} />                  
-                  <Route path="/invite" element={<EventInvitation />} />                 
-                  {/* Admin Routes */}
-                  <Route
-                    path="/my/users/*"
-                    element={(() => {
-                      console.log('Checking admin access...');
-                      const adminStatus = isAdmin();
-                      console.log('Is admin?', adminStatus);
-                      
-                      if (!adminStatus) {
-                        return <Navigate to="/dashboard" replace />;
-                      }
-                      
-                      return (
-                        <Routes>
-                          <Route path="/" element={<UserManagement />} />
-                        </Routes>
-                      );
-                    })()}
-                  />
-                  {/* Catch-all route - should be last */}
-                  <Route 
-                    path="*" 
-                    element={<Navigate to="/dashboard" replace />} 
-                  />
-                </Route>
-              ) : (
                 <>
-                  <Route path="/signed-out" element={<SignedOut />} />
-                  <Route path="*" element={<Navigate to="/signed-out" replace />} />
+                  {/* Main routes with AppLayout */}
+                  <Route element={<AppLayout />}>
+                    <Route index element={<Navigate to="/dashboard" replace />} />              
+                    <Route path="/dashboard" element={<DashboardHome />} />          
+                    <Route path="profile-view" element={<ProfileView />} />
+                    <Route path="/calendar" element={<Calendar />} />
+                    <Route path="/marketing" element={<Marketing />} />                 
+                    {/* <Route path="/notifications/create" element={<CreateNotification />} />
+                    <Route path="/marketing-overview" element={<MarketingOverview />} />
+                    <Route path="/customer-demographics" element={<CustomerDemographics />} />
+                    <Route path="/changelog" element={<Changelog />} />                  
+                    <Route path="/invite" element={<EventInvitation />} />
+                    <Route path="/profile-view" element={<ProfileView />} />
+                    <Route path="user-admin" element={<UserAdmin />} /> */}
+                  </Route>
+
+                  {/* Admin routes with AdminLayout */}
+                  {isAdmin() ? (
+                    <Route path="/admin/*" element={<AdminLayout children={undefined} />}>
+                      <Route index element={<Navigate to="admin/user-admin" replace />} />                      
+                      {/* <Route path="calendar" element={<Calendar />} />
+                    <Route path="marketing" element={<Marketing />} />                  */}
+                    <Route path="notifications/create" element={<CreateNotification />} />
+                    <Route path="marketing-overview" element={<MarketingOverview />} />
+                    <Route path="customer-demographics" element={<CustomerDemographics />} />
+                    <Route path="changelog" element={<Changelog />} />                  
+                      <Route path="invite" element={<EventInvitation />} />
+                      <Route path="users" element={
+                        <React.Suspense fallback={<Loader />}>
+                          <UserManagement />
+                        </React.Suspense>
+                      } />
+                    
+                    <Route path="user-admin" element={<UserAdmin />} />
+                      {/* Add other admin routes here */}
+                    </Route>
+                  ) : (
+                    <Route path="/admin/*" element={<Navigate to="/user-admin" replace />} />
+                  )}
+
+                  {/* Catch all route */}
+                  <Route path="*" element={<NotFound />} />
                 </>
-                
+              ) : (
+                <Route path="*" element={<Navigate to="/signed-out" replace />} />
               )}
             </Routes>
           </div>
@@ -424,6 +431,14 @@ function App() {
     </NavigationContext.Provider>
   );
 }
+
+const PageWithCustomLayout = () => {
+  return (
+    <AdminLayout>
+      <UserAdmin />
+    </AdminLayout>
+  );
+};
 
 export default App;
 

@@ -12,13 +12,17 @@ const handleTimeout = async () => {
       // Cancel all pending requests
       window.stop();
       
-      // Clear all storage except theme
+      // Clear all storage except theme and userRole
       const savedTheme = localStorage.getItem('theme');
-      localStorage.clear();
-      sessionStorage.clear();
-      if (savedTheme) {
-        localStorage.setItem('theme', savedTheme);
+      const userRole = localStorage.getItem('userRole');
+      
+      // Clear specific items instead of everything
+      for (const key of Object.keys(localStorage)) {
+        if (key !== 'theme' && key !== 'userRole') {
+          localStorage.removeItem(key);
+        }
       }
+      sessionStorage.clear();
 
       // Clear any existing timeouts and intervals
       const highestTimeoutId = setTimeout(() => {});
@@ -27,9 +31,11 @@ const handleTimeout = async () => {
         clearInterval(i);
       }
 
-      await client.logout();
+      // Redirect to signed-out page
+      window.location.href = '/signed-out';
+      
     } catch (error) {
-      console.error('Session timeout logout error:', error);
+      console.error('Session timeout error:', error);
       window.location.href = '/signed-out';
     }
   }

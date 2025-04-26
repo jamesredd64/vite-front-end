@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useState, useEffect, useCallback } from "react";
 import UserMetadata from "../../types/user.js";
@@ -13,6 +14,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import debounce from 'lodash/debounce';
+import { useAdmin } from "../../hooks/useAdmin.js";
+// import Select from "../form/input/Select";
 
 interface UserMetaCardProps {
   onUpdate: (newInfo: Partial<UserMetadata>) => void;
@@ -26,12 +29,27 @@ interface UserMetaCardProps {
       gender: string;
       profilePictureUrl: string;
       role: 'admin' | 'user' | 'manager' | 'super-admin';
+      timezone: string;
     };
   };
 }
 
 const roleOptions = ["admin", "user", "manager", "super-admin"] as const;
 const genderOptions = ["male", "female", "prefer_not_to_say"] as const;
+
+const timezoneOptions = [
+  { value: 'America/New_York', label: 'Eastern Standard Time (EST)', displayTime: '2 p.m.' },
+  { value: 'America/Chicago', label: 'Central Standard Time (CST)', displayTime: '1 p.m.' },
+  { value: 'America/Denver', label: 'Mountain Standard Time (MST)', displayTime: '12 p.m.' },
+  { value: 'America/Los_Angeles', label: 'Pacific Standard Time (PST)', displayTime: '11 a.m.' },
+  { value: 'America/Anchorage', label: 'Alaska Standard Time (AKST)', displayTime: '10 a.m.' },
+  { value: 'Pacific/Honolulu', label: 'Hawaii-Aleutian Standard Time (HST)', displayTime: '8 a.m.' }
+];
+
+const getTimezoneLabel = (tzValue: string) => {
+  const timezone = timezoneOptions.find(tz => tz.value === tzValue);
+  return timezone ? timezone.label : tzValue;
+};
 
 export const UserMetaCard: React.FC<UserMetaCardProps> = ({
   onUpdate,
@@ -40,6 +58,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
   const { isOpen, openModal, closeModal } = useModal();
   const { user } = useAuth0();
   const userProfile = useUserProfile();
+  const { isAdmin } = useAdmin(); // Add this hook to check admin status
 
   const [formData, setFormData] = useState({
     email: initialData.email || "",
@@ -51,10 +70,12 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
       gender: initialData.profile.gender || "",
       profilePictureUrl: initialData.profile.profilePictureUrl || user?.picture || "",
       role: (initialData.profile.role as 'user' | 'admin' | 'manager' | 'super-admin') || 'user',
+      timezone: initialData.profile.timezone || "America/New_York", // Default to EST
     },
   });
 
   // Debounced update function
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedUpdate = useCallback(
     debounce((updates: Partial<typeof formData>) => {
       onUpdate(updates);
@@ -75,9 +96,14 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
   const maxDate = new Date(today.setFullYear(today.getFullYear() - 18)); // 18 years ago
   const minDate = new Date(today.setFullYear(today.getFullYear() - 92)); // 110 years ago from max date
 
+  // Disable editing if not admin
+  const isEditable = isAdmin;
+
   const handleInputChange = (field: string) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
+    if (!isEditable) return; // Prevent changes if not admin
+    
     const newValue = e.target.value;
     let updates: Partial<typeof formData>;
     
@@ -106,6 +132,8 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
 
   // For immediate updates (like dropdowns, date picker)
   const handleImmediateUpdate = (updates: Partial<typeof formData>) => {
+    if (!isEditable) return; // Prevent changes if not admin
+    
     setFormData(prev => ({
       ...prev,
       ...updates,
@@ -115,6 +143,8 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
   };
 
   const handleRoleChange = (newRole: string) => {
+    if (!isEditable) return; // Prevent changes if not admin
+    
     handleImmediateUpdate({
       ...formData,
       profile: {
@@ -234,6 +264,18 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
     debouncedUpdate(updates);
   };
 
+  // Add timezone handler
+  const handleTimezoneChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newTimezone = e.target.value;
+    handleImmediateUpdate({
+      ...formData,
+      profile: {
+        ...formData.profile,
+        timezone: newTimezone,
+      },
+    });
+  };
+
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
@@ -288,6 +330,14 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
                   </span>
                   <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
                     {formatDateForDisplay(formData.profile.dateOfBirth)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Timezone:
+                  </span>
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400">
+                    {getTimezoneLabel(formData.profile.timezone)}
                   </span>
                 </div>
               </div>
@@ -479,37 +529,72 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
                   </div>
                 </div>
 
-                <div className="lg:col-span-2">
-                  <Label>Date of Birth</Label>
-                  <div className="relative">
-                    <DatePicker
-                      selected={formData.profile.dateOfBirth ? new Date(formData.profile.dateOfBirth) : null}
-                      onChange={handleDateOfBirthChange}
-                      dateFormat="MMMM d, yyyy"
-                      maxDate={maxDate}
-                      minDate={minDate}
-                      showYearDropdown
-                      scrollableYearDropdown
-                      yearDropdownItemNumber={110}
-                      placeholderText="Select your birth date"
-                      className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
-                    />
-                    <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
+                <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+                  <div>
+                    <Label>Date of Birth</Label>
+                    <div className="relative">
+                      <DatePicker
+                        selected={formData.profile.dateOfBirth ? new Date(formData.profile.dateOfBirth) : null}
+                        onChange={handleDateOfBirthChange}
+                        dateFormat="MMMM d, yyyy"
+                        maxDate={maxDate}
+                        minDate={minDate}
+                        showYearDropdown
+                        scrollableYearDropdown
+                        yearDropdownItemNumber={110}
+                        placeholderText="Select your birth date"
+                        className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
+                      />
+                      <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Timezone</Label>
+                    <div className="relative">
+                      <select
+                        value={formData.profile.timezone}
+                        onChange={handleInputChange('profile.timezone')}
+                        className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </span>
+                        {timezoneOptions.map((tz) => (
+                          <option key={tz.value} value={tz.value}>
+                            {tz.label} | {tz.displayTime}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          />
+                        </svg>
+                      </span>
+                    </div>
                   </div>
                 </div>
 

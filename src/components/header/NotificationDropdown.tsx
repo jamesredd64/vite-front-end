@@ -73,7 +73,7 @@ export default function NotificationDropdown() {
     // Set up polling every 30 seconds
     const pollInterval = setInterval(() => {
       fetchNotifications(showAllNotifications);
-    }, 120000);
+    }, 30 * 60 * 1000); // 30 minutes in milliseconds
 
     // Cleanup interval on unmount
     return () => clearInterval(pollInterval);

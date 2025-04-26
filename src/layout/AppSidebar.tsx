@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -50,14 +51,14 @@ const navItems: NavItem[] = [
     name: "Dashboard",
     subItems: [   
       { name: "Attendee Demographics", path: "/customer-demographics", pro: false, requiresAdmin: true },
-      { name: "Calendar", path: "/calendar", pro: false, icon: <CalenderIcon /> , requiresAdmin: true},
-      { name: "Ecommerce", path: "/dashboard", pro: false, requiresAdmin: true },          
+      { name: "Calendar", path: "/calendar", pro: false, icon: <CalenderIcon /> , requiresAdmin: true},          
       // { name: "Edit User", path: "/edit-user", pro: false, icon: <UserCircleIcon />, requiresAdmin: false },
       { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview />, requiresAdmin: true },
-      { name: "User Management", path: "/users", pro: false, icon: <UserCircleIcon />, requiresAdmin: true },
+      { name: "User Management", path: "/user-admin", pro: false, icon: <UserCircleIcon />, requiresAdmin: true },
       // { name: "User Profile", path: "/profile", pro: false, icon: <UserCircleIcon /> },
       { name: "User Profile", path: "/profile-view", pro: false, icon: <TaskIcon /> },
-      { name: "Event Invitation", path: "/invite", pro: false, icon: <TaskIcon /> , requiresAdmin: true},
+      { name: "Event Invitation", path: "/invite", pro: false, icon: <TaskIcon />, requiresAdmin: true },
+      { name: "Ecommerce", path: "/dashboard", pro: false, requiresAdmin: false },      
 
       
     ],
@@ -120,23 +121,33 @@ const AppSidebar: React.FC = () => {
   const { isAdmin } = useAdmin();
   
   // Filter menu items based on admin role
-  const filteredNavItems = useMemo(() => {
-    return navItems.map(item => {
-      if (item.requiresAdmin && !isAdmin()) {
-        return null;
-      }
-      
-      return {
+  const filteredNavItems = useMemo(() => 
+    navItems
+      .filter(item => !item.requiresAdmin || isAdmin) // Filter out non-admin items if the user isn't admin
+      .map(item => ({
         ...item,
-        subItems: item.subItems?.filter(subItem => {
-          if (subItem.requiresAdmin && !isAdmin()) {
-            return false;
-          }
-          return true;
-        })
-      };
-    }).filter(Boolean);
-  }, [isAdmin]);
+        subItems: item.subItems?.filter(subItem => !subItem.requiresAdmin || isAdmin) // Filter subItems for admin
+      })),
+    [isAdmin, navItems] // Dependencies now include navItems for better safety
+  );
+  
+  // const filteredNavItems = useMemo(() => {
+  //   return navItems.map(item => {
+  //     if (item.requiresAdmin && !isAdmin) {
+  //       return null;
+  //     }
+      
+  //     return {
+  //       ...item,
+  //       subItems: item.subItems?.filter(subItem => {
+  //         if (subItem.requiresAdmin && !isAdmin) {
+  //           return false;
+  //         }
+  //         return true;
+  //       })
+  //     };
+  //   }).filter(Boolean);
+  // }, [isAdmin]);
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -160,7 +171,7 @@ const AppSidebar: React.FC = () => {
       toggleMobileSidebar();
     }
 
-    if (handleNavigation(path)) {
+    if (handleNavigation && handleNavigation(path)) {
       navigate(path);
     }
   };
@@ -228,8 +239,8 @@ const AppSidebar: React.FC = () => {
                   openSubmenu?.type === menuType && openSubmenu?.index === index
                     ? "menu-item-active"
                     : "menu-item-inactive"
-                } ${nav.requiresAdmin && !isAdmin() ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                disabled={nav.requiresAdmin && !isAdmin()}
+                } ${nav.requiresAdmin && !isAdmin ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                disabled={nav.requiresAdmin && !isAdmin}
               >
                 <span
                   className={`menu-item-icon-size  ${
@@ -259,7 +270,7 @@ const AppSidebar: React.FC = () => {
                 <Link
                   to={nav.path}
                   onClick={(e) => {
-                    if (nav.requiresAdmin && !isAdmin()) {
+                    if (nav.requiresAdmin && !isAdmin) {
                       e.preventDefault();
                       return;
                     }
@@ -267,7 +278,7 @@ const AppSidebar: React.FC = () => {
                   }}
                   className={`menu-item group ${
                     isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                  } ${nav.requiresAdmin && !isAdmin() ? "opacity-50 cursor-not-allowed" : ""}`}
+                  } ${nav.requiresAdmin && !isAdmin ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <span
                     className={`menu-item-icon-size ${

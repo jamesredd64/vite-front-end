@@ -14,6 +14,17 @@ import { SearchProvider } from './context/SearchContext';
 import { CalendarProvider } from './context/CalendarContext';
 import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
 
+const onRedirectCallback = (appState: any) => {
+  const userRole = localStorage.getItem('userRole');
+  const returnTo = appState?.returnTo || window.location.pathname;
+  
+  if (userRole === 'admin' || userRole === 'super-admin') {
+    window.location.href = returnTo.includes('/admin') ? returnTo : '/admin';
+  } else {
+    window.location.href = returnTo.includes('/admin') ? '/dashboard' : returnTo;
+  }
+};
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>
@@ -27,8 +38,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             scope: 'openid profile email'
           }}
           cacheLocation="localstorage"
-          useRefreshTokens={false}
-          skipRedirectCallback={window.location.pathname === '/signed-out'}
+          useRefreshTokens={true}
+          onRedirectCallback={onRedirectCallback}
         >
           <CalendarProvider>
             <Provider store={store}>
