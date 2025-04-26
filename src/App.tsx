@@ -383,10 +383,10 @@ function App() {
                     <Route index element={<Navigate to="/dashboard" replace />} />              
                     <Route path="/dashboard" element={<DashboardHome />} />          
                     <Route path="profile-view" element={<ProfileView />} />
-                    <Route path="/calendar" element={<Calendar />} />
+                    {/* <Route path="/calendar" element={<Calendar />} />
                     <Route path="/marketing" element={<Marketing />} />                 
-                    {/* <Route path="/notifications/create" element={<CreateNotification />} />
-                    <Route path="/marketing-overview" element={<MarketingOverview />} />
+                    {/* <Route path="/notifications/create" element={<CreateNotification />} /> */}
+                    {/* <Route path="/marketing-overview" element={<MarketingOverview />} />
                     <Route path="/customer-demographics" element={<CustomerDemographics />} />
                     <Route path="/changelog" element={<Changelog />} />                  
                     <Route path="/invite" element={<EventInvitation />} />
@@ -400,7 +400,7 @@ function App() {
                       <Route index element={<Navigate to="admin/user-admin" replace />} />                      
                       {/* <Route path="calendar" element={<Calendar />} />
                     <Route path="marketing" element={<Marketing />} />                  */}
-                    <Route path="notifications/create" element={<CreateNotification />} />
+                    {/* <Route path="notifications/create" element={<CreateNotification />} />
                     <Route path="marketing-overview" element={<MarketingOverview />} />
                     <Route path="customer-demographics" element={<CustomerDemographics />} />
                     <Route path="changelog" element={<Changelog />} />                  
@@ -409,7 +409,7 @@ function App() {
                         <React.Suspense fallback={<Loader />}>
                           <UserManagement />
                         </React.Suspense>
-                      } />
+                      } /> */}
                     
                     <Route path="user-admin" element={<UserAdmin />} />
                       {/* Add other admin routes here */}
@@ -432,13 +432,13 @@ function App() {
   );
 }
 
-const PageWithCustomLayout = () => {
-  return (
-    <AdminLayout>
-      <UserAdmin />
-    </AdminLayout>
-  );
-};
+// const PageWithCustomLayout = () => {
+//   return (
+//     <AdminLayout>
+//       <UserAdmin />
+//     </AdminLayout>
+//   );
+// };
 
 export default App;
 
