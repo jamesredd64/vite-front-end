@@ -29,6 +29,7 @@ import EventInvitation from "./pages/EventInvitation";
 import UserAdmin from './pages/admin/Users';
 // Add this to your imports
 import NewUserWelcome from './pages/NewUserWelcome';
+import ProfilePage from "./pages/ProfilePage";
 
 
 
@@ -54,6 +55,8 @@ import NewUserWelcome from './pages/NewUserWelcome';
 // import Privacy from "./pages/Legal/Privacy";
 // import Terms from "./pages/Legal/Terms";
 
+type UserRole = "user" | "admin" | "manager" | "super-admin";
+
 interface UserMetadata {
   auth0Id: string;
   email: string;
@@ -64,7 +67,8 @@ interface UserMetadata {
     dateOfBirth: string;
     gender: string;
     profilePictureUrl: string;
-    role: string;
+    role: UserRole;
+    timezone: "";
   };
   marketingBudget: {
     adBudget: number;
@@ -182,7 +186,9 @@ function App() {
             profile: {
               dateOfBirth: '',
               gender: '',
-              profilePictureUrl: user.picture || ''
+              profilePictureUrl: user.picture || '',
+              role: '',
+              timezone: '',
             },
             marketingBudget: {
               adBudget: user.marketingBudget?.adBudget || 0,
@@ -198,7 +204,13 @@ function App() {
           };
 
           // Update MongoDB and local storage
-          const createdUser = await updateUser(user.sub, newUserData);
+          const createdUser = await updateUser(user.sub, {
+            ...newUserData,
+            profile: {
+              ...newUserData.profile,
+              role: 'user' as 'user' | 'admin' | 'manager' | 'super-admin'
+            }
+          });
           setUserMetadata(createdUser as UserMetadata);
           return;
         }
@@ -216,6 +228,7 @@ function App() {
             gender: mongoUser.profile.gender || '',
             profilePictureUrl: user.picture || mongoUser.profile.profilePictureUrl,
             role: mongoUser.profile.role || '',
+            timezone: mongoUser.profile.role || "user",
           },
           marketingBudget: {
             adBudget: mongoUser.marketingBudget?.adBudget || 0,
@@ -332,6 +345,8 @@ function App() {
             dateOfBirth: '',
             gender: '',
             profilePictureUrl: user?.picture || '',
+            role: "user",
+            timezone: "",
             
           },
           marketingBudget: {
@@ -344,6 +359,7 @@ function App() {
             notificationPreferences: [],
             roiTarget: 0,
             frequency: 'monthly'
+            
           }
           
         });
@@ -383,9 +399,10 @@ function App() {
                   {/* Main routes with AppLayout */}
                   <Route element={<AppLayout />}>
                     <Route index element={<Navigate to="/welcome-new" replace />} />              
-                    {/* <Route path="/dashboard" element={<DashboardHome />} />           */}
-                    <Route path="profile-view" element={<ProfileView />} />
-                    <Route path="/welcome-new" element={<NewUserWelcome />} />                    
+                    {/* <Route path="/dashboard" element={<DashboardHome />} />        */}                    
+                    <Route path="/welcome-new" element={<NewUserWelcome />} />  
+                    <Route path="/profile" element={<ProfilePage />} />  
+                    
                     {/* <Route path="/calendar" element={<Calendar />} />
                     <Route path="/marketing" element={<Marketing />} />                 
                     {/* <Route path="/notifications/create" element={<CreateNotification />} /> */}

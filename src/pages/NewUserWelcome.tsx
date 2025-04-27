@@ -14,7 +14,7 @@ const NewUserWelcome: React.FC = () => {
 
   return (
     <div className="relative font-normal font-sans z-[1] bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300">
-      <div className="p-4 md:p-6 2xl:p-8">
+      <div className="p-4 md:p-6 2xl:p-2">
         <div className="rounded-md border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-800/50">
           <PageMeta title="Welcome" description="Welcome to your dashboard" />
           <PageBreadcrumb pageTitle="Welcome" />

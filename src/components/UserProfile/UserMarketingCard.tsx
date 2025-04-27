@@ -155,95 +155,86 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({
   onUpdate,
   initialData,
 }) => {
-  const { isOpen, openModal, closeModal } = useModal();
   const { user } = useAuth0();
   const userProfile = useUserProfileStore();
+  const { isOpen, openModal, closeModal } = useModal();
   const [saveResult, setSaveResult] = useState<string | null>(null);
 
-  // Add debug logging
-  useEffect(() => {
-    console.log("Initial Marketing Data:", initialData);
-  }, [initialData]);
+  // Helper function to format number as currency while typing
+  const formatNumberAsCurrency = (value: string): string => {
+    // Remove all non-digits/decimal
+    const numericValue = value.replace(/[^\d.]/g, '');
+    
+    // Ensure only one decimal point
+    const parts = numericValue.split('.');
+    const wholePart = parts[0];
+    const decimalPart = parts.length > 1 ? parts[1].slice(0, 2) : '';
+    
+    // Convert to number and format
+    const numberValue = parseFloat(wholePart || '0') || 0;
+    const formattedWholePart = new Intl.NumberFormat('en-US').format(numberValue);
+    
+    // Return formatted string
+    if (value.includes('.')) {
+      return `$${formattedWholePart}${decimalPart ? '.' + decimalPart : '.'}`;
+    }
+    return `$${formattedWholePart}`;
+  };
+
+  // Helper function to parse currency string to number
+  const parseCurrencyToNumber = (value: string): number => {
+    return Number(value.replace(/[^\d.]/g, '')) || 0;
+  };
 
   const [formData, setFormData] = useState({
     marketingBudget: {
-      frequency: initialData.marketingBudget?.frequency || "monthly",
-      adBudget: Number(initialData.marketingBudget?.adBudget) || 0,
-      costPerAcquisition:
-        Number(initialData.marketingBudget?.costPerAcquisition) || 0,
-      dailySpendingLimit:
-        Number(initialData.marketingBudget?.dailySpendingLimit) || 0,
-      marketingChannels: initialData.marketingBudget?.marketingChannels || "",
-      monthlyBudget: Number(initialData.marketingBudget?.monthlyBudget) || 0,
-      preferredPlatforms: initialData.marketingBudget?.preferredPlatforms || "",
-      notificationPreferences: Array.isArray(
-        initialData.marketingBudget?.notificationPreferences
-      )
-        ? initialData.marketingBudget.notificationPreferences
-        : [],
-      roiTarget: Number(initialData.marketingBudget?.roiTarget) || 0,
-    },
+      frequency: initialData?.marketingBudget?.frequency || "monthly",
+      adBudget: initialData?.marketingBudget?.adBudget || 0,
+      costPerAcquisition: initialData?.marketingBudget?.costPerAcquisition || 0,
+      dailySpendingLimit: initialData?.marketingBudget?.dailySpendingLimit || 0,
+      marketingChannels: initialData?.marketingBudget?.marketingChannels || "",
+      monthlyBudget: initialData?.marketingBudget?.monthlyBudget || 0,
+      preferredPlatforms: initialData?.marketingBudget?.preferredPlatforms || "",
+      notificationPreferences: initialData?.marketingBudget?.notificationPreferences || [],
+      roiTarget: initialData?.marketingBudget?.roiTarget || 0,
+    }
   });
 
-  // Update formData when initialData changes
-  useEffect(() => {
-    if (initialData.marketingBudget) {
-      const newFormData = {
-        marketingBudget: {
-          frequency: initialData.marketingBudget.frequency || "monthly",
-          adBudget: Number(initialData.marketingBudget.adBudget) || 0,
-          costPerAcquisition:
-            Number(initialData.marketingBudget.costPerAcquisition) || 0,
-          dailySpendingLimit:
-            Number(initialData.marketingBudget.dailySpendingLimit) || 0,
-          marketingChannels: initialData.marketingBudget.marketingChannels || "",
-          monthlyBudget: Number(initialData.marketingBudget.monthlyBudget) || 0,
-          preferredPlatforms:
-            initialData.marketingBudget.preferredPlatforms || "",
-          notificationPreferences: Array.isArray(
-            initialData.marketingBudget.notificationPreferences
-          )
-            ? initialData.marketingBudget.notificationPreferences
-            : [],
-          roiTarget: Number(initialData.marketingBudget.roiTarget) || 0,
-        },
-      };
+  const handleInputChange = (field: keyof MarketingBudget) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const value = e.target.value;
+    let processedValue = value;
 
-      console.log("Updating form data with:", newFormData);
-      setFormData(newFormData);
+    // Handle numeric/currency fields
+    if (['adBudget', 'costPerAcquisition', 'dailySpendingLimit', 'monthlyBudget'].includes(field)) {
+      // If the value is empty or just a dollar sign, set it to "$0"
+      if (!value || value === '$') {
+        processedValue = '$0';
+      } else {
+        // Remove the dollar sign before formatting if it exists
+        const valueWithoutDollar = value.startsWith('$') ? value.slice(1) : value;
+        processedValue = formatNumberAsCurrency(valueWithoutDollar);
+      }
+    } else if (field === 'roiTarget') {
+      // Handle ROI as a plain number
+      const numericValue = value.replace(/[^\d.]/g, '');
+      processedValue = numericValue === '' ? '0' : numericValue;
     }
-  }, [initialData]);
 
-  const handleInputChange =
-    (field: keyof MarketingBudget) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const value = e.target.value;
-      setFormData((prev) => ({
-        marketingBudget: {
-          ...prev.marketingBudget,
-          [field]:
-            field === "notificationPreferences"
-              ? typeof value === "string"
-                ? value
-                    .split(",")
-                    .map((v) => v.trim())
-                    .filter(Boolean)
-                : []
-              : field === "marketingChannels" || field === "preferredPlatforms"
-              ? value
-              : field === "frequency"
-              ? value
-              : field === "adBudget" ||
-                field === "costPerAcquisition" ||
-                field === "dailySpendingLimit" ||
-                field === "monthlyBudget" ||
-                field === "roiTarget"
-              ? parseFloat(value.replace(/,/g, '')) || 0  // Remove commas before parsing
-              : value,
-        },
-      }));
-      userProfile.setHasUnsavedChanges(true);
+    const updates = {
+      marketingBudget: {
+        ...formData.marketingBudget,
+        [field]: field === 'roiTarget' ? Number(processedValue) : processedValue,
+      },
     };
+
+    setFormData(prev => ({
+      ...prev,
+      ...updates
+    }));
+    userProfile.setHasUnsavedChanges(true);
+  };
 
   const handleMarketingChannelsChange = (selected: string[]) => {
     const channelsString = selected.join(", ");
@@ -270,17 +261,40 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({
   const handleSave = async () => {
     try {
       if (!user?.sub) return;
-      onUpdate({
+      
+      // Process numeric fields during save
+      const processedData = {
         marketingBudget: {
           ...formData.marketingBudget,
-        },
-      });
+          adBudget: parseCurrencyToNumber(formData.marketingBudget.adBudget.toString()),
+          costPerAcquisition: parseCurrencyToNumber(formData.marketingBudget.costPerAcquisition.toString()),
+          dailySpendingLimit: parseCurrencyToNumber(formData.marketingBudget.dailySpendingLimit.toString()),
+          monthlyBudget: parseCurrencyToNumber(formData.marketingBudget.monthlyBudget.toString()),
+          roiTarget: Number(formData.marketingBudget.roiTarget) || 0, // Handle ROI separately
+        }
+      };
+
+      onUpdate(processedData);
       closeModal();
     } catch (error) {
-      console.error("Error saving marketing info:", error);
-      setSaveResult("Error saving marketing information");
+      console.error('Error saving marketing info:', error);
+      setSaveResult('Error saving marketing preferences');
     }
   };
+
+  // Initialize form data with formatted values
+  useEffect(() => {
+    setFormData({
+      marketingBudget: {
+        ...initialData.marketingBudget,
+        adBudget: parseCurrencyToNumber(initialData.marketingBudget.adBudget.toString()),
+        costPerAcquisition: parseCurrencyToNumber(initialData.marketingBudget.costPerAcquisition.toString()),
+        dailySpendingLimit: parseCurrencyToNumber(initialData.marketingBudget.dailySpendingLimit.toString()),
+        monthlyBudget: parseCurrencyToNumber(initialData.marketingBudget.monthlyBudget.toString()),
+        roiTarget: parseCurrencyToNumber(initialData.marketingBudget.roiTarget.toString()),
+      }
+    });
+  }, [initialData]);
 
   return (
     <>
@@ -306,10 +320,7 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({
                   Cost Per Acquisition
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  }).format(formData.marketingBudget.costPerAcquisition)}
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(formData.marketingBudget.costPerAcquisition))}
                 </p>
               </div>
 
@@ -318,10 +329,7 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({
                   Budget
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  }).format(formData.marketingBudget.monthlyBudget)}
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(formData.marketingBudget.monthlyBudget))}
                 </p>
               </div>
 
@@ -334,7 +342,7 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({
                   {formData.marketingBudget.marketingChannels
                     ? formData.marketingBudget.marketingChannels
                         .split(",")
-                        .map((s) => s.trim())
+                        .map((s: string) => s.trim())
                         .filter(Boolean)
                         .join(", ")
                     : "Not set"}
@@ -498,7 +506,7 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({
                     options={MarketingChannels}
                     value={formData.marketingBudget.marketingChannels
                       .split(",")
-                      .map((s) => s.trim())
+                      .map((s: string) => s.trim())
                       .filter(Boolean)}
                     onChange={handleMarketingChannelsChange}
                     placeholder="Select marketing channels"
@@ -514,7 +522,7 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({
                     options={MarketingPlatforms}
                     value={formData.marketingBudget.preferredPlatforms
                       .split(",")
-                      .map((s) => s.trim())
+                      .map((s: string) => s.trim())
                       .filter(Boolean)}
                     onChange={handlePlatformsChange}
                     placeholder="Select preferred platforms"
@@ -555,10 +563,11 @@ export const UserMarketingCard: React.FC<UserMarketingCardProps> = ({
                     type="number"
                     value={formData.marketingBudget.roiTarget}
                     onChange={handleInputChange("roiTarget")}
+                    placeholder="0"
                     step={1}
                     min="0"
                     max="100"
-                    placeholder="0"
+                    
                   />
                 </div>
               </div>

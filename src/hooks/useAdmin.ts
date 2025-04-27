@@ -1,36 +1,42 @@
 import { useGlobalStorage } from './useGlobalStorage';
 import { UserMetadata } from '../types/user';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export const useAdmin = () => {
   const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const [state, setState] = useState({
     isAdmin: false,
-    isLoading: false
+    isLoading: true
   });
 
-  useEffect(() => {
-    console.log('[useAdmin Hook]', {
-      hasUserMetadata: !!userMetadata,
-      userRole: userMetadata?.profile?.role,
-      currentState: state
-    });
-
+  const checkAdminStatus = useCallback(() => {
+    // Wait for userMetadata to be available
     if (!userMetadata) {
-      console.log('[useAdmin Hook]', 'No user metadata, setting non-admin state');
-      setState({ isAdmin: false, isLoading: false });
-      return;
+      return false;
     }
 
-    const adminStatus = userMetadata.profile?.role === 'admin' || 
-                       userMetadata.profile?.role === 'super-admin';
+    const role = userMetadata?.profile?.role;
+    console.log('[useAdmin Hook] Checking admin status:', {
+      currentRole: role,
+      metadata: userMetadata
+    });
+
+    return ['admin', 'super-admin'].includes(role || '');
+  }, [userMetadata]);
+
+  useEffect(() => {
+    const adminStatus = checkAdminStatus();
     
-    console.log('[useAdmin Hook]', `Setting admin status to: ${adminStatus}`);
+    console.log('[useAdmin Hook] Setting state:', {
+      isAdmin: adminStatus,
+      userMetadata: userMetadata
+    });
+
     setState({
       isAdmin: adminStatus,
       isLoading: false
     });
-  }, [userMetadata]);
+  }, [userMetadata, checkAdminStatus]);
 
   return state;
 };

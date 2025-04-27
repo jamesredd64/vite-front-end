@@ -13,7 +13,7 @@ const Loader: React.FC<LoaderProps> = ({ size = 'medium', className = '' }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50">
+    <div className="fixed inset-0 flex justify-center items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-[9999]">
       <div className="flex flex-col items-center gap-4">
         <div 
           className={`

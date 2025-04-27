@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useState, useEffect, useCallback } from "react";
@@ -13,7 +14,6 @@ import Radio from "../form/input/Radio";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
-import debounce from 'lodash/debounce';
 import { useAdmin } from "../../hooks/useAdmin.js";
 // import Select from "../form/input/Select";
 
@@ -55,55 +55,51 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
   onUpdate,
   initialData,
 }) => {
-  const { isOpen, openModal, closeModal } = useModal();
   const { user } = useAuth0();
   const userProfile = useUserProfile();
-  const { isAdmin } = useAdmin(); // Add this hook to check admin status
+  const { isAdmin, isLoading: adminLoading } = useAdmin();
+  const { isOpen: isModalOpen, openModal, closeModal } = useModal();
 
   const [formData, setFormData] = useState({
     email: initialData.email || "",
     firstName: initialData.firstName || "",
     lastName: initialData.lastName || "",
-    phoneNumber: initialData.phoneNumber || "", // Added on 04/16/2025
+    phoneNumber: initialData.phoneNumber || "",
     profile: {
       dateOfBirth: initialData.profile.dateOfBirth || "",
       gender: initialData.profile.gender || "",
       profilePictureUrl: initialData.profile.profilePictureUrl || user?.picture || "",
-      role: (initialData.profile.role as 'user' | 'admin' | 'manager' | 'super-admin') || 'user',
-      timezone: initialData.profile.timezone || "America/New_York", // Default to EST
+      role: initialData.profile.role || 'user',
+      timezone: initialData.profile.timezone || "America/New_York",
     },
   });
 
-  // Debounced update function
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedUpdate = useCallback(
-    debounce((updates: Partial<typeof formData>) => {
-      onUpdate(updates);
-      userProfile.setHasUnsavedChanges(true);
-    }, 500),
-    [onUpdate, userProfile]
-  );
-
-  // Cleanup on unmount
   useEffect(() => {
-    return () => {
-      debouncedUpdate.cancel();
-    };
-  }, [debouncedUpdate]);
+    if (!adminLoading) {
+      setFormData(prev => ({
+        ...prev,
+        profile: {
+          ...prev.profile,
+          role: initialData.profile.role
+        }
+      }));
+    }
+  }, [adminLoading, initialData.profile.role]);
 
+  if (adminLoading) {
+    return <div>Loading...</div>;
+  }
   // Calculate date ranges for the date picker
   const today = new Date();
   const maxDate = new Date(today.setFullYear(today.getFullYear() - 18)); // 18 years ago
   const minDate = new Date(today.setFullYear(today.getFullYear() - 92)); // 110 years ago from max date
 
-  // Disable editing if not admin
-  const isEditable = isAdmin;
+  // Allow editing if it's the user's own profile or if they're an admin
+  const isEditable = true; // Remove admin-only restriction
 
   const handleInputChange = (field: string) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    if (!isEditable) return; // Prevent changes if not admin
-    
     const newValue = e.target.value;
     let updates: Partial<typeof formData>;
     
@@ -127,13 +123,12 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
       ...prev,
       ...updates
     }));
-    debouncedUpdate(updates);
+    onUpdate(updates); // Direct update instead of debounced
+    userProfile.setHasUnsavedChanges(true);
   };
 
   // For immediate updates (like dropdowns, date picker)
   const handleImmediateUpdate = (updates: Partial<typeof formData>) => {
-    if (!isEditable) return; // Prevent changes if not admin
-    
     setFormData(prev => ({
       ...prev,
       ...updates,
@@ -142,8 +137,9 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
     userProfile.setHasUnsavedChanges(true);
   };
 
+  // Only restrict role changes to admins
   const handleRoleChange = (newRole: string) => {
-    if (!isEditable) return; // Prevent changes if not admin
+    if (!isAdmin) return; // Keep role changes admin-only
     
     handleImmediateUpdate({
       ...formData,
@@ -175,27 +171,34 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
 
   const handleDateOfBirthChange = (date: Date | null) => {
     if (date) {
-      const formattedDate = date.toISOString();
+      const formattedDate = date.toLocaleDateString("en-US"); // Change formatting for better user readability
       handleImmediateUpdate({
         ...formData,
         profile: {
           ...formData.profile,
-          dateOfBirth: formattedDate,
+          dateOfBirth: formattedDate, // Pass formatted date
         },
       });
     }
   };
+  
 
   const handleSave = async () => {
     try {
       if (!user?.sub) return;
-      onUpdate({
+      
+      // Ensure we're sending the complete profile data
+      const updatedData = {
         ...formData,
         profile: {
           ...formData.profile,
+          timezone: formData.profile.timezone,
           role: (formData.profile.role as 'user' | 'admin' | 'manager') || 'user'
         }
-      });
+      };
+      
+      await onUpdate(updatedData);
+      userProfile.setHasUnsavedChanges(false);
       closeModal();
     } catch (error) {
       console.error("Error saving meta info:", error);
@@ -261,19 +264,33 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
       ...prev,
       ...updates
     }));
-    debouncedUpdate(updates);
+    onUpdate(updates); // Direct update instead of debounced
+    userProfile.setHasUnsavedChanges(true);
   };
 
   // Add timezone handler
   const handleTimezoneChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newTimezone = e.target.value;
-    handleImmediateUpdate({
-      ...formData,
+    
+    const updates = {
       profile: {
         ...formData.profile,
         timezone: newTimezone,
+      }
+    };
+
+    // Update local state
+    setFormData(prev => ({
+      ...prev,
+      profile: {
+        ...prev.profile,
+        timezone: newTimezone,
       },
-    });
+    }));
+
+    // Trigger the update
+    onUpdate(updates);
+    userProfile.setHasUnsavedChanges(true);
   };
 
   return (
@@ -444,7 +461,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
           </button>
       </div>
 
-      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
+      <Modal isOpen={isModalOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="relative w-full p-4 overflow-y-auto bg-white border border-gray-200 dark:border-gray-700 no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
@@ -543,6 +560,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
                         scrollableYearDropdown
                         yearDropdownItemNumber={110}
                         placeholderText="Select your birth date"
+                        disabled={!isEditable}
                         className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
                       />
                       <span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
@@ -569,7 +587,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
                     <div className="relative">
                       <select
                         value={formData.profile.timezone}
-                        onChange={handleInputChange('profile.timezone')}
+                        onChange={handleTimezoneChange}
                         className="h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
                       >
                         {timezoneOptions.map((tz) => (

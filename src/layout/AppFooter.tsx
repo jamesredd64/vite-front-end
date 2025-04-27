@@ -6,7 +6,7 @@ const AppFooter: React.FC = () => {
   const buildDate = new Date(VERSION.buildDate).toLocaleDateString();
   
   return (
-    <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+    <footer className="mt-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
       <div className="w-full mx-auto px-4 py-6">
         {/* Main grid container - full width */}
         <div className="w-full mx-auto">

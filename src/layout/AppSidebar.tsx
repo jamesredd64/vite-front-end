@@ -7,7 +7,9 @@ import { useSidebar } from "../context/SidebarContext";
 import { useNavigation } from "../hooks/useNavigation";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useAdmin } from '../hooks/useAdmin';
-// const [userMetadata, setUserMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
+// import { useGlobalStorage } from './hooks/useGlobalStorage';
+
+
 
 // Assume these icons are imported from an icon library
 import {
@@ -39,9 +41,11 @@ type NavItem = {
   requiresAdmin?: boolean;
 };
 
+
 // Add this function to check if user is admin
-// const isAdmin = () => {
-//   return userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
+// const username = () => {
+  
+//   return user.firstName;
 // };
 
 
@@ -50,14 +54,15 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Dashboard",
     subItems: [   
+      { name: "Welcome", path: "/welcome-new", pro: false, requiresAdmin: false },     
+      { name: "Your Profile ", path: "/profile", pro: false, icon: <TaskIcon /> },
       // { name: "Attendee Demographics", path: "/customer-demographics", pro: false, requiresAdmin: true },
       // { name: "Calendar", path: "/calendar", pro: false, icon: <CalenderIcon /> , requiresAdmin: true},          
       // // { name: "Edit User", path: "/edit-user", pro: false, icon: <UserCircleIcon />, requiresAdmin: false },
       // { name: "MarketingOverview", path: "/marketing-overview", pro: false, icon: <MarketingOverview />, requiresAdmin: true },
       // { name: "User Management", path: "/user-admin", pro: false, icon: <UserCircleIcon />, requiresAdmin: true },
       // { name: "User Profile", path: "/profile", pro: false, icon: <UserCircleIcon /> },
-      { name: "Welcome", path: "/welcome-new", pro: false, requiresAdmin: false },      
-      { name: "User Profile", path: "/profile-view", pro: false, icon: <TaskIcon /> },
+      
       // { name: "Event Invitation", path: "/invite", pro: false, icon: <TaskIcon />, requiresAdmin: true },
       // { name: "Ecommerce", path: "/dashboard", pro: false, requiresAdmin: false },      
 

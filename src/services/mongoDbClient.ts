@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import  UserMetadata  from '../types/user';
 import { API_CONFIG } from '../config/api.config';
 import { CalendarEvent, CalendarApiResponse } from '../types/calendar.types';
-import axios from 'axios';
+// import axios from 'axios';
 
 // const MAX_RETRIES = 2;
 // const RETRY_DELAY = 1000;
@@ -25,6 +26,7 @@ type UserData = {
     gender?: string;
     profilePictureUrl?: string;
     role?: string;
+    timezone?: string;
   };
   marketingBudget?: {
     adBudget?: number;
@@ -51,12 +53,6 @@ type UserData = {
 const normalizeAuthId = (auth0Id: string): string => {
   return auth0Id;
 };
-
-
-
-
-
-
 
 export const useMongoDbClient = () => {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
