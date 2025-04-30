@@ -1,10 +1,30 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { VERSION } from '../config/version';
 
 export const SignedOut = () => {
-  const { loginWithRedirect } = useAuth0();
+  const { loginWithRedirect, isAuthenticated } = useAuth0();
+  const navigate = useNavigate();
   const buildDate = new Date(VERSION.buildDate).toLocaleDateString();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleLogin = async () => {
+    try {
+      await loginWithRedirect({
+        appState: {
+          returnTo: window.location.origin
+        }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-white dark:bg-gray-900">
@@ -40,7 +60,7 @@ export const SignedOut = () => {
 
           <div className="flex justify-center">
             <button
-              onClick={() => loginWithRedirect()}
+              onClick={handleLogin}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-8 py-3 text-sm font-medium text-white transition-all hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
             >
               <svg 

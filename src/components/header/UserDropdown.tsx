@@ -15,14 +15,12 @@ export default function UserDropdown() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
 
-
-
   // Display name logic - use metadata first, fallback to Auth0 user info
   const displayName = useMemo(() => {
     if (!isAuthenticated) return '';
     return userMetadata?.email || user?.email || user?.name || '';
   }, [isAuthenticated, userMetadata?.email, user?.email, user?.name]);
-  
+
   const profilePicture = useMemo(() => {
     if (!isAuthenticated) return "/icons/default-avatar.png";
     if (user?.picture) return user.picture;
@@ -30,11 +28,11 @@ export default function UserDropdown() {
     return "/icons/default-avatar.png";
   }, [isAuthenticated, user?.picture, userMetadata?.profile.profilePictureUrl]);
 
-    // Don't render if not authenticated
-    if (!isAuthenticated) {
-      return null;
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
   }
-  
+
   const toggleDropdown = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsOpen(!isOpen);
@@ -48,25 +46,41 @@ export default function UserDropdown() {
     e.stopPropagation();
 
     try {
-       const savedTheme = localStorage.getItem('theme');
-      // const savedTheme = localStorage.getItem('theme');
-            // const userRole = localStorage.getItem('userRole');
-            
-            // Clear specific items instead of everything
-            for (const key of Object.keys(localStorage)) {
-              if (key !== 'theme' && key !== 'userRole') {
-                localStorage.removeItem(key);
-              }
-            }
-            
-      
-      
-      if (savedTheme) {
-        localStorage.setItem('theme', savedTheme);
-      }
+      const savedTheme = localStorage.getItem('theme');
 
-      sessionStorage.clear();
-      
+      // Get the current userMetadata and extract the role before clearing
+      // const userMetadataStr = localStorage.getItem('userMetadata');
+      // const userRole = UserRoleStorage.getRole(user.email);
+      // let savedRole = localStorage.getItem('userRole');
+
+      // if (userMetadataStr) {
+      //   const userMetadata = JSON.parse(userMetadataStr);
+      //   // If we have a role in userMetadata, use that as the saved role
+      //   if (userMetadata?.profile?.role) {
+      //     savedRole = userMetadata.profile.role;
+      //     if (savedRole) {
+      //       localStorage.setItem('userRole', savedRole);
+      //     }
+      //   }
+      // }
+
+      // Clear specific items instead of everything
+      // for (const key of Object.keys(localStorage)) {
+      //   if (key !== 'theme' && key !== 'userRole') {
+      //     localStorage.removeItem(key);
+      //   }
+      // }
+
+      // // Restore saved values
+      // if (savedTheme) {
+      //   localStorage.setItem('theme', savedTheme);
+      // }
+      // if (savedRole) {
+      //   localStorage.setItem('userRole', savedRole);
+      // }
+
+      // sessionStorage.clear();
+
       logout({
         logoutParams: {
           returnTo: `${window.location.origin}${isAdminRoute ? '/admin' : ''}/signed-out`,
@@ -97,7 +111,7 @@ export default function UserDropdown() {
         <span className="font-medium text-sm hidden sm:block">
           {displayName}
         </span>
-        
+
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""

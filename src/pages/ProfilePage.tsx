@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useCallback } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth0, User } from "@auth0/auth0-react";
 // import { useNavigate } from "react-router-dom";
 import { UserMetaCard } from "../components/UserProfile/UserMetaCard";
 import { UserAddressCard } from "../components/UserProfile/UserAddressCard";
@@ -17,6 +16,7 @@ import { useNavigation } from "../hooks/useNavigation";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from "../components/ui/button/Button";
 import Loader from "../components/common/Loader";
+import { useLocation } from "react-router-dom";
 
 // Logger utility
 const logger = (message: string, data?: unknown) => {
@@ -70,7 +70,15 @@ interface ProfilePageProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const UserProfile: React.FC<ProfilePageProps> = ({ userId }) => {
+// const UserProfile: React.FC<ProfilePageProps> = ({ userId }) => {
+  const ProfilePage: React.FC<ProfilePageProps> = () => {
+    const location = useLocation();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { userId, userDetails } = location.state as { 
+      userId: string;
+      userDetails: User;
+    };
+  
   const { user, isAuthenticated, isLoading: auth0Loading } = useAuth0();
   const { getUserById, saveUserData } = useMongoDbClient();
   const auth0Id = userId || user?.sub;
@@ -208,7 +216,7 @@ const UserProfile: React.FC<ProfilePageProps> = ({ userId }) => {
               ...defaultMarketingBudget,
               ...fetchedUserData.marketingBudget
             },
-            isActive: fetchedUserData.isActive ?? true
+            isActive: fetchedUserData.isActive ?? false
           };
           setUserData(restructuredData);
           setInitialUserData(restructuredData);
@@ -360,7 +368,7 @@ const UserProfile: React.FC<ProfilePageProps> = ({ userId }) => {
           ...prevData.marketingBudget,
           ...updates.marketingBudget
         } : prevData.marketingBudget,
-        isActive: prevData.isActive
+        isActive: updates.isActive ?? false
       };
       
       console.log('Previous data:', prevData);
@@ -468,7 +476,8 @@ const UserProfile: React.FC<ProfilePageProps> = ({ userId }) => {
                   profilePictureUrl: newInfo.profile?.profilePictureUrl || userData.profile.profilePictureUrl || (user?.picture || ''),
                   role: (newInfo.profile?.role as 'user' | 'admin' | 'manager') || userData.profile.role || 'user',
                   timezone: newInfo.profile?.timezone || userData.profile.timezone,  // Fixed: Preserve timezone
-                }
+                },
+                isActive: newInfo?.isActive ?? false,
               });
             }}
             initialData={{
@@ -482,7 +491,8 @@ const UserProfile: React.FC<ProfilePageProps> = ({ userId }) => {
                 profilePictureUrl: auth0Id ? (userData?.profile?.profilePictureUrl || "") : (user?.picture || userData?.profile?.profilePictureUrl || ""),
                 role: (userData?.profile?.role as 'user' | 'admin' | 'manager' | 'super-admin') || 'user',
                 timezone: userData?.profile?.timezone || "America/New_York",  // Fixed: Set default timezone
-              },              
+              },     
+              isActive: userData?.isActive ?? false,
             }}
           />
 
@@ -518,4 +528,4 @@ const UserProfile: React.FC<ProfilePageProps> = ({ userId }) => {
   );
 };
 
-export default React.memo(UserProfile);
+export default React.memo(ProfilePage);

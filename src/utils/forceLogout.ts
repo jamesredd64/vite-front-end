@@ -6,18 +6,18 @@ export const forceLogout = async (auth0Client?: Auth0Client) => {
   
   // Clear all storage except theme
   const savedTheme = localStorage.getItem('theme');
-  localStorage.clear();
-  sessionStorage.clear();
+  // localStorage.clear();
+  // sessionStorage.clear();
   if (savedTheme) {
     localStorage.setItem('theme', savedTheme);
   }
 
   // Clear any existing timeouts and intervals
-  const highestTimeoutId = setTimeout(() => {});
-  for (let i = 0; i < highestTimeoutId; i++) {
-    clearTimeout(i);
-    clearInterval(i);
-  }
+  // const highestTimeoutId = setTimeout(() => {});
+  // for (let i = 0; i < highestTimeoutId; i++) {
+  //   clearTimeout(i);
+  //   clearInterval(i);
+  // }
 
   // Remove all event listeners (if any were set globally)
   const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];

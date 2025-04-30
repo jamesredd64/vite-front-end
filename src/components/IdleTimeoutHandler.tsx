@@ -17,12 +17,12 @@ export const IdleTimeoutHandler: React.FC = () => {
     //   const userRole = localStorage.getItem('userRole');
       
       // Clear specific items instead of everything
-      for (const key of Object.keys(localStorage)) {
-        if (key !== 'theme' && key !== 'userRole') {
-          localStorage.removeItem(key);
-        }
-      }
-      sessionStorage.clear();
+    //   for (const key of Object.keys(localStorage)) {
+    //     if (key !== 'theme' && key !== 'userRole') {
+    //       localStorage.removeItem(key);
+    //     }
+    //   }
+    //   sessionStorage.clear();
         
 
         // Preserve theme preference if needed

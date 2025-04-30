@@ -15,6 +15,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import { useAdmin } from "../../hooks/useAdmin.js";
+import  Switch  from '../../components/form/switch/Switch';
 // import Select from "../form/input/Select";
 
 interface UserMetaCardProps {
@@ -31,6 +32,7 @@ interface UserMetaCardProps {
       role: 'admin' | 'user' | 'manager' | 'super-admin';
       timezone: string;
     };
+    isActive: boolean;
   };
 }
 
@@ -59,6 +61,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
   const userProfile = useUserProfile();
   const { isAdmin, isLoading: adminLoading } = useAdmin();
   const { isOpen: isModalOpen, openModal, closeModal } = useModal();
+  const [isActive, setIsActive] = useState(initialData.isActive);
 
   const [formData, setFormData] = useState({
     email: initialData.email || "",
@@ -72,8 +75,21 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
       role: initialData.profile.role || 'user',
       timezone: initialData.profile.timezone || "America/New_York",
     },
+    isActive: initialData.isActive,
   });
 
+  const handleIsActiveChange = (checked: boolean) => {
+    console.log("Is checked " , checked);
+    const updates = {
+      ...formData,
+      isActive: checked,
+    };
+    setFormData(updates);
+    onUpdate(updates);
+    userProfile.setHasUnsavedChanges(true);
+  };
+
+  
   useEffect(() => {
     if (!adminLoading) {
       setFormData(prev => ({
@@ -105,6 +121,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
     
     if (field.startsWith('profile.')) {
       const profileField = field.split('.')[1];
+      // console.log("newValue " , newValue);
       updates = {
         ...formData,
         profile: {
@@ -112,13 +129,14 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
           [profileField]: newValue,
         },
       };
+      // console.log("profileField " , profileField);
     } else {
       updates = {
         ...formData,
         [field]: newValue,
       };
     }
-    
+    // console.log("newValue 2" , newValue);
     setFormData(prev => ({
       ...prev,
       ...updates
@@ -614,6 +632,16 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
                       </span>
                     </div>
                   </div>
+                  <div className="flex items-center gap-2">
+                  <Switch                    
+                    label="Active Status"
+                    defaultChecked={initialData.isActive}
+                    onChange={handleIsActiveChange}
+                  />
+                  <span className="text-sm">User Active Status</span>
+                </div>
+
+
                 </div>
 
                 <div>

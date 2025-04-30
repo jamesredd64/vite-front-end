@@ -217,16 +217,26 @@ export default function UserManagement() {
     );
   }
 
-  const handleViewDetails = (userId: string) => {
-    setSelectedUserId(userId);
-    // Comment out view mode changes
-    // setViewMode("profile");
-    // Use navigate with state instead of modifying URL directly
-    navigate(`${location.pathname}`, {
-      state: { userId /*, viewMode: "profile" */ },
-      replace: true // Use replace to avoid adding to history stack
-    });
+  const handleViewDetails = async (userId: string) => {
+    console.log("Button clicked - userId:", userId);
+    
+    const clickedUser = filteredUsers.find(user => user.auth0Id === userId);
+    console.log("Found clicked user:", clickedUser);
+
+    if (clickedUser) {
+      // Force the navigation to treat this as a new route
+      navigate(`/admin/users/${clickedUser.auth0Id}/profile`, {
+        state: { 
+          userId: clickedUser.auth0Id,
+          userDetails: clickedUser
+        },
+        replace: true  // Add this to force a fresh route
+      });
+    } else {
+      console.error("User not found:", userId);
+    }
   };
+
 
 
 
@@ -466,21 +476,3 @@ export default function UserManagement() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

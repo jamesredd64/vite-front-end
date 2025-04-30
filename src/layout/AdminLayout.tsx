@@ -1,24 +1,35 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { SidebarProvider, useSidebar } from "../context/SidebarContext";
-import { useGlobalStorage } from '../hooks/useGlobalStorage';
-import { UserMetadata } from '../types/user';
-import { Outlet } from "react-router";
-import AppHeader from "./AppHeader";
-import Backdrop from "./Backdrop";
-import AdminSidebar from "./AdminSidebar";
-import AppFooter from "./AppFooter";
-// import AdminSidebar from "./AdminSidebar";
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useAdmin } from '../hooks/useAdmin';
+import AdminSidebar from './AdminSidebar';
+import AppHeader from './AppHeader';
+import Backdrop from './Backdrop';
+import { useSidebar } from '../context/SidebarContext';
+import AppFooter from './AppFooter';
 
-const LayoutContent: React.FC = () => {
+const AdminLayout: React.FC = () => {
+  const { isAuthenticated, isLoading: isAuth0Loading } = useAuth0();
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
-  const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
 
-  const isAdminUser = userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
+  if (isAuth0Loading || isAdminLoading) {
+    return <div>Loading Admin Layout...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/signed-out" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   return (
     <div className="min-h-screen xl:flex">
       <div>
-        {isAdminUser ? <AdminSidebar /> : <AdminSidebar />}
+        <AdminSidebar />
         <Backdrop />
       </div>
       <div
@@ -36,16 +47,4 @@ const LayoutContent: React.FC = () => {
   );
 };
 
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
-
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  return (
-    <SidebarProvider>
-      <LayoutContent />
-    </SidebarProvider>
-  );
-};
-
-export default AdminLayout;
+export default AdminLayout;  

@@ -22,14 +22,14 @@ const handleTimeout = async () => {
           localStorage.removeItem(key);
         }
       }
-      sessionStorage.clear();
+      // sessionStorage.clear();
 
       // Clear any existing timeouts and intervals
-      const highestTimeoutId = setTimeout(() => {});
-      for (let i = 0; i < highestTimeoutId; i++) {
-        clearTimeout(i);
-        clearInterval(i);
-      }
+      // const highestTimeoutId = setTimeout(() => {});
+      // for (let i = 0; i < highestTimeoutId; i++) {
+      //   clearTimeout(i);
+      //   clearInterval(i);
+      // }
 
       // Redirect to signed-out page
       window.location.href = '/signed-out';

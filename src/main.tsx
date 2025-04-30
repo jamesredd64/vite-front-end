@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
@@ -13,6 +14,9 @@ import { ThemeProvider } from './context/ThemeContext';
 import { SearchProvider } from './context/SearchContext';
 import { CalendarProvider } from './context/CalendarContext';
 import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
+import { useAuth0} from '@auth0/auth0-react';
+import { useState } from 'react';
+import { UserRoleStorage } from "./utils/userStorage";
 
 const onRedirectCallback = (appState: any) => {
   const userRole = localStorage.getItem('userRole');
@@ -25,38 +29,58 @@ const onRedirectCallback = (appState: any) => {
   }
 };
 
+
+
+// useEffect(() => {
+//   const { user } = useAuth0();
+//   const userRole = user && user.email ? UserRoleStorage.getRole(user.email) : null;
+//   console.log('[Auth] Redirect - User role:', userRole);
+  
+//   // Get the intended return path or default to root
+//   // const returnTo = (appState as { returnTo?: string })?.returnTo || '/';
+  
+//   if (userRole === 'admin' || userRole === 'super-admin') {
+//     console.log('[Auth] Redirecting admin to:', '/admin');
+//     window.location.href = '/admin';
+//   } else {
+//     console.log('[Auth] Redirecting user to:', '/user');
+//     window.location.href = '/user';
+//   }
+// }, [useAuth0()]);
+
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <HelmetProvider>
       <ThemeProvider>
-        <Auth0Provider
-          domain={import.meta.env.VITE_AUTH0_DOMAIN}
-          clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
-          authorizationParams={{
-            redirect_uri: window.location.origin,
-            audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-            scope: 'openid profile email'
-          }}
-          cacheLocation="localstorage"
-          useRefreshTokens={true}
-          onRedirectCallback={onRedirectCallback}
-        >
-          <CalendarProvider>
-            <Provider store={store}>
-              <UnsavedChangesProvider>
-                <SidebarProvider>
-                  <SearchProvider>
-                    <BrowserRouter>
+        <BrowserRouter>
+          <Auth0Provider
+            domain={import.meta.env.VITE_AUTH0_DOMAIN}
+            clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
+            authorizationParams={{
+              redirect_uri: window.location.origin,
+              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+              scope: 'openid profile email'
+            }}
+            cacheLocation="localstorage"
+            useRefreshTokens={true}
+            onRedirectCallback={onRedirectCallback}
+          >
+            <CalendarProvider>
+              <Provider store={store}>
+                <UnsavedChangesProvider>
+                  <SidebarProvider>
+                    <SearchProvider>
                       <App />
-                    </BrowserRouter>
-                  </SearchProvider>
-                </SidebarProvider>
-              </UnsavedChangesProvider>
-            </Provider>
-          </CalendarProvider>
-        </Auth0Provider>
+                    </SearchProvider>
+                  </SidebarProvider>
+                </UnsavedChangesProvider>
+              </Provider>
+            </CalendarProvider>
+          </Auth0Provider>
+        </BrowserRouter>
       </ThemeProvider>
     </HelmetProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );
 

@@ -1,23 +1,35 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { SidebarProvider, useSidebar } from "../context/SidebarContext";
 import { useGlobalStorage } from '../hooks/useGlobalStorage';
+import { useAdmin } from '../hooks/useAdmin';
 import { UserMetadata } from '../types/user';
-import { Outlet } from "react-router";
+import { Outlet, Navigate } from "react-router";
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
 import AppFooter from "./AppFooter";
-// import AdminSidebar from "./AdminSidebar";
+import AdminSidebar from "./AdminSidebar";
+import { useAuth0 } from '@auth0/auth0-react';
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
-  const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const { isAuthenticated, isLoading: isAuth0Loading } = useAuth0();
 
-  const isAdminUser = userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
+  // Wait for both Auth0 and admin status to load
+  if (isAuth0Loading || isAdminLoading) {
+    return <div>Loading App Layout</div>;
+  }
+
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/signed-out" replace />;
+  }
 
   return (
     <div className="min-h-screen xl:flex">
       <div>
-        {isAdminUser ? <AppSidebar /> : <AppSidebar />}
+        {isAdmin ? <AppSidebar /> : <AppSidebar />}
         <Backdrop />
       </div>
       <div

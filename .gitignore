@@ -106,12 +106,12 @@ src/pages/DemoApp.tsx
 src/pages/oldProfile.tsx
 scripts/migrate-roles.js
 src/console.log.md
-src/components/ProtectedAdminRoute.tsx
-src/components/ProtectedRoute.tsx
+# src/components/ProtectedAdminRoute.tsx
+# src/components/ProtectedRoute.tsx
 src/components/admin/AdminCodeVerification.tsx
 src/components/admin/AdminManagement.tsx
 src/models/AdminCode.ts
-src/pages/ProfilesPage.tsx
+# src/pages/ProfilesPage.tsx
 src/components/common/WifiLoader.tsx
 
 # Add these lines to your .gitignore
