@@ -16,11 +16,6 @@ interface ApiError {
   status?: number;
 }
 
-interface ErrorResponse {
-  message: string;
-  status?: number; // Optional, if you want to include an HTTP status code
-}
-
 type UserData = {
   email?: string;
   firstName?: string;
@@ -51,7 +46,6 @@ type UserData = {
     zipCode?: string;
     country?: string;
   };
-  isActive: boolean;
 };
 
 // const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -125,6 +119,7 @@ export const useMongoDbClient = () => {
   };
 
 
+
   const getUserById = useCallback(async (auth0Id: string) => {
     if (!isAuthenticated) {
       console.log('getUserById: Not authenticated, returning null');
@@ -196,14 +191,12 @@ export const useMongoDbClient = () => {
           createdAt: new Date().toISOString(),
         };
   
-        console.log("newUserData ", newUserData);
-        
         const createResponse = await fetch(createUrl, {
           method: 'POST',
           headers,
           body: JSON.stringify(newUserData),
         });
-
+  
         if (!createResponse.ok) {
           throw new Error(`Failed to create user. Status: ${createResponse.status}`);
         }
@@ -220,74 +213,69 @@ export const useMongoDbClient = () => {
   }, []);
   
  
-  // Update User
-  const updateUser = useCallback(async (auth0Id: string, userData: {
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-    phoneNumber?: string;
-    profile?: {
-      dateOfBirth?: string | null;
-      gender?: string;
-      profilePictureUrl?: string;
-      role?: 'admin' | 'user' | 'manager' | 'super-admin';
-      timezone?: string;
+// Update User
+const updateUser = useCallback(async (auth0Id: string, userData: {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  profile?: {
+    dateOfBirth?: string | null;
+    gender?: string;
+    profilePictureUrl?: string;
+    role?: 'admin' | 'user' | 'manager' | 'super-admin';
+    timezone?: string;
+  };
+  marketingBudget?: {
+    adBudget?: number;
+    costPerAcquisition?: number;
+    dailySpendingLimit?: number;
+    marketingChannels?: string;
+    monthlyBudget?: number;
+    preferredPlatforms?: string;
+    notificationPreferences?: string[];
+    roiTarget?: number;
+    frequency?: "daily" | "monthly" | "quarterly" | "yearly";
+  };
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+  };
+}) => {
+  setLoading(true);
+  setError(null);
+
+  try {
+    const existingUser = await getUserById(auth0Id);
+
+    const mergedData = {
+      ...userData,
+      auth0Id,
+      profile: {
+        ...existingUser?.profile,
+        ...userData.profile,
+        role: userData.profile?.role || existingUser?.profile?.role || 'user',
+      },
+      marketingBudget: userData.marketingBudget || {},
     };
-    marketingBudget?: {
-      adBudget?: number;
-      costPerAcquisition?: number;
-      dailySpendingLimit?: number;
-      marketingChannels?: string;
-      monthlyBudget?: number;
-      preferredPlatforms?: string;
-      notificationPreferences?: string[];
-      roiTarget?: number;
-      frequency?: "daily" | "monthly" | "quarterly" | "yearly";
-    };
-    address?: {
-      street?: string;
-      city?: string;
-      state?: string;
-      zipCode?: string;
-      country?: string;
-    };
-  }) => {
-    setLoading(true);
-    setError(null);
 
-    try {
-      const existingUser = await getUserById(auth0Id);
+    const updatedUser = await checkAndInsertUser(auth0Id, mergedData);
 
-      const mergedData = {
-        ...userData,
-        auth0Id,
-        profile: {
-          ...existingUser?.profile,
-          ...userData.profile,
-          role: userData.profile?.role || existingUser?.profile?.role || 'user',
-        },
-        marketingBudget: userData.marketingBudget || {},
-        address: userData.address || {},
-        isActive: true
-      };
-
-      console.log("Preparing to update user with data:", mergedData);
-
-      const updatedUser = await checkAndInsertUser(auth0Id, mergedData);
-
-      return updatedUser;
-      
-    } catch (error) {
-      console.error('Error in updateUser:', error);
-      setError({
-        message: error instanceof Error ? error.message : 'An unknown error occurred',
-        status: error instanceof Error ? undefined : 500,
-      });
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, [checkAndInsertUser, getUserById]);
+    return updatedUser;
+  } catch (error) {
+    console.error('Error in updateUser:', error);
+    setError({
+      message: error instanceof Error ? error.message : 'An unknown error occurred',
+      status: error instanceof Error ? undefined : 500,
+    });
+    throw error;
+  } finally {
+    setLoading(false);
+  }
+}, [checkAndInsertUser, getUserById]);
 
 
   const saveUserData = async (auth0Id: string, data: Partial<UserMetadata>, section?: 'meta' | 'address' | 'marketing') => {
@@ -534,15 +522,10 @@ export const useMongoDbClient = () => {
     getUserById, 
     checkAndInsertUser, 
     saveUserData,
-    getUsersRole,
     fetchCalendarEvents,
     createCalendarEvent,
     updateCalendarEvent,
-    deleteCalendarEvent
-    
+    deleteCalendarEvent,
+    getUsersRole
   };
 }; 
-  
-
-  
-  
