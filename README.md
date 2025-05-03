@@ -307,3 +307,49 @@ app.use('/images', express.static(path.join(__dirname, 'public/images')));
 ### Test the image loading in both development and production environments
 ### Consider implementing image optimization middleware in your backend
 ### Set up proper caching headers for static assets
+
+<AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subordinate"
+            element={
+              <ProtectedRoute>
+                <SubordinateDashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
+```
+    // src/components/ProtectedRoute/ProtectedRoute.jsx
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+
+const ProtectedRoute = ({ children }) => {
+  const { currentUser } = useAuth();
+  return currentUser ? children : <Navigate to="/login" />;
+};
+
+export default ProtectedRoute;
+```

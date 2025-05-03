@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+<<<<<<< Updated upstream
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
@@ -8,11 +9,25 @@ import AppHeader from './AppHeader';
 import Backdrop from './Backdrop';
 import { useSidebar } from '../context/SidebarContext';
 import AppFooter from './AppFooter';
+=======
+import { SidebarProvider, useSidebar } from "../context/SidebarContext";
+import { useGlobalStorage } from '../hooks/useGlobalStorage';
+import { UserMetadata } from '../types/user';
+import { Outlet } from "react-router";
+import AppHeader from "./AppHeader";
+import Backdrop from "./Backdrop";
+import AdminSidebar from "./AdminSidebar";
+import AppFooter from "./AppFooter";
+import { useAdmin } from "../hooks/useAdmin";
+// import AdminSidebar from "./AdminSidebar";
+>>>>>>> Stashed changes
 
 const AdminLayout: React.FC = () => {
   const { isAuthenticated, isLoading: isAuth0Loading } = useAuth0();
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
   if (isAuth0Loading || isAdminLoading) {
     return <div>Loading Admin Layout...</div>;
@@ -25,6 +40,17 @@ const AdminLayout: React.FC = () => {
   if (!isAdmin) {
     return <Navigate to="/unauthorized" replace />;
   }
+=======
+=======
+>>>>>>> Stashed changes
+  const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
+  const { isAdmin } = useAdmin();
+  const isAdminUser = isAdmin; 
+  // userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 
   return (
     <div className="min-h-screen xl:flex">
@@ -47,4 +73,21 @@ const AdminLayout: React.FC = () => {
   );
 };
 
+<<<<<<< Updated upstream
 export default AdminLayout;  
+=======
+interface AdminLayoutProps {
+  children: React.ReactNode;
+}
+
+const AdminLayout: React.FC = () => {
+// React.FC<AdminLayoutProps> = ({ children }) => {
+  return (
+    <SidebarProvider>
+      <LayoutContent />
+    </SidebarProvider>
+  );
+};
+
+export default AdminLayout;
+>>>>>>> Stashed changes

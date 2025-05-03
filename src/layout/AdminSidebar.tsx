@@ -33,6 +33,8 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
     icon: <GridIcon />,
     name: "Admin Dashboard",
     subItems: [   
@@ -44,8 +46,40 @@ const navItems: NavItem[] = [
       { name: "User Admin", path: "/admin/user-management", icon: <UserCircleIcon /> },
       { name: "Invitations", path: "/admin/invite", icon: <TaskIcon /> },
     ],
+=======
+=======
+>>>>>>> Stashed changes
+      icon: <GridIcon />,
+      name: "Admin Dashboard",
+      subItems: [
+          { name: "Dashboard", path: "/admin/dashboard", icon: <CalenderIcon /> },
+          { name: "Users", path: "/admin/users", icon: <UserCircleIcon /> },
+          { name: "Calendar", path: "/admin/calendar", icon: <CalenderIcon /> },
+          { name: "Marketing Overview", path: "/admin/marketing-overview", icon: <InfoIcon /> },
+          { name: "Customer Demographics", path: "/admin/customer-demographics", icon: <UserCircleIcon /> },
+          { name: "Changelog", path: "/admin/changelog", icon: <TaskIcon /> },
+          { name: "Invite", path: "/admin/invite", icon: <TaskIcon /> },
+      ],
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
   },
 ];
+// const navItems: NavItem[] = [
+//   {
+//     icon: <GridIcon />,
+//     name: "Admin Dashboard",
+//     subItems: [   
+//       { name: "Calendar", path: "/calendar", icon: <CalenderIcon /> },      
+//       { name: "Marketing Overview", path: "/marketing-overview", icon: <InfoIcon /> },
+//       { name: "Demographics", path: "admin/customer-demographics", icon: <UserCircleIcon /> },
+//       { name: "Changelog", path: "admin/changelog", icon: <TaskIcon /> },
+//       { name: "User Admin", path: "/admin/users", icon: <UserCircleIcon /> },
+//       { name: "Invitations", path: "/admin/invite", icon: <TaskIcon /> },
+//     ],
+//   },
+// ];
 
 const AdminSidebar: React.FC = () => {
   const { isAuthenticated } = useAuth0();

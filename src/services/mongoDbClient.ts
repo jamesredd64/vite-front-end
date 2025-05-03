@@ -538,7 +538,7 @@ export const useMongoDbClient = () => {
     fetchCalendarEvents,
     createCalendarEvent,
     updateCalendarEvent,
-    deleteCalendarEvent   
+    deleteCalendarEvent
   };
 }; 
   
