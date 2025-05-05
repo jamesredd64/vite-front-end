@@ -116,6 +116,7 @@ const AppSidebar: React.FC = () => {
   const { isAuthenticated } = useAuth0();
   const { isAdmin } = useAdmin();
   
+  console.log('🚀 Initializing isAdmin From AppSidebar..', isAdmin);
   // Filter menu items based on admin role
   const filteredNavItems = useMemo(() => 
     navItems

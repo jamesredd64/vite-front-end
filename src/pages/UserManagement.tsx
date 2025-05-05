@@ -69,7 +69,7 @@ export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  // const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -146,7 +146,7 @@ export default function UserManagement() {
         setSelectedUserId(state.userId);
         console.log('Selected user ID changed to:', selectedUserId);
         
-        // setViewMode(state.viewMode || 'profile');
+        setViewMode(state.viewMode || 'profile');
       }
     }, [location.state]);
   
@@ -217,24 +217,15 @@ export default function UserManagement() {
     );
   }
 
-  const handleViewDetails = async (userId: string) => {
-    console.log("Button clicked - userId:", userId);
-    
-    const clickedUser = filteredUsers.find(user => user.auth0Id === userId);
-    console.log("Found clicked user:", clickedUser);
-
-    if (clickedUser) {
-      // Force the navigation to treat this as a new route
-      navigate(`/admin/users/${clickedUser.auth0Id}/profile`, {
-        state: { 
-          userId: clickedUser.auth0Id,
-          userDetails: clickedUser
-        },
-        replace: true  // Add this to force a fresh route
-      });
-    } else {
-      console.error("User not found:", userId);
-    }
+  const handleViewDetails = (userId: string) => {
+    console.log('Viewing details for user:', userId);  // Add logging for debugging
+    setSelectedUserId(userId);
+    // setViewMode('profile');
+    setActiveTab('current');
+    navigate(`${location.pathname}`, {
+      state: { userId , viewMode: "profile"  },
+      replace: true // Use replace to avoid adding to history stack
+    });
   };
 
 
@@ -243,7 +234,7 @@ export default function UserManagement() {
   const handleTabChange = (tab: 'all' | 'active' | 'inactive' | 'current') => {
     if (tab !== 'current') {
       // Comment out view mode changes
-      // setViewMode('table');
+       setViewMode('table');
       console.log('Selected user ID changed to:', selectedUserId);
       setSelectedUserId(null);
     }
@@ -399,6 +390,102 @@ export default function UserManagement() {
     </div>
   );
 
+    // ************************************
+  // NEW CARD VIEW IMPLEMENTATION
+  // ************************************
+  const renderCardView = () => (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {filteredUsers.map((user) => (
+        <div key={user.auth0Id} className="flex flex-col rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-start justify-between">
+            {/* Profile Pic and Name/Email Block */}
+            <div className="flex items-center gap-3">
+               <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full">
+                  {user.profile?.profilePictureUrl ? (
+                    <img
+                      src={user.profile.profilePictureUrl}
+                      alt={`${user.firstName} ${user.lastName}`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gray-200 text-lg font-bold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                      {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">
+                    {user.firstName} {user.lastName}
+                  </p>
+                  <p className="truncate text-sm text-gray-500 dark:text-gray-400" title={user.email}>
+                    {user.email}
+                  </p>
+                </div>
+            </div>
+             {/* Checkbox */}
+             <div className="ml-2 flex-shrink-0">
+                <input
+                    type="checkbox"
+                    id={`select-card-${user.auth0Id}`}
+                    checked={selectedUsers.includes(user.auth0Id)}
+                    onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    setSelectedUsers(prevSelected =>
+                        isChecked
+                        ? [...prevSelected, user.auth0Id]
+                        : prevSelected.filter(id => id !== user.auth0Id)
+                    );
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
+                />
+                 <label htmlFor={`select-card-${user.auth0Id}`} className="sr-only">Select user {user.firstName} {user.lastName}</label>
+            </div>
+          </div>
+
+           {/* Details Section */}
+           <div className="mt-3 space-y-2 text-sm">
+                <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">Phone:</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">{user.phoneNumber || 'N/A'}</span>
+                </div>
+                 <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">Role:</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">{user.profile?.role || 'User'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold leading-tight ${ // adjusted padding/size
+                    user.isActive === true
+                      ? 'bg-success/10 text-success'
+                      : 'bg-danger/10 text-danger'
+                  }`}>
+                    {user.isActive === true ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+           </div>
+
+           {/* Actions Section */}
+           <div className="mt-4 border-t border-gray-200 pt-3 dark:border-gray-700">
+                <button
+                    onClick={() => handleViewDetails(user.auth0Id)}
+                    className="w-full rounded-md border border-primary px-3 py-1.5 text-center text-xs font-medium text-primary transition-colors hover:bg-primary/10 dark:hover:bg-primary/20"
+                >
+                    View Details
+                </button>
+           </div>
+        </div>
+      ))}
+       {filteredUsers.length === 0 && viewMode === 'card' && (
+             <div className="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">
+                 No users found matching the current filter.
+             </div>
+        )}
+    </div>
+  );
+  // ************************************
+  // END OF CARD VIEW IMPLEMENTATION
+  // ************************************
+  
   return (
     <div className="relative font-normal font-sans z-[1] bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300">
       <div className="p-1 md:p-1 2xl:p-1">
@@ -416,8 +503,7 @@ export default function UserManagement() {
                 Manage and view all users in the system
               </p>
             </div>
-            <div className="flex gap-4">
-              {/* Comment out view mode switch button
+            <div className="flex gap-4">              
               <button
                 onClick={() =>
                   setViewMode(viewMode === "table" ? "card" : "table")
@@ -426,7 +512,7 @@ export default function UserManagement() {
               >
                 Switch to {viewMode === "table" ? "Card" : "Table"} View
               </button>
-              */}
+             
               <button
                 onClick={() => setShowNotificationModal(true)}
                 disabled={selectedUsers.length === 0}
@@ -454,7 +540,11 @@ export default function UserManagement() {
         <div className="mt-1">
           {" "}
           {/* Further reduced top margin */}
-          {renderTableView()}
+          {viewMode === 'table' && renderTableView()}
+          {viewMode === 'card' && renderCardView()}
+          {viewMode === 'profile' && selectedUserId && (
+             <ProfileView userId={selectedUserId} />
+          )}
         </div>
       </div>
 

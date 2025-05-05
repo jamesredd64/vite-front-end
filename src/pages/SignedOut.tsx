@@ -1,30 +1,51 @@
+// import React, { useEffect } from 'react';
+// import { useAuth0 } from '@auth0/auth0-react';
+// import { useNavigate } from 'react-router-dom';
+
+// const SignedOut = () => {
+//     const { loginWithRedirect, isAuthenticated, user } = useAuth0();
+//     const navigate = useNavigate();
+
+//     useEffect(() => {
+//         if (isAuthenticated) {
+//             // Redirect based on role after login
+//             const roles = user?.["https://dev-uizu7j8qzflxzjpy.jr.com/roles"] || []; // Correct namespace
+  
+//     // Ensure roles are defined before navigating
+//     if (roles.length === 0) return;
+  
+//     // Redirect based on role
+//     if (roles.includes("admin") && window.location.pathname !== "/admin") {
+//       console.log("Navigating to /admin...");
+//       navigate("/admin", { replace: true });
+//     } else if (window.location.pathname !== "/user") {
+//       console.log("Navigating to /user...");
+//       navigate("/user", { replace: true });
+//     }
+//         }
+//     }, [isAuthenticated, user]);
+
+//     const handleLogin = async () => {
+//         await loginWithRedirect();
+//     };
+
+//     return (
+//         <div>
+//             <h1>Login Page</h1>
+//             <button onClick={handleLogin}>Login</button>
+//         </div>
+//     );
+// };
+
+// export default SignedOut;
+
 import { useAuth0 } from '@auth0/auth0-react';
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { VERSION } from '../config/version';
 
 export const SignedOut = () => {
-  const { loginWithRedirect, isAuthenticated } = useAuth0();
-  const navigate = useNavigate();
+  const { loginWithRedirect } = useAuth0();
   const buildDate = new Date(VERSION.buildDate).toLocaleDateString();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate]);
-
-  const handleLogin = async () => {
-    try {
-      await loginWithRedirect({
-        appState: {
-          returnTo: window.location.origin
-        }
-      });
-    } catch (error) {
-      console.error('Login error:', error);
-    }
-  };
 
   return (
     <div className="min-h-screen w-full bg-white dark:bg-gray-900">
@@ -60,7 +81,7 @@ export const SignedOut = () => {
 
           <div className="flex justify-center">
             <button
-              onClick={handleLogin}
+              onClick={() => loginWithRedirect()}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-8 py-3 text-sm font-medium text-white transition-all hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
             >
               <svg 
