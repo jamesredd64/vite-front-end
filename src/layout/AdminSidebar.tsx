@@ -71,9 +71,9 @@ const AdminSidebar: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isAuthenticated } = useAuth0();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isAdmin } = useAdmin();
+  // const { isAdmin } = useAdmin();
 
-  console.log('🚀 Initializing isAdmin From AdminSidebar..', isAdmin);
+  // console.log('🚀 Initializing isAdmin From AdminSidebar..', isAdmin);
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
