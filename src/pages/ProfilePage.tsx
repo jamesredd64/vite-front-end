@@ -71,17 +71,18 @@ interface ProfilePageProps {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // const UserProfile: React.FC<ProfilePageProps> = ({ userId }) => {
-  const ProfilePage: React.FC<ProfilePageProps> = () => {
-    const location = useLocation();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { userId, userDetails } = location.state as { 
-      userId: string;
-      userDetails: User;
-    };
-  
-  const { user, isAuthenticated, isLoading: auth0Loading } = useAuth0();
-  const { getUserById, saveUserData } = useMongoDbClient();
-  const auth0Id = userId || user?.sub;
+  // const ProfilePage: React.FC<ProfilePageProps> = () => {
+  //   const location = useLocation();
+  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //   const { userId, userDetails } = location.state as { 
+  //     userId: string;
+  //     userDetails: User;
+  //   };
+  const ProfilePage: React.FC<ProfilePageProps> = ({ userId }) => {
+    const { user, isAuthenticated, isLoading: auth0Loading } = useAuth0();
+    const { getUserById, saveUserData } = useMongoDbClient();
+    const auth0Id = userId || user?.sub;
+
   
   // const { handleNavigation } = useNavigation();
   

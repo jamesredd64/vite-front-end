@@ -27,8 +27,24 @@ export const useAdmin = () => {
   }, [user, isAuthenticated]);
 
   const getRoute = useCallback(() => {
-    return state.isAdmin ? '/admin' : '/user'; // Determine route based on isAdmin
+    const currentPath = window.location.pathname;
+    console.log("Current Path is ", currentPath);
+  
+    // If already on an admin or user route, return the current path
+    if (currentPath.startsWith("/admin") || currentPath.startsWith("/user")) {
+      console.log("Already on Path ", currentPath);
+      return currentPath;
+      
+    }
+  
+    // Determine the route based on admin status
+    return state.isAdmin ? "/admin" : "/user";
   }, [state.isAdmin]);
+
+  
+  // const getRoute = useCallback(() => {
+  //   return state.isAdmin ? '/admin' : '/user'; // Determine route based on isAdmin
+  // }, [state.isAdmin]);
     
   useEffect(() => {
     if (isLoading) return; // Don't run logic until authentication completes
@@ -37,14 +53,14 @@ export const useAdmin = () => {
     console.log("state.isAdmin ?", adminStatus );
     console.log('[useAdmin Hook] Setting state:', {
       isAdmin: adminStatus,
-      userMetadata: userMetadata
+      userMetadata: userMetadata,
     });
 
-    setState({
+    setState((prevState) => ({
       isAdmin: adminStatus,
       isLoading: false,
       route: getRoute(), // Set the route based on admin status
-    });
+    }));
   }, [userMetadata, checkAdminStatus, isLoading, getRoute]);
 
   return state;

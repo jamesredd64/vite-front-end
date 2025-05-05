@@ -1,4 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
+// import { useAdmin } from '../hooks/useAdmin';
+// import { useGlobalStorage } from '../hooks/useGlobalStorage';
 
 type Theme = "light" | "dark";
 
@@ -7,6 +9,9 @@ type ThemeContextType = {
   toggleTheme: () => void;
 };
 
+
+
+const savedTheme = localStorage.getItem('theme');
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const saveThemeToStorage = (theme: Theme) => {
@@ -16,6 +21,9 @@ const saveThemeToStorage = (theme: Theme) => {
 
 // Initialize theme immediately when the file loads
 const initializeTheme = () => {
+  // const { isAdmin } = useAdmin();
+// console.log('🚀 Initializing isAdmin...', isAdmin);
+
   console.log('🚀 Initializing theme...');
   const savedTheme = localStorage.getItem('theme');
   console.log('📦 Retrieved theme from localStorage:', savedTheme);

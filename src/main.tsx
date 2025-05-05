@@ -14,9 +14,11 @@ import { ThemeProvider } from './context/ThemeContext';
 import { SearchProvider } from './context/SearchContext';
 import { CalendarProvider } from './context/CalendarContext';
 import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
+
 import { useAuth0} from '@auth0/auth0-react';
 import { useState } from 'react';
 import { UserRoleStorage } from "./utils/userStorage";
+
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 const onRedirectCallback = (appState: any) => {
