@@ -29,7 +29,7 @@ const Loader: React.FC<LoaderProps> = ({ size = 'medium', className = '' }) => {
           `}
         />
         <span className="text-brand-500 dark:text-brand-400 font-semibold animate-pulse">
-          Loading Loader
+          Loading...
         </span>
       </div>
     </div>

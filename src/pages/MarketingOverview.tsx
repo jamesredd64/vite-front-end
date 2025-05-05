@@ -3,14 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import PageMeta from "../components/common/PageMeta";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import StatsCard from "../components/marketing/StatsCard";
+import { useAuth0 } from "@auth0/auth0-react";
 import RevenueChart from "../components/charts/RevenueChart";
 import TopChannels from "../components/marketing/TopChannels";
 import LeadConversion from "../components/marketing/LeadConversion";
 import CampaignPerformance from "../components/marketing/CampaignPerformance";
+import Loader from "../components/common/Loader";
 
 const MarketingOverview: FC = () => {
   const navigate = useNavigate();
+  const { isLoading } = useAuth0();
   
+  if (isLoading) {
+    return <Loader />;
+  }
+
+
   return (
     <>
       <PageMeta

@@ -1,7 +1,18 @@
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
+import { useAuth0 } from "@auth0/auth0-react";
+import Loader from "../../components/common/Loader";
+
+const { isLoading } = useAuth0();
+
+
 
 export default function Users() {
+
+  if (isLoading) {
+    return <Loader />;
+  }
+  
   return (
     <>
       <PageMeta
