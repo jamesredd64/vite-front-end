@@ -138,17 +138,27 @@ export default function UserDropdown() {
       >
         <div className="p-2">
           <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
-            <DropdownItem
+             {/* <DropdownItem
               onClick={() => {
                 closeDropdown();
-                window.location.href = '/profile-view';
+                const isAdmin = userMetadata?.profile?.role === "admin" || userMetadata?.profile?.role === "super-admin";
+                window.location.href = isAdmin ? "/admin/profile" : "/user/profile";
               }}
               as="button"
               className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50"
             >
-              <UserIcon className="w-5 h-5" />
+
+            {/* <DropdownItem
+              onClick={() => {
+                closeDropdown();
+                window.location.href = '/user/profile';
+              }}
+              as="button"
+              className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50"
+            > */}
+              {/* <UserIcon className="w-5 h-5" />
               Profile
-            </DropdownItem>
+            </DropdownItem> */} 
           </div>
 
           <button

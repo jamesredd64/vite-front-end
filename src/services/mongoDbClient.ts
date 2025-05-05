@@ -181,36 +181,46 @@ export const useMongoDbClient = () => {
     const cacheKey = `checkAndInsertUser-${userId}`;
     const cachedRequest = getCachedRequest(cacheKey);
     if (cachedRequest) {
-      console.debug('Returning cached insert/update request for:', userId);
+      console.debug("Returning cached insert/update request for:", userId);
       return cachedRequest;
     }
   
     const requestPromise = (async () => {
       try {
         const headers = await createHeaders();
+        const userUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}/${userId}`;
         const createUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`;
   
+        // 🔹 Step 1: Check if user already exists
+        const checkResponse = await fetch(userUrl, { method: "GET", headers });
+  
+        if (checkResponse.ok) {
+          console.debug(`User ${userId} already exists in the database.`);
+          return await checkResponse.json(); // Return existing user data
+        }
+  
+        // 🔹 Step 2: If user does NOT exist, create a new user
         const newUserData = {
           ...userData,
           auth0Id: userId,
           createdAt: new Date().toISOString(),
         };
   
-        console.log("newUserData ", newUserData);
-        
+        console.log("Creating new user:", newUserData);
+  
         const createResponse = await fetch(createUrl, {
-          method: 'POST',
+          method: "POST",
           headers,
           body: JSON.stringify(newUserData),
         });
-
+  
         if (!createResponse.ok) {
           throw new Error(`Failed to create user. Status: ${createResponse.status}`);
         }
   
         return await createResponse.json();
       } catch (error) {
-        console.error('Error in checkAndInsertUser:', error);
+        console.error("Error in checkAndInsertUser:", error);
         throw error;
       }
     })();
@@ -218,6 +228,49 @@ export const useMongoDbClient = () => {
     setCachedRequest(cacheKey, requestPromise);
     return requestPromise;
   }, []);
+
+  
+  // const checkAndInsertUser = useCallback(async (userId: string, userData: UserData) => {
+  //   const cacheKey = `checkAndInsertUser-${userId}`;
+  //   const cachedRequest = getCachedRequest(cacheKey);
+  //   if (cachedRequest) {
+  //     console.debug('Returning cached insert/update request for:', userId);
+  //     return cachedRequest;
+  //   }
+  
+  //   const requestPromise = (async () => {
+  //     try {
+  //       const headers = await createHeaders();
+  //       const createUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`;
+  
+  //       const newUserData = {
+  //         ...userData,
+  //         auth0Id: userId,
+  //         createdAt: new Date().toISOString(),
+  //       };
+  
+  //       console.log("newUserData ", newUserData);
+        
+  //       const createResponse = await fetch(createUrl, {
+  //         method: 'POST',
+  //         headers,
+  //         body: JSON.stringify(newUserData),
+  //       });
+
+  //       if (!createResponse.ok) {
+  //         throw new Error(`Failed to create user. Status: ${createResponse.status}`);
+  //       }
+  
+  //       return await createResponse.json();
+  //     } catch (error) {
+  //       console.error('Error in checkAndInsertUser:', error);
+  //       throw error;
+  //     }
+  //   })();
+  
+  //   setCachedRequest(cacheKey, requestPromise);
+  //   return requestPromise;
+  // }, []);
   
  
   // Update User
@@ -233,6 +286,7 @@ export const useMongoDbClient = () => {
       role?: 'admin' | 'user' | 'manager' | 'super-admin';
       timezone?: string;
     };
+    
     marketingBudget?: {
       adBudget?: number;
       costPerAcquisition?: number;
@@ -271,7 +325,7 @@ export const useMongoDbClient = () => {
         address: userData.address ,
         isActive: userData.isActive || existingUser?.isActive,
       };
-
+      console.log("IsActive ", userData.isActive);
       console.log("Preparing to update user with data:", mergedData);
 
       const updatedUser = await checkAndInsertUser(auth0Id, mergedData);

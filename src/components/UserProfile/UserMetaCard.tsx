@@ -78,6 +78,15 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
     isActive: initialData.isActive,
   });
 
+    // Initialize state properly
+    const [state, setState] = useState({
+      isAdmin: false,
+      isLoading: true,
+      route: '', // Added route to state
+    });
+
+     console.log("State is admin", state.isAdmin);
+
   const handleIsActiveChange = (checked: boolean) => {
     console.log("Is checked " , checked);
     const updates = {
@@ -548,7 +557,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
 
                 <div className="lg:col-span-2">
                   <Label>Role</Label>
-                  <div className="grid grid-cols-2 gap-4 mt-2 sm:grid-cols-4">
+                   <div className="grid grid-cols-2 gap-4 mt-2 sm:grid-cols-4">
                     {roleOptions.map((role) => (
                       <Radio
                         key={role}
@@ -559,9 +568,12 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
                         onChange={handleRoleChange}
                         label={role.charAt(0).toUpperCase() + role.slice(1)}
                         className="capitalize"
+                        // disabled={state.isAdmin} // Disable for non-admins
                       />
-                    ))}
-                  </div>
+                      
+                  ))}
+                </div>
+
                 </div>
 
                 <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
