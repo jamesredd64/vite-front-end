@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 
 interface BreadcrumbProps {
   pageTitle: string;
+  onNavigate?: (path: string) => void; // Ensure this exists
 }
+
 
 const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
   return (
