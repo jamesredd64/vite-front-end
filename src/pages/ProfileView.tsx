@@ -24,6 +24,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
   const [userData, setUserData] = useState<UserMetadata | null>(null);
   const [saveStatus, setSaveStatus] = useState<{ message: string; isError: boolean } | null>(null);
 
+
   // Define default values
   const defaultMarketingBudget = useMemo(() => ({
     adBudget: 0,
@@ -212,21 +213,29 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
         phoneNumber: updates.phoneNumber,
         profile: updates.profile
       };
-
+      console.log("Before saving meta info:", userData)
+      // setUserData(prev => prev ? { ...prev, ...metaUpdates, 'meta' } : null);
+      
       await saveUserData(userData.auth0Id, metaUpdates, 'meta');
-      setUserData(prev => prev ? {
-        ...prev,
-        email: metaUpdates.email ?? prev.email,
-        firstName: metaUpdates.firstName ?? prev.firstName,
-        lastName: metaUpdates.lastName ?? prev.lastName,
-        phoneNumber: metaUpdates.phoneNumber ?? prev.phoneNumber,
-        profile: metaUpdates.profile ? {
-          ...prev.profile,
-          ...metaUpdates.profile
-        } : prev.profile
-      } : null);
+      console.log("After saving meta info:", userData);
+      
+     ;
+
+      // await saveUserData(userData.auth0Id, metaUpdates, 'meta');
+      // setUserData(prev => prev ? {
+      //   ...prev,
+      //   email: metaUpdates.email ?? prev.email,
+      //   firstName: metaUpdates.firstName ?? prev.firstName,
+      //   lastName: metaUpdates.lastName ?? prev.lastName,
+      //   phoneNumber: metaUpdates.phoneNumber ?? prev.phoneNumber,
+      //   profile: metaUpdates.profile ? {
+      //     ...prev.profile,
+      //     ...metaUpdates.profile
+      //   } : prev.profile
+      // } : null);
       setSaveStatus({ message: "Profile information saved", isError: false });
-    } catch (error) {
+    } 
+    catch (error) {
       console.error("Error saving meta info:", error);
       setSaveStatus({ message: "Failed to save profile information", isError: true });
     }
@@ -366,13 +375,15 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
 
               {/* User metadata section (basic info) */}
               <UserMetaCard
-                onUpdate={handleMetaUpdate}
+                // onUpdate={handleMetaUpdate}
+                onUpdate={(data: unknown) => handleMetaUpdate(data as Partial<UserMetadata>)}
                 initialData={{
                   email: userData.email,
                   firstName: userData.firstName,
                   lastName: userData.lastName,
                   phoneNumber: userData.phoneNumber,
-                  profile: userData.profile
+                  profile: userData.profile,
+                  isActive: userData.isActive
                 }}
               />
 

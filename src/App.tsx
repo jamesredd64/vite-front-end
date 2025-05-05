@@ -9,7 +9,6 @@ import AppLayout from "./layout/AppLayout";
 import AdminLayout from "./layout/AdminLayout";
 import { useEffect, useRef, useState, useCallback } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
-import ProfileView from "./pages/ProfileView";
 // import UserProfileView from "./pages/UserProfileView";
 import  Calendar from "./pages/Calendar";
 import DashboardHome from "./pages/Dashboard/Home";
@@ -29,10 +28,11 @@ import EventInvitation from "./pages/EventInvitation";
 import UserAdmin from './pages/admin/Users';
 // Add this to your imports
 import NewUserWelcome from './pages/NewUserWelcome';
-import ProfilePage from "./pages/ProfilePage";
+import ProfileView from "./pages/ProfileView";
 import RoleBasedRoute from "./routes/RoleBasedRoute";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminDashboard from "./components/AdminDashboard";
+import ComingSoon from "./pages/ComingSoon";
 
 
 
@@ -409,20 +409,22 @@ function App() {
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="invite" element={<EventInvitation />} />
                     <Route path="userman" element={<UserManagement />} />
-                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="profile" element={<ProfileView />} />
                     <Route path="calendar" element={<Calendar />} />
                     <Route path="marketing" element={<Marketing />} />
                     <Route path="notif" element={<CreateNotification />} />
                     <Route path="marketing-overview" element={<MarketingOverview />} />
                     <Route path="customer-demographics" element={<CustomerDemographics />} />
                     <Route path="changelog" element={<Changelog />} />
+                    <Route path="welcome" element={<NewUserWelcome />} />
+                    
                   </Route>
 
                   {/* User Routes */}
                   <Route path="/user/*" element={<AppLayout />}>
                     <Route index element={<Navigate to="dashboard" replace />} />
-                    <Route path="dashboard" element={<DashboardHome />} />
-                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="dashboard" element={<NewUserWelcome />} />
+                    <Route path="profile" element={<ProfileView />} />
                     
                   </Route>
                 </Route>

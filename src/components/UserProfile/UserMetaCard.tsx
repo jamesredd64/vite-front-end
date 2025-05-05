@@ -215,7 +215,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
         }
       };
       
-      await onUpdate(updatedData);
+      onUpdate(updatedData);
       userProfile.setHasUnsavedChanges(false);
       closeModal();
     } catch (error) {

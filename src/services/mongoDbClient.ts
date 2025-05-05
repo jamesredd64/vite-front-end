@@ -251,6 +251,7 @@ export const useMongoDbClient = () => {
       zipCode?: string;
       country?: string;
     };
+    isActive?: boolean;
   }) => {
     setLoading(true);
     setError(null);
@@ -266,9 +267,9 @@ export const useMongoDbClient = () => {
           ...userData.profile,
           role: userData.profile?.role || existingUser?.profile?.role || 'user',
         },
-        marketingBudget: userData.marketingBudget || {},
-        address: userData.address || {},
-        isActive: true
+        marketingBudget: userData.marketingBudget,
+        address: userData.address ,
+        isActive: userData.isActive || existingUser?.isActive,
       };
 
       console.log("Preparing to update user with data:", mergedData);

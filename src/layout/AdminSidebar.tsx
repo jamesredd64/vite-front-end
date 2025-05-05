@@ -47,7 +47,7 @@ const navItems: NavItem[] = [
       { name: "App Changelog", path: "/admin/changelog", icon: <TaskIcon /> },
       { name: "User Administration", path: "/admin/userman", icon: <UserCircleIcon /> },
       { name: "Send Event Invitations", path: "/admin/invite", icon: <TaskIcon /> },     
-      // { name: "Profile", path: "/admin/profile", icon: <UserCircleIcon /> },
+      { name: "Profile", path: "/admin/profile", icon: <UserCircleIcon /> },
       { name: "Create User Notifications", path: "/admin/notif", icon: <UserCircleIcon /> },
     ],
   },
@@ -55,7 +55,7 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Settings",
     subItems: [  
-      { name: "App Settings", path: "/admin/settings", icon: <UserCircleIcon /> },
+      { name: "App Settings", path: "/admin/welcome", icon: <UserCircleIcon /> },
           
       // { name: "Profile", path: "/admin/profile", icon: <UserCircleIcon /> },
       
