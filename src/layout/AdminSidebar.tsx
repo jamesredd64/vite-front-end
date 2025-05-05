@@ -11,10 +11,14 @@ import {
   CalenderIcon,
   ChevronDownIcon,
   GridIcon,
+  HorizontaLDots,
   UserCircleIcon,
   TaskIcon,
   InfoIcon,
 } from "../icons";
+
+
+
 
 type NavItem = {
   name: string;
@@ -33,77 +37,67 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     icon: <GridIcon />,
     name: "Admin Dashboard",
-    subItems: [   
-      { name: "Home", path: "/admin", icon: <TaskIcon /> },
-      { name: "Calendar", path: "/admin/calendar", icon: <CalenderIcon /> },      
-      { name: "Marketing Overview", path: "/admin/marketing-overview", icon: <InfoIcon /> },
-      { name: "Demographics", path: "/admin/customer-demographics", icon: <UserCircleIcon /> },
-      { name: "Changelog", path: "/admin/changelog", icon: <TaskIcon /> },
-      { name: "User Admin", path: "/admin/user-management", icon: <UserCircleIcon /> },
-      { name: "Invitations", path: "/admin/invite", icon: <TaskIcon /> },
+    subItems: [  
+      { name: "Home", path: "/admin/dashboard", icon: <UserCircleIcon /> },
+      { name: "Your Calendar", path: "/admin/calendar", icon: <CalenderIcon /> },      
+      { name: "Marketing Statistics", path: "/admin/marketing", icon: <InfoIcon /> },
+      { name: "Demographic Statistics", path: "/admin/customer-demographics", icon: <UserCircleIcon /> },
+      { name: "App Changelog", path: "/admin/changelog", icon: <TaskIcon /> },
+      { name: "User Administration", path: "/admin/userman", icon: <UserCircleIcon /> },
+      { name: "Send Event Invitations", path: "/admin/invite", icon: <TaskIcon /> },     
+      // { name: "Profile", path: "/admin/profile", icon: <UserCircleIcon /> },
+      { name: "Create User Notifications", path: "/admin/notif", icon: <UserCircleIcon /> },
     ],
-=======
-=======
->>>>>>> Stashed changes
-      icon: <GridIcon />,
-      name: "Admin Dashboard",
-      subItems: [
-          { name: "Dashboard", path: "/admin/dashboard", icon: <CalenderIcon /> },
-          { name: "Users", path: "/admin/users", icon: <UserCircleIcon /> },
-          { name: "Calendar", path: "/admin/calendar", icon: <CalenderIcon /> },
-          { name: "Marketing Overview", path: "/admin/marketing-overview", icon: <InfoIcon /> },
-          { name: "Customer Demographics", path: "/admin/customer-demographics", icon: <UserCircleIcon /> },
-          { name: "Changelog", path: "/admin/changelog", icon: <TaskIcon /> },
-          { name: "Invite", path: "/admin/invite", icon: <TaskIcon /> },
-      ],
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+  },
+  {
+    icon: <GridIcon />,
+    name: "Settings",
+    subItems: [  
+      { name: "App Settings", path: "/admin/settings", icon: <UserCircleIcon /> },
+          
+      // { name: "Profile", path: "/admin/profile", icon: <UserCircleIcon /> },
+      
+    ],
   },
 ];
-// const navItems: NavItem[] = [
-//   {
-//     icon: <GridIcon />,
-//     name: "Admin Dashboard",
-//     subItems: [   
-//       { name: "Calendar", path: "/calendar", icon: <CalenderIcon /> },      
-//       { name: "Marketing Overview", path: "/marketing-overview", icon: <InfoIcon /> },
-//       { name: "Demographics", path: "admin/customer-demographics", icon: <UserCircleIcon /> },
-//       { name: "Changelog", path: "admin/changelog", icon: <TaskIcon /> },
-//       { name: "User Admin", path: "/admin/users", icon: <UserCircleIcon /> },
-//       { name: "Invitations", path: "/admin/invite", icon: <TaskIcon /> },
-//     ],
-//   },
-// ];
 
 const AdminSidebar: React.FC = () => {
-  const { isAuthenticated } = useAuth0();
-  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
   const navigate = useNavigate();
+  const { handleNavigation } = useNavigation();
   const { isExpanded, isMobileOpen, isHovered, setIsHovered, toggleMobileSidebar } = useSidebar();
   const location = useLocation();
-  const { handleNavigation } = useNavigation();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { isAuthenticated } = useAuth0();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { isAdmin } = useAdmin();
+
+  console.log('🚀 Initializing isAdmin From AdminSidebar..', isAdmin);
+
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;
   } | null>(null);
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  
+
   const isActive = useCallback(
     (path: string) => location.pathname === path,
     [location.pathname]
   );
 
-  useEffect(() => {
-    if (isAuthenticated && !isAdminLoading && !isAdmin) {
-      navigate('/unauthorized');
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    e.preventDefault();
+    
+    if (window.innerWidth < 768) {
+      toggleMobileSidebar();
     }
-  }, [isAuthenticated, isAdmin, isAdminLoading, navigate]);
+
+    if (handleNavigation && handleNavigation(path)) {
+      navigate(path);
+    }
+  };
 
   useEffect(() => {
     let submenuMatched = false;
@@ -129,17 +123,17 @@ const AdminSidebar: React.FC = () => {
     }
   }, [location, isActive]);
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
-    e.preventDefault();
-    
-    if (window.innerWidth < 768) {
-      toggleMobileSidebar();
+  useEffect(() => {
+    if (openSubmenu !== null) {
+      const key = `${openSubmenu.type}-${openSubmenu.index}`;
+      if (subMenuRefs.current[key]) {
+        setSubMenuHeight((prevHeights) => ({
+          ...prevHeights,
+          [key]: subMenuRefs.current[key]?.scrollHeight || 0,
+        }));
+      }
     }
-
-    if (handleNavigation && handleNavigation(path)) {
-      navigate(path);
-    }
-  };
+  }, [openSubmenu]);
 
   const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
     setOpenSubmenu((prevOpenSubmenu) => {
@@ -153,11 +147,6 @@ const AdminSidebar: React.FC = () => {
       return { type: menuType, index };
     });
   };
-
-  // Add loading state handling
-  if (isAdminLoading) {
-    return <div className="loading-spinner" />; // Add your loading component
-  }
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
     <ul className="flex flex-col gap-2">
@@ -279,31 +268,71 @@ const AdminSidebar: React.FC = () => {
   );
 
   return (
-    <>
-      {/* Backdrop for mobile */}
-      {isMobileOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 lg:hidden"
-          onClick={toggleMobileSidebar}
-        ></div>
-      )}
-      
-      {/* Sidebar */}
-      <aside
-        className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
-            ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
-            ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-            lg:translate-x-0`}
-        onMouseEnter={() => !isExpanded && setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+    <aside
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+        ${
+          isExpanded || isMobileOpen
+            ? "w-[290px]"
+            : isHovered
+            ? "w-[290px]"
+            : "w-[90px]"
+        }
+        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0`}
+      onMouseEnter={() => !isExpanded && setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div
+        className={`py-8 flex ${
+          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+        }`}
       >
-        <div className="flex flex-col overflow-y-auto duration-300 ease-linear">
-          <nav className="mt-5 py-4">
-            {renderMenuItems(navItems, "main")}
-          </nav>
-        </div>
-      </aside>
-    </>
+        {/* <Link to="/">
+          {isExpanded || isHovered || isMobileOpen ? (
+            <>
+              <img
+                className="dark:hidden h-8"
+                src="/images/logo/logo.svg"
+                alt="Logo"
+              />
+              <img
+                className="hidden dark:block h-8"
+                src="/images/logo/logo-dark.svg"
+                alt="Logo"
+              />
+            </>
+          ) : (
+            <img
+              src="/images/logo/logo-icon.svg"
+              alt="Logo"
+              className="h-8"
+            />
+          )}
+        </Link> */}
+      </div>
+      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+        <nav className="mb-6">
+          <div className="flex flex-col gap-4">
+            <div>
+              <h2
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                  !isExpanded && !isHovered
+                    ? "lg:justify-center"
+                    : "justify-start"
+                }`}
+              >
+                {isExpanded || isHovered || isMobileOpen ? (
+                  "Menu"
+                ) : (
+                  <HorizontaLDots className="size-6" />
+                )}
+              </h2>
+              {renderMenuItems(navItems, "main")}
+            </div>
+          </div>
+        </nav>
+      </div>
+    </aside>
   );
 };
 

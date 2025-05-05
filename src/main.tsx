@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { store } from './store/store';
-import {App } from './App';
+import App from './App';
 import './index.css';
 import { Auth0Provider } from '@auth0/auth0-react';
 import { HelmetProvider } from 'react-helmet-async';
@@ -14,17 +14,10 @@ import { ThemeProvider } from './context/ThemeContext';
 import { SearchProvider } from './context/SearchContext';
 import { CalendarProvider } from './context/CalendarContext';
 import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 import { useAuth0} from '@auth0/auth0-react';
 import { useState } from 'react';
 import { UserRoleStorage } from "./utils/userStorage";
-=======
 import ProtectedRoute from "./routes/ProtectedRoute";
->>>>>>> Stashed changes
-=======
-import ProtectedRoute from "./routes/ProtectedRoute";
->>>>>>> Stashed changes
 
 const onRedirectCallback = (appState: any) => {
   const userRole = localStorage.getItem('userRole');
@@ -58,7 +51,7 @@ const onRedirectCallback = (appState: any) => {
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  // <React.StrictMode>
+  <React.StrictMode>
     <HelmetProvider>
       <ThemeProvider>
         <BrowserRouter>
@@ -89,6 +82,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </BrowserRouter>
       </ThemeProvider>
     </HelmetProvider>
-  // </React.StrictMode>
+   </React.StrictMode>
 );
 
