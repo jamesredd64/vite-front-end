@@ -33,7 +33,7 @@ import RoleBasedRoute from "./routes/RoleBasedRoute";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminDashboard from "./components/AdminDashboard";
 import ComingSoon from "./pages/ComingSoon";
-
+import AdminSettings from "./pages/AdminSettings";
 
 
 // import { forceLogout } from './utils/forceLogout';
@@ -419,6 +419,8 @@ function App() {
                     <Route path="customer-demographics" element={<CustomerDemographics />} />
                     <Route path="changelog" element={<Changelog />} />
                     <Route path="welcome" element={<NewUserWelcome />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                    
                     
                   </Route>
 

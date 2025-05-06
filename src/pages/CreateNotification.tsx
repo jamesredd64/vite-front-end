@@ -91,8 +91,10 @@ export default function CreateNotification() {
       console.log('Calling notification service...');
       await notificationService.createNotification({
         ...formData,
-        type: formData.type as 'all' | 'selected'
-      });
+        type: formData.type as 'all' | 'selected', 
+        auth0Id: localStorage.getItem('auth0Id') || '',
+        senderProfilePic: localStorage.getItem('profilePictureUrl') || '',
+      }, localStorage.getItem('auth0Id') || '');
       console.log('Notification created successfully');
       setFormData({ title: '', message: '', type: 'all', recipients: [] });
       setStatus({
@@ -126,8 +128,8 @@ export default function CreateNotification() {
   }
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6">Create Notification</h2>
+    <div className="rounded-md border border-gray-200 bg-white p-1 dark:border-gray-800 dark:bg-gray-800/50 lg:p-1">
+      <h2 className="text-lg font-semibold text-gray-800 dark:text-white/90 flex items-center gap-2 mb-4">Create Notification</h2>
 
       {status && (
         <div className="mb-6">
@@ -148,26 +150,27 @@ export default function CreateNotification() {
             type="text"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border bg-white p-1 dark:border-gray-800 dark:bg-gray-800/50 lg:p-1 rounded-md focus:outline-none focus:ring-2 dark:text-white focus:ring-blue-500"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
             Message
           </label>
           <textarea
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border bg-white p-1 dark:border-gray-800 dark:bg-gray-800/50 lg:p-1 rounded-md focus:outline-none focus:ring-2 dark:text-white focus:ring-blue-500"
             rows={4}
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="w-full px-3 py-2 border bg-white p-1 dark:border-gray-800 dark:bg-gray-800/50 lg:p-1 rounded-md focus:outline-none focus:ring-2 dark:text-white focus:ring-blue-500">
+          
             Recipients
           </label>
           <select
@@ -179,7 +182,7 @@ export default function CreateNotification() {
                 recipients: []
               });
             }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border bg-white p-1 dark:border-gray-800 dark:bg-gray-800/50 lg:p-1 rounded-md focus:outline-none focus:ring-2 dark:text-white focus:ring-blue-500"
           >
             <option value="all">All Users</option>
             <option value="selected">Selected Users</option>
@@ -193,7 +196,7 @@ export default function CreateNotification() {
             </label>
             <div className="max-h-60 overflow-y-auto border border-gray-300 rounded-md p-2">
               {users.map((user) => (
-                <label key={user._id} className="flex items-center p-2 hover:bg-gray-50">
+                <label key={user._id} className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                   <input
                     type="checkbox"
                     checked={formData.recipients.includes(user._id)}

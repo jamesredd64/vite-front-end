@@ -41,26 +41,28 @@ const navItems: NavItem[] = [
     name: "Admin Dashboard",
     subItems: [  
       { name: "Home", path: "/admin/dashboard", icon: <UserCircleIcon /> },
-      { name: "Your Calendar", path: "/admin/calendar", icon: <CalenderIcon /> },      
-      { name: "Marketing Statistics", path: "/admin/marketing", icon: <InfoIcon /> },
+      // { name: "Create User Notifications", path: "/admin/notif", icon: <UserCircleIcon /> },
       { name: "Demographic Statistics", path: "/admin/customer-demographics", icon: <UserCircleIcon /> },
-      { name: "App Changelog", path: "/admin/changelog", icon: <TaskIcon /> },
-      { name: "User Administration", path: "/admin/userman", icon: <UserCircleIcon /> },
-      { name: "Send Event Invitations", path: "/admin/invite", icon: <TaskIcon /> },     
+      { name: "Event Calendar", path: "/admin/calendar", icon: <CalenderIcon /> },      
+      { name: "Marketing Statistics", path: "/admin/marketing", icon: <InfoIcon /> },
       { name: "Profile", path: "/admin/profile", icon: <UserCircleIcon /> },
-      { name: "Create User Notifications", path: "/admin/notif", icon: <UserCircleIcon /> },
-    ],
-  },
-  {
-    icon: <GridIcon />,
-    name: "Settings",
-    subItems: [  
-      { name: "App Settings", path: "/admin/welcome", icon: <UserCircleIcon /> },
-          
-      // { name: "Profile", path: "/admin/profile", icon: <UserCircleIcon /> },
+      { name: "Send Event Invitations", path: "/admin/invite", icon: <TaskIcon /> },     
+      { name: "User Administration", path: "/admin/userman", icon: <UserCircleIcon /> },
+     
+      
       
     ],
   },
+      {
+        icon: <GridIcon />,
+        name: "Settings",
+        subItems: [  
+          { name: "App Changelog", path: "/admin/changelog", icon: <TaskIcon /> },         
+          { name: "Admin Settings", path: "/admin/settings", icon: <UserCircleIcon /> },
+          // { name: "Profile", path: "/admin/profile", icon: <UserCircleIcon /> },
+          
+        ],
+      },
 ];
 
 const AdminSidebar: React.FC = () => {
