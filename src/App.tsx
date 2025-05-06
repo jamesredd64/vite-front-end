@@ -35,7 +35,6 @@ import AdminDashboard from "./components/AdminDashboard";
 import ComingSoon from "./pages/ComingSoon";
 import AdminSettings from "./pages/AdminSettings";
 
-
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -43,10 +42,6 @@ import AdminSettings from "./pages/AdminSettings";
 // import { AdminManagement } from './components/admin/AdminManagement';
 // import { AdminCodeVerification } from "./components/admin/AdminCodeVerification";
 // import { ProtectedRoute } from "./components/ProtectedRoute";
-
-
-
-
 // import Marketing2 from './pages/Dashboard/Main/Marketing';
 // import Marketing from "./pages/Dashboard/Main/Marketing";
 // import About from "./pages/Company/About";
@@ -71,29 +66,29 @@ interface UserMetadata {
     gender: string;
     profilePictureUrl: string;
     role: UserRole;
-    timezone: "";
+    timezone: string;
   };
-  marketingBudget: {
-    adBudget: number;
-    costPerAcquisition: number;
-    dailySpendingLimit: number;
-    marketingChannels: string;
-    monthlyBudget: number;
-    preferredPlatforms: string;
-    notificationPreferences: string[];
-    roiTarget: number;
-    frequency: "daily" | "monthly" | "quarterly" | "yearly";
-  };  
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  isActive: boolean;
-  createdAt: string | Date;
-  updatedAt: string | Date;  
+  // marketingBudget: {
+  //   adBudget: number;
+  //   costPerAcquisition: number;
+  //   dailySpendingLimit: number;
+  //   marketingChannels: string;
+  //   monthlyBudget: number;
+  //   preferredPlatforms: string;
+  //   notificationPreferences: string[];
+  //   roiTarget: number;
+  //   frequency: "daily" | "monthly" | "quarterly" | "yearly";
+  // };  
+  // address: {
+  //   street: string;
+  //   city: string;
+  //   state: string;
+  //   zipCode: string;
+  //   country: string;
+  // };
+   isActive: boolean;
+  // createdAt: string | Date;
+  // updatedAt: string | Date;  
 }
 
 interface NavigationContextType {
@@ -114,12 +109,13 @@ function App() {
   const navigate = useNavigate();
   // const location = useLocation();
   const [userMetadata, setUserMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
-  const { updateUser, getUserById } = useMongoDbClient();
+  const { updateUser, getUserById, saveUserData } = useMongoDbClient();
   const initializationAttempted = useRef(false);
   const params = useParams<{ userId: string }>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const userId = params.userId;
 
+  // Cleanup
   useEffect(() => {
     if (isAuthenticated) {
       const cleanup = initSessionTimeout({
@@ -152,6 +148,7 @@ function App() {
     }
   }, [isAuthenticated, getAccessTokenSilently]);
 
+  // Save Theme Mode
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       // Clear all storage except theme
@@ -167,99 +164,165 @@ function App() {
     }
   }, [isLoading, isAuthenticated]);
   
-  // Add new effect to fetch MongoDB user data early
+  // fetch MongoDB user data 
   useEffect(() => {
-    const fetchMongoUserData = async () => {
+    const initializeUserMetadata = async () => {
       if (!isAuthenticated || !user?.sub) return;
-
+  
       try {
-        const normalizedAuthId = user.sub;
-        const mongoUser = await getUserById(normalizedAuthId);
-
+        const auth0Id = user.sub;
+        let mongoUser = await getUserById(auth0Id);
+  
+        // If the user doesn't exist, create a new minimal user record
         if (!mongoUser) {
-          const firstName = user.given_name || user.name?.split(' ')[0] || '';
-          const lastName = user.family_name || user.name?.split(' ')[1] || '';
-          
-          const newUserData = {
-            auth0Id: user.sub,
-            email: user.email || '',
-            firstName: firstName,
-            phoneNumber: user.phoneNumber || '',
-            lastName: lastName,
+          console.log("User not found, inserting new user record...");
+  
+          const newUserMetadata: Partial<UserMetadata> = {
+            auth0Id,
+            email: user.email || "",
+            firstName: user.given_name || user.name?.split(" ")[0] || "",
+            lastName: user.family_name || user.name?.split(" ")[1] || "",
+            phoneNumber: "",
             profile: {
-              dateOfBirth: '',
-              gender: '',
-              profilePictureUrl: user.picture || '',
-              role: '',
-              timezone: '',
+              dateOfBirth: "",
+              gender: "",
+              profilePictureUrl: user.picture || "",
+              role: "user",
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,            
+            
             },
-            marketingBudget: {
-              adBudget: user.marketingBudget?.adBudget || 0,
-              costPerAcquisition: user.marketingBudget?.costPerAcquisition || 0,
-              dailySpendingLimit: user.marketingBudget?.dailySpendingLimit || 0,
-              marketingChannels: user.marketingBudget?.marketingChannels || '',
-              monthlyBudget: user.marketingBudget?.monthlyBudget || 0,
-              preferredPlatforms: user.marketingBudget?.preferredPlatforms || '',
-              notificationPreferences: user.marketingBudget?.notificationPreferences || [],
-              roiTarget: user.marketingBudget?.roiTarget || 0,
-              frequency: user.marketingBudget?.frequency || 'monthly'
-            },
-            isActive: user.isActive || true    
+            isActive: true,
           };
 
-          // Update MongoDB and local storage
-          const createdUser = await updateUser(user.sub, {
-            ...newUserData,
-            profile: {
-              ...newUserData.profile,
-              role: 'user' as 'user' | 'admin' | 'manager' | 'super-admin'
-            }
-          });
-          setUserMetadata(createdUser as UserMetadata);
+          // Set in local storage
+          setUserMetadata(newUserMetadata as UserMetadata);
+  
+          // Save to MongoDB
+          await saveUserData(auth0Id, newUserMetadata, "meta"); 
+          
           return;
         }
-
-        // If user exists, update with any new Auth0 data while preserving existing data
-        initializationAttempted.current = true;
-
-        const updatedData = {
+  
+        // If the user exists, update local storage without fetching again
+        console.log("User found, updating user record...");
+        const updatedMetadata: UserMetadata = {
+          auth0Id,
           email: user.email || mongoUser.email,
           firstName: mongoUser.firstName,
           lastName: mongoUser.lastName,
           phoneNumber: mongoUser.phoneNumber,
           profile: {
-            dateOfBirth: mongoUser.profile.dateOfBirth || '',
-            gender: mongoUser.profile.gender || '',
+            dateOfBirth: mongoUser.profile.dateOfBirth || "",
+            gender: mongoUser.profile.gender || "",
             profilePictureUrl: user.picture || mongoUser.profile.profilePictureUrl,
-            role: mongoUser.profile.role || '',
+            role: mongoUser.profile.role || "",
             timezone: mongoUser.profile.role || "user",
           },
-          marketingBudget: {
-            adBudget: mongoUser.marketingBudget?.adBudget || 0,
-            costPerAcquisition: mongoUser.marketingBudget?.costPerAcquisition || 0,
-            dailySpendingLimit: mongoUser.marketingBudget?.dailySpendingLimit || 0,
-            marketingChannels: mongoUser.marketingBudget?.marketingChannels || '',
-            monthlyBudget: mongoUser.marketingBudget?.monthlyBudget || 0,
-            preferredPlatforms: mongoUser.marketingBudget?.preferredPlatforms || '',
-            notificationPreferences: mongoUser.marketingBudget?.notificationPreferences || [],
-            roiTarget: mongoUser.marketingBudget?.roiTarget || 0,
-            frequency: mongoUser.marketingBudget?.frequency || 'monthly'
-          },
-          isActive: mongoUser.isActive || true
+          isActive: mongoUser.isActive || true,
         };
-
-        const userData = await updateUser(user.sub, updatedData);
-        if (userData) {
-          setUserMetadata(userData as UserMetadata);
-        }
+  
+        setUserMetadata(updatedMetadata);
       } catch (error) {
-        console.error('Error updating user:', error);
+        console.error("Error initializing user metadata:", error);
       }
     };
+  
+    initializeUserMetadata();
+  }, [isAuthenticated, user, getUserById]);
+  
 
-    fetchMongoUserData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, user, getUserById, updateUser]);
+  // useEffect(() => {
+  //   const fetchMongoUserData = async () => {
+  //     if (!isAuthenticated || !user?.sub) return;
+
+  //     try {
+  //       const normalizedAuthId = user.sub;
+  //       const mongoUser = await getUserById(normalizedAuthId);
+
+  //       if (!mongoUser) {
+  //         const firstName = user.given_name || user.name?.split(' ')[0] || '';
+  //         const lastName = user.family_name || user.name?.split(' ')[1] || '';
+          
+  //         const newUserData = {
+  //           auth0Id: user.sub,
+  //           email: user.email || '',
+  //           firstName: firstName,
+  //           phoneNumber: user.phoneNumber || '',
+  //           lastName: lastName,
+  //           profile: {
+  //             dateOfBirth: '',
+  //             gender: '',
+  //             profilePictureUrl: user.picture || '',
+  //             role: '',
+  //             timezone: '',
+  //           },
+  //           marketingBudget: {
+  //             adBudget: user.marketingBudget?.adBudget || 0,
+  //             costPerAcquisition: user.marketingBudget?.costPerAcquisition || 0,
+  //             dailySpendingLimit: user.marketingBudget?.dailySpendingLimit || 0,
+  //             marketingChannels: user.marketingBudget?.marketingChannels || '',
+  //             monthlyBudget: user.marketingBudget?.monthlyBudget || 0,
+  //             preferredPlatforms: user.marketingBudget?.preferredPlatforms || '',
+  //             notificationPreferences: user.marketingBudget?.notificationPreferences || [],
+  //             roiTarget: user.marketingBudget?.roiTarget || 0,
+  //             frequency: user.marketingBudget?.frequency || 'monthly'
+  //           },
+  //           isActive: user.isActive || true    
+  //         };
+
+  //         // Update MongoDB and local storage
+  //         const createdUser = await updateUser(user.sub, {
+  //           ...newUserData,
+  //           profile: {
+  //             ...newUserData.profile,
+  //             role: 'user' as 'user' | 'admin' | 'manager' | 'super-admin'
+  //           }
+  //         });
+  //         setUserMetadata(createdUser as UserMetadata);
+  //         return;
+  //       }
+
+  //       // If user exists, update with any new Auth0 data while preserving existing data
+  //       initializationAttempted.current = true;
+
+  //       const updatedData = {
+  //         email: user.email || mongoUser.email,
+  //         firstName: mongoUser.firstName,
+  //         lastName: mongoUser.lastName,
+  //         phoneNumber: mongoUser.phoneNumber,
+  //         profile: {
+  //           dateOfBirth: mongoUser.profile.dateOfBirth || '',
+  //           gender: mongoUser.profile.gender || '',
+  //           profilePictureUrl: user.picture || mongoUser.profile.profilePictureUrl,
+  //           role: mongoUser.profile.role || '',
+  //           timezone: mongoUser.profile.role || "user",
+  //         },
+  //         marketingBudget: {
+  //           adBudget: mongoUser.marketingBudget?.adBudget || 0,
+  //           costPerAcquisition: mongoUser.marketingBudget?.costPerAcquisition || 0,
+  //           dailySpendingLimit: mongoUser.marketingBudget?.dailySpendingLimit || 0,
+  //           marketingChannels: mongoUser.marketingBudget?.marketingChannels || '',
+  //           monthlyBudget: mongoUser.marketingBudget?.monthlyBudget || 0,
+  //           preferredPlatforms: mongoUser.marketingBudget?.preferredPlatforms || '',
+  //           notificationPreferences: mongoUser.marketingBudget?.notificationPreferences || [],
+  //           roiTarget: mongoUser.marketingBudget?.roiTarget || 0,
+  //           frequency: mongoUser.marketingBudget?.frequency || 'monthly'
+  //         },
+  //         isActive: mongoUser.isActive || true
+  //       };
+
+  //       const userData = await updateUser(user.sub, updatedData);
+  //       if (userData) {
+  //         setUserMetadata(userData as UserMetadata);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error updating user:', error);
+  //     }
+  //   };
+
+  //   fetchMongoUserData();
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [isAuthenticated, user, getUserById, updateUser]);
 
   // Update your existing profile picture effect to avoid conflicts
   useEffect(() => {
@@ -293,9 +356,6 @@ function App() {
     }
     return true; // Allow navigation
   }, [hasUnsavedChanges]);
-
-  // console.log('MongoDB user role:', userMetadata?.profile?.role);
-  // console.log('MongoDB user data:', userMetadata);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleConfirmNavigation = () => {
@@ -444,12 +504,9 @@ function App() {
   );
 }
 
-// const PageWithCustomLayout = () => {
-//   return (
-//     <AdminLayout>
-//       <UserAdmin />
-//     </AdminLayout>
-//   );
-// };
-
 export default App;
+
+
+
+
+

@@ -60,8 +60,9 @@ export interface UserMetadata {
     country: string;
   };
   isActive: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  [key: string]: any;
 }
 
 export default UserMetadata;

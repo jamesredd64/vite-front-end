@@ -177,6 +177,7 @@ export const useMongoDbClient = () => {
     }
   }, [isAuthenticated, getAuthHeaders]);
 
+
   const checkAndInsertUser = useCallback(async (userId: string, userData: UserData) => {
     const cacheKey = `checkAndInsertUser-${userId}`;
     const cachedRequest = getCachedRequest(cacheKey);
@@ -277,40 +278,43 @@ export const useMongoDbClient = () => {
   const updateUser = useCallback(async (auth0Id: string, userData: {
     email?: string;
     firstName?: string;
-    lastName?: string;
-    phoneNumber?: string;
+    // lastName?: string;
+    // phoneNumber?: string;
     profile?: {
-      dateOfBirth?: string | null;
-      gender?: string;
+      // dateOfBirth?: string | null;
+      // gender?: string;
       profilePictureUrl?: string;
       role?: 'admin' | 'user' | 'manager' | 'super-admin';
-      timezone?: string;
+      // timezone?: string;
     };
     
-    marketingBudget?: {
-      adBudget?: number;
-      costPerAcquisition?: number;
-      dailySpendingLimit?: number;
-      marketingChannels?: string;
-      monthlyBudget?: number;
-      preferredPlatforms?: string;
-      notificationPreferences?: string[];
-      roiTarget?: number;
-      frequency?: "daily" | "monthly" | "quarterly" | "yearly";
-    };
-    address?: {
-      street?: string;
-      city?: string;
-      state?: string;
-      zipCode?: string;
-      country?: string;
-    };
+    // marketingBudget?: {
+    //   adBudget?: number;
+    //   costPerAcquisition?: number;
+    //   dailySpendingLimit?: number;
+    //   marketingChannels?: string;
+    //   monthlyBudget?: number;
+    //   preferredPlatforms?: string;
+    //   notificationPreferences?: string[];
+    //   roiTarget?: number;
+    //   frequency?: "daily" | "monthly" | "quarterly" | "yearly";
+    // };
+    // address?: {
+    //   street?: string;
+    //   city?: string;
+    //   state?: string;
+    //   zipCode?: string;
+    //   country?: string;
+    // };
     isActive?: boolean;
   }) => {
     setLoading(true);
     setError(null);
 
     try {
+
+       // getUserById
+
       const existingUser = await getUserById(auth0Id);
 
       const mergedData = {
@@ -321,12 +325,14 @@ export const useMongoDbClient = () => {
           ...userData.profile,
           role: userData.profile?.role || existingUser?.profile?.role || 'user',
         },
-        marketingBudget: userData.marketingBudget,
-        address: userData.address ,
+        // marketingBudget: userData.marketingBudget,
+        // address: userData.address ,
         isActive: userData.isActive || existingUser?.isActive,
       };
       console.log("IsActive ", userData.isActive);
       console.log("Preparing to update user with data:", mergedData);
+
+      // Check and Insert User
 
       const updatedUser = await checkAndInsertUser(auth0Id, mergedData);
 
@@ -344,35 +350,82 @@ export const useMongoDbClient = () => {
     }
   }, [checkAndInsertUser, getUserById]);
 
-
-  const saveUserData = async (auth0Id: string, data: Partial<UserMetadata>, section?: 'meta' | 'address' | 'marketing') => {
+  const doesUserExist = async (auth0Id: string) => {
     try {
-      let endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`;
-      if (section) {
+      const userData = await getUserById(auth0Id); // 🔹 Use the existing function from mongodbClient
+      return userData !== null; // If userData is null, the user does not exist
+    } catch (error) {
+      console.error("Error checking user existence:", error);
+      return false; // Assume user doesn't exist if there's an error
+    }
+  };
+  
+
+  const saveUserData = async (auth0Id: string, data: Partial<UserMetadata>, section?: "meta" | "address" | "marketing") => {
+    try {
+      const userExists = await getUserById(auth0Id); // 🔹 Check if user exists first
+  
+      let method = userExists ? "PUT" : "POST"; // 🔹 Use `POST` if the user doesn't exist
+      let endpoint = userExists
+        ? `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`
+        : `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`; // Ensure this endpoint properly handles creation
+  
+      if (section && userExists) {
         endpoint += `?section=${section}`;
       }
-
+  
       const headers = await getAuthHeaders();
       const response = await fetch(endpoint, {
-        method: 'PUT',
+        method,
         headers: {
           ...headers,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
-
+  
       if (!response.ok) {
-        throw new Error(`Failed to save user data. Status: ${response.status}`);
+        throw new Error(`Failed to ${method === "POST" ? "create" : "update"} user. Status: ${response.status}`);
       }
-
-      const serverResponse = await response.json();
-      return serverResponse;
+  
+      return await response.json();
     } catch (error) {
-      console.error('Error in saveUserData:', error);
+      console.error("Error in saveUserData:", error);
       throw error;
     }
   };
+  
+  
+
+
+  // const saveUserData = async (auth0Id: string, data: Partial<UserMetadata>, section?: 'meta' | 'address' | 'marketing') => {
+  //   try {
+  //     let endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`;
+  //     if (section) {
+  //       endpoint += `?section=${section}`;
+  //     }
+
+  //     const headers = await getAuthHeaders();
+  //     const response = await fetch(endpoint, {
+  //       method: 'PUT',
+  //       headers: {
+  //         ...headers,
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(data)
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to save user data. Status: ${response.status}`);
+  //     }
+
+  //     const serverResponse = await response.json();
+  //     return serverResponse;
+  //   } catch (error) {
+  //     console.error('Error in saveUserData:', error);
+  //     throw error;
+  //   }
+  // };
 
   const fetchWithTimeout = async (url: string, options: RequestInit) => {
     const controller = new AbortController();
