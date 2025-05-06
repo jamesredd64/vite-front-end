@@ -206,7 +206,7 @@ export default function UserManagement() {
   }), [showNotificationModal, selectedUsers, users, userMetadata?.profile?.profilePictureUrl, handleNotificationSent]);
 
   if (loading) {
-    return <Loader size="large" />;
+    return <Loader size="medium" />;
   }
 
   if (error) {
@@ -489,7 +489,7 @@ export default function UserManagement() {
   // ************************************
   
     if (isLoading) {
-      return <Loader />;
+      return <Loader size="medium" />;
     }
 
   return (

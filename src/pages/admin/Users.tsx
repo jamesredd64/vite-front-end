@@ -10,7 +10,7 @@ const { isLoading } = useAuth0();
 export default function Users() {
 
   if (isLoading) {
-    return <Loader />;
+    return <Loader size="medium" />;
   }
   
   return (

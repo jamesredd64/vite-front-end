@@ -444,7 +444,7 @@ function App() {
   // }, [isAuthenticated, user?.sub]);
 
   if (isLoading) {
-    return <Loader />;
+    return <Loader size="medium" />;
   }
 
   if (auth0Error) {

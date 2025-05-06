@@ -356,7 +356,7 @@ const EventInvitation: React.FC = () => {
   };
 
    if (isLoading) {
-      return <Loader />;
+    return <Loader size="medium" />;
     }
 
   return (

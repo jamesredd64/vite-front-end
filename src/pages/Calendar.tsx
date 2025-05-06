@@ -217,7 +217,7 @@ const Calendar: React.FC = () => {
  
   // Show loading state
   if (isLoading) {
-    return <Loader size="large" />;
+    return <Loader size="medium" />;
   }
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {

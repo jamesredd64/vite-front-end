@@ -427,7 +427,7 @@ interface ProfilePageProps {
   // }
 
   if (isLoading) {
-    return <Loader />;
+    return <Loader size="medium" />;
   }
 
   return (
