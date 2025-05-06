@@ -20,6 +20,8 @@ import Alert from '../components/ui/alert/Alert';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import '../styles/datepicker-custom.css';
+import Loader from '../components/common/Loader';
+
 
 
 interface EventFormData {
@@ -44,6 +46,7 @@ const EventInvitation: React.FC = () => {
   const [showUserLookup, setShowUserLookup] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<SelectedUser[]>([]);
   const [users, setUsers] = useState<UserMetadata[]>([]);
+   const { isLoading } = useAuth0();
   const [formData, setFormData] = useState<EventFormData>({
     title: '',
     start: '',
@@ -351,6 +354,10 @@ const EventInvitation: React.FC = () => {
       });
     }
   };
+
+   if (isLoading) {
+      return <Loader />;
+    }
 
   return (
     <>

@@ -10,6 +10,7 @@ import { useGlobalStorage } from "../hooks/useGlobalStorage";
 import UserMetadata from "../types/user";
 import ProfileView from './ProfileView';
 import Loader from '../components/common/Loader';
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface TabProps {
   label: string;
@@ -75,6 +76,7 @@ export default function UserManagement() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const isInitialMount = useRef(true);
+  const { isLoading } = useAuth0();
 
   // Define handleNotificationSent before using it in useMemo
   const handleNotificationSent = useCallback(() => {
@@ -486,6 +488,10 @@ export default function UserManagement() {
   // END OF CARD VIEW IMPLEMENTATION
   // ************************************
   
+    if (isLoading) {
+      return <Loader />;
+    }
+
   return (
     <div className="relative font-normal font-sans z-[1] bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300">
       <div className="p-1 md:p-1 2xl:p-1">
