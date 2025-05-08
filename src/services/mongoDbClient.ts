@@ -433,7 +433,7 @@ export const useMongoDbClient = () => {
         },
         body: JSON.stringify(data),
       });
-  
+      console.log("Saving users...", data);
       if (!response.ok) {
         throw new Error(`Failed to ${method === "POST" ? "create" : "update"} user. Status: ${response.status}`);
       }

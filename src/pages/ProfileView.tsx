@@ -70,7 +70,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
       try {
         // First try to get the user
         const fetchedUserData = await getUserById(auth0Id);
-        
+        console.log("Fetched User Data jim:", fetchedUserData);
+
         // If user doesn't exist, create a new one
         if (!fetchedUserData && isMounted) {
           console.log('User not found, creating new user...');
@@ -163,15 +164,18 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
   const handleMetaUpdate = async (updates: Partial<UserMetadata>) => {
     if (!userData?.auth0Id) return;
 
+    console.log("updates Before saving meta info:", updates);
+
     try {
       const metaUpdates = {
         email: updates.email,
         firstName: updates.firstName,
         lastName: updates.lastName,
         phoneNumber: updates.phoneNumber,
-        profile: updates.profile
+        profile: updates.profile,
+        isActive: updates.isActive,
       };
-      console.log("Before saving meta info:", userData)
+      // console.log("Before saving meta info:", userData);
       // setUserData(prev => prev ? { ...prev, ...metaUpdates, 'meta' } : null);
       
       await saveUserData(userData.auth0Id, metaUpdates, 'meta');

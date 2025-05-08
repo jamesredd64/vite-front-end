@@ -12,6 +12,7 @@ import ProfileView from './ProfileView';
 import Loader from '../components/common/Loader';
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMongoDbClient } from "../services/mongoDbClient";
+  
 
 interface TabProps {
   label: string;
@@ -84,7 +85,7 @@ export default function UserManagement() {
   const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const isInitialMount = useRef(true);
   const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
-  const { getAllUsers } = useMongoDbClient();
+  const { getAllUsers, saveUserData } = useMongoDbClient();
   
   const [state, setState] = useState({
     isLoading: true,
@@ -250,42 +251,72 @@ export default function UserManagement() {
     userProfilePic: userMetadata?.profile?.profilePictureUrl
   }), [showNotificationModal, selectedUsers, users, userMetadata?.profile?.profilePictureUrl, handleNotificationSent]);
 
+  // const handleStatusToggle = async (userId: string, currentStatus: boolean) => {
+  //   try {
+  //     // Optimistically update the UI
+  //     setUsers(prevUsers => 
+  //       prevUsers.map(user => 
+  //         user.auth0Id === userId 
+  //           ? { ...user, isActive: !currentStatus } 
+  //           : user
+  //       )
+  //     );
+
+  //     // Call your API to update the status
+  //     const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(userId)}`, {
+  //       method: 'PUT',
+  //       headers: await getAuthHeaders(),
+  //       body: JSON.stringify({ isActive: !currentStatus })
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error('Failed to update user status');
+  //     }
+
+  //     // Refresh the user list to ensure consistency
+  //     // fetchUsers();
+  //   } catch (error) {
+  //     console.error('Error toggling user status:', error);
+  //     // Revert the UI change on error
+  //     setUsers(prevUsers => 
+  //       prevUsers.map(user => 
+  //         user.auth0Id === userId 
+  //           ? { ...user, isActive: currentStatus } 
+  //           : user
+  //       )
+  //     );
+  //   }
+  // };
+
   const handleStatusToggle = async (userId: string, currentStatus: boolean) => {
     try {
-      // Optimistically update the UI
-      setUsers(prevUsers => 
-        prevUsers.map(user => 
-          user.auth0Id === userId 
-            ? { ...user, isActive: !currentStatus } 
-            : user
+      // Optimistically update UI before API call
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.auth0Id === userId ? { ...user, isActive: currentStatus } : user
         )
       );
-
-      // Call your API to update the status
-      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(userId)}`, {
-        method: 'PUT',
-        headers: await getAuthHeaders(),
-        body: JSON.stringify({ isActive: !currentStatus })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update user status');
+  
+      // 🔹 Call your frontend service instead of direct API fetch
+      const updatedUser = await saveUserData(userId, { isActive: currentStatus });
+  
+      if (!updatedUser) {
+        throw new Error("Failed to update user status");
       }
-
-      // Refresh the user list to ensure consistency
-      // fetchUsers();
+  
+      console.log("User status updated successfully:", updatedUser);
     } catch (error) {
-      console.error('Error toggling user status:', error);
-      // Revert the UI change on error
-      setUsers(prevUsers => 
-        prevUsers.map(user => 
-          user.auth0Id === userId 
-            ? { ...user, isActive: currentStatus } 
-            : user
+      console.error("Error toggling user status:", error);
+  
+      // 🔹 Revert UI changes if API call fails
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.auth0Id === userId ? { ...user, isActive: currentStatus } : user
         )
       );
     }
   };
+  
 
   const getAuthHeaders = async () => {
     const token = await getAccessTokenSilently();
@@ -455,7 +486,7 @@ export default function UserManagement() {
                   <Switch
                       label={user.isActive ? 'Active' : 'Inactive'}
                       defaultChecked={user.isActive}
-                      onChange={(checked) => handleStatusToggle(user.auth0Id, checked)}
+                      onChange={(checked) => { (async () => { await handleStatusToggle(user.auth0Id, checked); })(); }}
                       color={user.isActive ? 'blue' : 'gray'}
                     />                    
                     <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
