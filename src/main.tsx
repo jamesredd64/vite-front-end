@@ -26,6 +26,7 @@ const onRedirectCallback = (appState: any) => {
   const userRole = localStorage.getItem('userRole');
   const returnTo = appState?.returnTo || window.location.pathname;
   const isAdminRoute = location.pathname.startsWith('/admin');
+  
   // const navigate = useNavigate();  
     
   
@@ -65,7 +66,7 @@ const onRedirectCallback = (appState: any) => {
 //     window.location.href = '/user';
 //   }
 // }, [useAuth0()]);
-
+console.log("hello from main");
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

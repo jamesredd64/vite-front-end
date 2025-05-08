@@ -9,9 +9,9 @@ import AppFooter from "./AppFooter";
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
-  const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
+  // const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
 
-  const isAdminUser = userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
+  // const isAdminUser = userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
 
   return (
     <div className="min-h-screen xl:flex">

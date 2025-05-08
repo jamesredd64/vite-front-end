@@ -38,6 +38,7 @@ export const useAdmin = () => {
     }
   
     // Determine the route based on admin status
+    // console.log("************************************state.isAdmin ", state.isAdmin);
     return state.isAdmin ? "/admin" : "/user";
   }, [state.isAdmin]);
 

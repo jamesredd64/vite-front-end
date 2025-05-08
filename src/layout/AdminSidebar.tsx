@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Admin Dashboard",
     subItems: [  
-      { name: "Home", path: "/admin/dashboard", icon: <UserCircleIcon /> },
+      { name: "Home", path: "/admin/adm-dashboard", icon: <UserCircleIcon /> },
       // { name: "Create User Notifications", path: "/admin/notif", icon: <UserCircleIcon /> },
       { name: "Demographic Statistics", path: "/admin/customer-demographics", icon: <UserCircleIcon /> },
       { name: "Event Calendar", path: "/admin/calendar", icon: <CalenderIcon /> },      

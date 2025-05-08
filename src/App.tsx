@@ -474,9 +474,9 @@ function App() {
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />}>
                   {/* Admin Routes */}
-                  <Route path="/admin/*" element={<AppLayout />}>
-                    <Route index element={<Navigate to="dashboard" replace />} />
-                    <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin/*" element={<AdminLayout />}>
+                    <Route index element={<Navigate to="marketing" replace />} />
+                    <Route path="adm-dashboard" element={<AdminDashboard />} />
                     {/* <Route path="dashboard" element={<Home />} /> */}
                     <Route path="invite" element={<EventInvitation />} />
                     <Route path="userman" element={<UserManagement />} />
