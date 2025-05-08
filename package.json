@@ -1,11 +1,11 @@
 {
   "name": "vite-admin-app",
   "private": true,
-  "version": "2.0.38",
+  "version": "2.0.39",
   "scripts": {
     "prebuild": "node src/config/update-version.js",
     "build": "vite build && node src/config/update-version.js",
-    "vercel-build": "npm run prebuild && vite build",
+    "vercel-build": "npm run prebuild && vite build && changelog",
     "dev": "vite",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",

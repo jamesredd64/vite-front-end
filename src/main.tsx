@@ -35,7 +35,8 @@ const onRedirectCallback = (appState: any) => {
     if (userRole === 'admin' || userRole === 'super-admin') {
       window.location.href = returnTo.includes('/admin') ? returnTo : '/admin';
     } else {
-      window.location.href = returnTo.includes('/user') ? returnTo : '/user';
+      window.location.href = returnTo || '/user';
+      // window.location.href = returnTo.includes('/user') ? returnTo : '/user';
     }
   };
 

@@ -569,6 +569,7 @@ export const useMongoDbClient = () => {
           "Content-Type": "application/json",
         },
         credentials: "include",
+        mode: 'cors',
       });
   
       console.log("getAllScheduledEvents: Response status:", response.status);
