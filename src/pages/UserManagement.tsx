@@ -176,12 +176,23 @@ export default function UserManagement() {
     }, []);
 
     useEffect(() => {
-      fetchAllUsers().then(fetchedUsers => {
+      let isMounted = true;
+
+      const getUsers = async () => {
+        const fetchedUsers = await fetchAllUsers();
+        if (!isMounted) return;
+
         if (fetchedUsers) {
           setUsers(fetchedUsers);
         }
-      });
-    }, []);
+      };
+
+      getUsers();
+
+      return () => {
+        isMounted = false;
+      };
+    }, [fetchAllUsers]); // Added fetchAllUsers to dependencies as it's used inside
 
     // Add effect to handle navigation state
     useEffect(() => {
