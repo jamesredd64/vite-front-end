@@ -11,6 +11,7 @@ import UserMetadata from "../types/user";
 import ProfileView from './ProfileView';
 import Loader from '../components/common/Loader';
 import { useAuth0 } from "@auth0/auth0-react";
+import { useMongoDbClient } from "../services/mongoDbClient";
 
 interface TabProps {
   label: string;
@@ -53,6 +54,12 @@ interface User {
   };
 }
 
+interface ApiError extends Error {
+  status?: number;
+}
+
+// const [error, setError] = useState<ApiError | null>(null);
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface NotificationModalProps {
   isOpen: boolean;
@@ -76,7 +83,14 @@ export default function UserManagement() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const isInitialMount = useRef(true);
-  const { isLoading } = useAuth0();
+  const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const { getAllUsers } = useMongoDbClient();
+  
+  const [state, setState] = useState({
+    isLoading: true,
+    users: [] as User[],
+    error: null as Error | null,
+  });
 
   // Define handleNotificationSent before using it in useMemo
   const handleNotificationSent = useCallback(() => {
@@ -84,78 +98,109 @@ export default function UserManagement() {
   }, []); // Empty dependency array since it only uses setState
 
   // Fetch users only once on mount
-  useEffect(() => {
-    let mounted = true;
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     const users = await fetchAllUsers();
+  //     // if (users) {
+  //     //   setState(prev => ({
+  //     //     ...prev,
+  //     //     users: users,
+  //     //     isLoading: false
+  //     //   }));
+  //     // }
+  //   };
+  //   fetchUsers();
+  // }, []); // Empty dependency array ensures it runs only once on mount
 
-    const fetchUsers = async () => {
+    const fetchAllUsers = useCallback(async () => {
+      if (!isAuthenticated) {
+        console.log("fetchAllUsers: Not authenticated, returning null");
+        return null;
+      }
+    
+      setLoading(true);
+      console.log("fetchAllUsers: Fetching all users...");
+    
       try {
-        const response = await fetch(
-          `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USERS}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
+        // const headers = await getAuthHeaders();
+        const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ALL_USERS}`;
+    
+        console.log("fetchAllUsers: Making request to:", url);
+    
+        const response = await fetch(url, {
+          method: "GET",
+          credentials: "include", // Keep this if your API requires authentication cookies
+          headers: {
+            "Content-Type": "application/json", // Retain this if the API expects JSON format
+          },
+        });
+        
+    
+        console.log("fetchAllUsers: Response status:", response.status);
+    
+        if (response.status === 204) {
+          console.log("fetchAllUsers: No users found");
+          return [];
+        }
+    
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        const data = await response.json();
-
-        if (Array.isArray(data) && mounted) {
-          const formattedUsers = data.map((user: Partial<User>) => ({
-            auth0Id: user.auth0Id || "",
-            profile: {
-              dateOfBirth: user.profile?.dateOfBirth || null,
-              gender: user.profile?.gender || "",
-              profilePictureUrl: user.profile?.profilePictureUrl || "",
-              role: user.profile?.role || "User",
-            },
-            firstName: user.firstName || "",
-            lastName: user.lastName || "",
-            email: user.email || "",
-            phoneNumber: user.phoneNumber || "",
-            isActive: typeof user.isActive === "boolean" ? user.isActive : true,
-          }));
-          setUsers(formattedUsers as User[]);
-        }
+    
+        const users = await response.json();
+        console.log("fetchAllUsers: Received user list:", users);
+        return users;
       } catch (error) {
-        if (mounted) {
-          console.error("Error fetching users:", error);
-          setError(error instanceof Error ? error : new Error("Unknown error"));
+        console.error("fetchAllUsers: Error:", error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to fetch users";
+        const status = error instanceof Response ? error.status : undefined;
+        
+        const apiError = new Error(errorMessage) as ApiError;
+        if (status !== undefined) {
+          apiError.status = status;
         }
+        
+        setState(prev => ({
+          ...prev,
+          error: apiError,
+          isLoading: false
+        }));
+
+        setError(apiError);
+        return [];
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
-    };
+  
+    }, []);
 
-    fetchUsers();
-
-    return () => {
-      mounted = false;
-    };
-  }, []); // Empty dependency array for mount-only execution
+    useEffect(() => {
+      fetchAllUsers().then(fetchedUsers => {
+        if (fetchedUsers) {
+          setUsers(fetchedUsers);
+        }
+      });
+    }, []);
 
     // Add effect to handle navigation state
     useEffect(() => {
       const state = location.state as { userId?: string; viewMode?: ViewMode } | null;
-      if (state?.userId) {
+      
+      if (state?.userId && state.userId !== selectedUserId) {
         setSelectedUserId(state.userId);
-        console.log('Selected user ID changed to:', selectedUserId);
-        
-        setViewMode(state.viewMode || 'profile');
+        console.log("Setting selected user ID:", state.userId);
+    
+        // Ensure viewMode updates only when needed
+        setViewMode((prev) => state.viewMode ?? prev);
       }
-    }, [location.state]);
+    }, [location.state]);   
+    
   
   // Memoize filtered users
   const filteredUsers = useMemo(() => {
     // Skip filtering on initial mount
     if (isInitialMount.current) {
+      console.log("filteredUsers just ran:");
       isInitialMount.current = false;
       return users;
     }
@@ -205,9 +250,52 @@ export default function UserManagement() {
     userProfilePic: userMetadata?.profile?.profilePictureUrl
   }), [showNotificationModal, selectedUsers, users, userMetadata?.profile?.profilePictureUrl, handleNotificationSent]);
 
-  if (loading) {
-    return <Loader size="medium" />;
-  }
+  const handleStatusToggle = async (userId: string, currentStatus: boolean) => {
+    try {
+      // Optimistically update the UI
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user.auth0Id === userId 
+            ? { ...user, isActive: !currentStatus } 
+            : user
+        )
+      );
+
+      // Call your API to update the status
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(userId)}`, {
+        method: 'PUT',
+        headers: await getAuthHeaders(),
+        body: JSON.stringify({ isActive: !currentStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user status');
+      }
+
+      // Refresh the user list to ensure consistency
+      // fetchUsers();
+    } catch (error) {
+      console.error('Error toggling user status:', error);
+      // Revert the UI change on error
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user.auth0Id === userId 
+            ? { ...user, isActive: currentStatus } 
+            : user
+        )
+      );
+    }
+  };
+
+  const getAuthHeaders = async () => {
+    const token = await getAccessTokenSilently();
+    console.log("getAuthHeaders just ran: ", token);
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  };
+
 
   if (error) {
     return (
@@ -229,9 +317,6 @@ export default function UserManagement() {
       replace: true // Use replace to avoid adding to history stack
     });
   };
-
-
-
 
   const handleTabChange = (tab: 'all' | 'active' | 'inactive' | 'current') => {
     if (tab !== 'current') {
@@ -271,7 +356,7 @@ export default function UserManagement() {
 
   const renderTableView = () => (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
-      <div className="max-w-full overflow-x-auto">
+      <div className="max-w-full overflow-x-auto p-2">
         <Table>
           <TableHeader>
             <TableRow>
@@ -291,22 +376,22 @@ export default function UserManagement() {
                   <span className="text-sm">Select All</span>
                 </div>
               </TableCell>
-              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 User
               </TableCell>
-              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Email
               </TableCell>
-              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Phone
               </TableCell>
-              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Role
               </TableCell>
-              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Status
               </TableCell>
-              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Actions
               </TableCell>
             </TableRow>
@@ -331,7 +416,7 @@ export default function UserManagement() {
                     />
                   </div>
                 </TableCell>
-                <TableCell className="py-3">
+                <TableCell className="py-7">
                   <div className="flex items-center gap-1">
                     <div className="h-[50px] w-[50px] overflow-hidden rounded-full">
                       {user.profile?.profilePictureUrl ? (
@@ -366,13 +451,17 @@ export default function UserManagement() {
                   {user.profile?.role || 'User'}
                 </TableCell>
                 <TableCell className="py-3">
-                  <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                    user.isActive === true
-                      ? 'bg-success/10 text-success' 
-                      : 'bg-danger/10 text-danger'
-                  }`}>
-                    {user.isActive === true ? 'Active' : 'Inactive'}
-                  </span>
+                  <div className="flex items-center">
+                  <Switch
+                      label={user.isActive ? 'Active' : 'Inactive'}
+                      defaultChecked={user.isActive}
+                      onChange={(checked) => handleStatusToggle(user.auth0Id, checked)}
+                      color={user.isActive ? 'blue' : 'gray'}
+                    />                    
+                    <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
+                      {user.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
                 </TableCell>
                 <TableCell className="py-3">
                   <div className="flex space-x-2">
@@ -410,7 +499,7 @@ export default function UserManagement() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gray-200 text-lg font-bold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                    <div className="flex h-full w-full items-center justify-center bg-gray-200 text-lg font-bold">
                       {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                     </div>
                   )}
@@ -456,13 +545,17 @@ export default function UserManagement() {
                 </div>
                 <div className="flex items-center justify-between">
                     <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold leading-tight ${ // adjusted padding/size
-                    user.isActive === true
-                      ? 'bg-success/10 text-success'
-                      : 'bg-danger/10 text-danger'
-                  }`}>
-                    {user.isActive === true ? 'Active' : 'Inactive'}
-                  </span>
+                    <div className="flex items-center">
+                    <Switch
+                      label={user.isActive ? 'Active' : 'Inactive'}
+                      defaultChecked={user.isActive}
+                      onChange={(checked) => handleStatusToggle(user.auth0Id, checked)}
+                      color={user.isActive ? 'blue' : 'gray'}
+                    />
+                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
+                        {user.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
                 </div>
            </div>
 

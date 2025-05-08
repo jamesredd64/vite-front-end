@@ -119,6 +119,7 @@ const AppSidebar: React.FC = () => {
 
   // console.log('🚀 Initializing isAdmin From AdminSidebar..', isAdmin);
 
+
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;
@@ -142,6 +143,15 @@ const AppSidebar: React.FC = () => {
       navigate(path);
     }
   };
+
+  
+    useEffect(() => {
+      console.log('AppSidebar mounted');
+    }, []);
+  
+    useEffect(() => {
+      console.log('AppSidebar updated');
+    });
 
   useEffect(() => {
     let submenuMatched = false;

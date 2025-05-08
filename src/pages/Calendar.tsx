@@ -18,6 +18,12 @@ import "flatpickr/dist/themes/light.css";
 import { Instance as FlatpickrInstance } from "flatpickr/dist/types/instance";
 import { DateTimePickerProps } from "react-flatpickr";
 import Loader from "../components/common/Loader";
+// import useseGlobalStorage  from '../hooks/useGlobalStorage';
+
+
+// get role
+// Set in local storage
+// setUserMetadata(newUserMetadata as UserMetadata);
 
 // Create a wrapper component
 const DatePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
@@ -53,9 +59,32 @@ import "tippy.js/dist/tippy.css";
 import "../styles/calendar.css";
 import "flatpickr/dist/themes/light.css";
 // import { useNavigate } from 'react-router-dom';
+// const [userRole, setUserRole]  = useState("");
 
 import type { CalendarEvent } from "../types/calendar.types";
 
+
+interface ScheduledEvent {
+  _id: string;
+  eventDetails: {
+    startTime: string | Date;
+    endTime?: string | Date;
+    summary: string;
+    description?: string;
+    location?: string;
+    organizer?: {
+      name?: string;
+      email?: string;
+    };
+  };
+  selectedUsers?: Array<{
+    email: string;
+    name?: string;
+  }>;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  scheduledTime?: string | Date;
+  createdAt?: string | Date;
+}
 // type CustomFlatpickrProps = Omit<DateTimePickerProps, 'render'> & {
 //   render?: (
 //     props: Omit<DateTimePickerProps, 'render' | 'options'>,
@@ -63,10 +92,29 @@ import type { CalendarEvent } from "../types/calendar.types";
 //   ) => ReactElement<unknown, string | JSXElementConstructor<any>>;
 // };
 
+const mapToCalendarEvent = (scheduledEvent: ScheduledEvent) => {
+  return {
+    id: scheduledEvent._id,
+    title: scheduledEvent.eventDetails.summary || 'Untitled Event',
+    start: scheduledEvent.eventDetails.startTime,
+    end: scheduledEvent.eventDetails.endTime,
+    allDay: !scheduledEvent.eventDetails.endTime, // If no end time, treat as all-day
+    extendedProps: {
+      ...scheduledEvent,
+      // Keep all original data in extendedProps
+      status: scheduledEvent.status,
+      eventDetails: scheduledEvent.eventDetails,
+      selectedUsers: scheduledEvent.selectedUsers || []
+    }
+  };
+};
+
+
 const Calendar: React.FC = () => {
   const { user } = useAuth0();
   const {
     fetchCalendarEvents,
+    getAllScheduledEvents,
     createCalendarEvent,
     updateCalendarEvent,
     deleteCalendarEvent,
@@ -91,6 +139,10 @@ const Calendar: React.FC = () => {
   // const navigate = useNavigate();
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // const [userRole, setUserRole]  = useState("");
+  // const  _userRole = userRole;
+  // const [userRole, setUserRole]  = useState("");
+  // const  _userRole = userRole;
   const datePickerOptions = {
     dateFormat: "Y-m-d",
     enableTime: false,
@@ -117,6 +169,7 @@ const Calendar: React.FC = () => {
     },
   };
   
+  // const _userRole? = 'admin' || 'super-admin';
 
   // Add this useEffect to handle navigation to specific events
   useEffect(() => {
@@ -173,6 +226,107 @@ const Calendar: React.FC = () => {
     Warning: "warning",
   };
 
+  // useEffect(() => {
+  //   const loadEvents = async () => {
+  //     // Don't fetch if we already have events and user hasn't changed
+  //     if (events.length > 0 && isInitialized) {
+  //       return;
+  //     }
+
+  //     if (!user?.sub) {
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     try {
+  //       setIsLoading(true);
+  //       // const fetchedEvents = await fetchCalendarEvents(user.sub);
+  //       const fetchedScheduledEvents = await getAllScheduledEvents();
+  //       const eventsArray = Array.isArray(fetchedScheduledEvents) ? fetchedScheduledEvents : [];
+
+  //       setEvents(
+  //         eventsArray.map((event) => ({
+  //           ...event,
+  //           id: event.id || crypto.randomUUID(),
+  //           eventDetails: { // 
+  //             summary: event.summary,
+  //             description: event.description,
+  //             location: event.location,
+  //             organizer: {
+  //               name: event.organizer.name,
+  //               email: event.organizer.email,
+  //             },
+  //             startTime: {
+  //               date: new Date(event.startTime || event.date).toISOString(), // Ensure correct date source
+  //             },
+  //             endTime: {
+  //               date: new Date(event.endTime || event.date).toISOString(),
+  //             },
+  //           },
+  //           scheduledTime: {
+  //             date: new Date(event.scheduledTime || Date.now()).toISOString(),
+  //           },
+  //           createdAt: {
+  //             date: new Date(event.createdAt || Date.now()).toISOString(),
+  //           },
+  //           status: event.status || "pending",
+  //           selectedUsers: event.selectedUsers || [],
+  //         }))
+  //       );
+        
+  //       setIsInitialized(true);
+  //     } catch (err) {
+  //       setError(err instanceof Error ? err.message : "Failed to load events");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   loadEvents();
+  // // Add isInitialized to dependency array
+  // }, [user?.sub, setEvents, events.length, isInitialized, fetchCalendarEvents]);
+
+  // useEffect(() => {
+  //   const loadEvents = async () => {
+  //     // Don't fetch if we already have events and user hasn't changed
+  //     if (events.length > 0 && isInitialized) {
+  //       return;
+  //     }
+
+  //     if (!user?.sub) {
+  //       setIsLoading(false);
+  //       return;
+  //     }
+
+  //     try {
+  //       setIsLoading(true);
+  //       const fetchedEvents = await fetchCalendarEvents(user.sub);
+  //       const eventsArray = Array.isArray(fetchedEvents) ? fetchedEvents : [];
+
+  //       setEvents(
+  //         eventsArray.map((event) => ({
+  //           ...event,
+  //           id: event.id || crypto.randomUUID(),
+  //           title: event.title,
+  //           start: new Date(event.start).toISOString(),
+  //           end: new Date(event.end).toISOString(),
+  //           extendedProps: {
+  //             calendar: event.extendedProps?.calendar || "primary",
+  //           },
+  //         }))
+  //       );
+  //       setIsInitialized(true);
+  //     } catch (err) {
+  //       setError(err instanceof Error ? err.message : "Failed to load events");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   loadEvents();
+  // // Add isInitialized to dependency array
+  // }, [user?.sub, setEvents, events.length, isInitialized, fetchCalendarEvents]);
+
   useEffect(() => {
     const loadEvents = async () => {
       // Don't fetch if we already have events and user hasn't changed
@@ -187,21 +341,35 @@ const Calendar: React.FC = () => {
 
       try {
         setIsLoading(true);
-        const fetchedEvents = await fetchCalendarEvents(user.sub);
-        const eventsArray = Array.isArray(fetchedEvents) ? fetchedEvents : [];
+        // const fetchedEvents = await fetchCalendarEvents(user.sub);
+        const fetchedScheduledEvents = await getAllScheduledEvents();
+        const calendarEvents = fetchedScheduledEvents.map(mapToCalendarEvent);
+        setEvents(calendarEvents);
+        
+        // const eventsArray = Array.isArray(fetchedScheduledEvents) ? fetchedScheduledEvents : [];
 
-        setEvents(
-          eventsArray.map((event) => ({
-            ...event,
-            id: event.id || crypto.randomUUID(),
-            title: event.title,
-            start: new Date(event.start).toISOString(),
-            end: new Date(event.end).toISOString(),
-            extendedProps: {
-              calendar: event.extendedProps?.calendar || "primary",
-            },
-          }))
-        );
+        // setEvents(
+        //   eventsArray.map((event) => ({
+        //     ...event,
+        //     id: event._id || crypto.randomUUID(), // Use _id from MongoDB
+        //     eventDetails: {
+        //       startTime: event.eventDetails.startTime,
+        //       endTime: event.eventDetails.endTime,
+        //       summary: event.eventDetails.summary,
+        //       description: event.eventDetails.description,
+        //       location: event.eventDetails.location,
+        //       organizer: {
+        //         name: event.eventDetails.organizer.name,
+        //         email: event.eventDetails.organizer.email,
+        //       },
+        //     },
+        //     selectedUsers: event.selectedUsers || [],
+        //     scheduledTime: event.scheduledTime,
+        //     status: event.status || "pending",
+        //     createdAt: event.createdAt,
+        //   }))
+        // );
+        
         setIsInitialized(true);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load events");
@@ -213,12 +381,6 @@ const Calendar: React.FC = () => {
     loadEvents();
   // Add isInitialized to dependency array
   }, [user?.sub, setEvents, events.length, isInitialized, fetchCalendarEvents]);
-
- 
-  // Show loading state
-  if (isLoading) {
-    return <Loader size="medium" />;
-  }
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     // Check if this is a drag-drop operation by looking for a specific class
@@ -260,6 +422,10 @@ const Calendar: React.FC = () => {
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
+    // if (_userRole !== 'super-admin') {
+    //   return; // Don't allow editing for non-admin users
+    // }
+
     // Prevent any default touch behavior
     if (clickInfo.jsEvent) {
       clickInfo.jsEvent.preventDefault();
@@ -649,6 +815,21 @@ else {
     );
   };
 
+  // Show loading state
+  if (isLoading) {
+    return <Loader size="medium" />;
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 bg-white rounded-lg shadow-md">
+        <div className="flex items-center p-4 text-red-800 bg-red-100 rounded-lg">
+          <span className="font-medium">Error: {error}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-800/50 lg:p-6"> */}
@@ -677,7 +858,7 @@ else {
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
             // Drag-n-drop settings
-            editable={true}
+            // editable={_userRole === 'super-admin'}
             eventStartEditable={true}
             eventDurationEditable={true}
             droppable={true}
@@ -760,6 +941,9 @@ else {
               addEventButton: {
                 text: "Add Event +",
                 click: function () {
+                  // if (userRole !== 'super-admin') {
+                  //   return; // Don't allow adding events for non-admin users
+                  // }
                   // Set start date to today
                   const today = new Date();
                   const tomorrow = new Date();
@@ -1029,44 +1213,94 @@ const formatEventDate = (date: Date | null): string => {
 };
 
 const renderEventContent = (eventInfo: EventContentArg): JSX.Element => {
-  // Get the current view type from the calendar
-  const currentView = 'dayGridMonth'; // Default to month view since we can't access ref here
-  
-  // Determine tooltip placement based on view type
+  const currentView = 'dayGridMonth';
   const tooltipPlacement = currentView === 'dayGridMonth' ? 'top' : 'right';
-
-  const colorClass = `fc-bg-${eventInfo.event.extendedProps.calendar.toLowerCase()}`;
-  const dotColorMap = {
-    primary: "bg-brand-500",
-    success: "bg-success-500",
-    danger: "bg-error-500",
-    warning: "bg-orange-500",
+  // const [userRole, setUserRole]  = useState("");
+  // const  role = userRole;
+  // Map status to colors
+  const statusColorMap = {
+    pending: "border-orange-500",
+    processing: "border-blue-500",
+    completed: "border-green-500",
+    failed: "border-red-500"
   };
 
-  const dotColorClass =
-    dotColorMap[
-      eventInfo.event.extendedProps.calendar.toLowerCase() as keyof typeof dotColorMap
-    ];
+  // Get event data with proper fallbacks
+const status = eventInfo.event.extendedProps.status;
+const borderColorClass = statusColorMap[status as keyof typeof statusColorMap] || "border-gray-500";
+const eventDetails = eventInfo.event.extendedProps.eventDetails;
+const selectedUsers = eventInfo.event.extendedProps.selectedUsers || [];
 
   const tooltipContent = (
-    <div className="p-2.5">
+    <div className="p-3 max-w-xs">
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${dotColorClass}`}></span>
-          <h6 className="font-medium text-gray-800 dark:text-gray-200">
-            {eventInfo.event.title}
-          </h6>
+        {/* Status and Title */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${borderColorClass}`}></span>
+            <h6 className="font-medium text-gray-800 dark:text-gray-200">
+              {eventDetails.summary || 'No title'}
+            </h6>
+          </div>
+          <span className={`px-2 py-0.5 text-xs rounded-full ${borderColorClass} text-white`}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </span>
         </div>
-        <div className="space-y-1">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            <span className="font-medium">Start:</span>{" "}
-            {formatEventDate(eventInfo.event.start)}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            <span className="font-medium">End:</span>{" "}
-            {formatEventDate(eventInfo.event.end)}
-          </p>
+
+        {/* Time and Date */}
+        <div className="mt-1 space-y-1 text-sm">
+          {eventDetails.startTime && (
+            <p className="text-gray-600 dark:text-gray-300">
+              <span className="font-medium">When:</span>{' '}
+              {new Date(eventDetails.startTime).toLocaleString()}
+              {eventDetails.endTime && ` - ${new Date(eventDetails.endTime).toLocaleTimeString()}`}
+            </p>
+          )}
+          
+          {eventDetails.location && (
+            <p className="text-gray-600 dark:text-gray-300">
+              <span className="font-medium">Where:</span> {eventDetails.location}
+            </p>
+          )}
         </div>
+
+        {/* Description */}
+        {eventDetails.description && (
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+            {eventDetails.description}
+          </p>
+        )}
+
+        {/* Organizer */}
+        {eventDetails.organizer && (
+          <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Organizer</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              {eventDetails.organizer.name || eventDetails.organizer.email}
+            </p>
+          </div>
+        )}
+
+        {/* Attendees */}
+        {selectedUsers.length > 0 && (
+          <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+              {selectedUsers.length} {selectedUsers.length === 1 ? 'Attendee' : 'Attendees'}
+            </p>
+            <div className="mt-1 space-y-1">
+              {selectedUsers.slice(0, 3).map((user, index) => (
+                <p key={index} className="text-sm text-gray-700 dark:text-gray-300">
+                  {user.name || user.email}
+                </p>
+              ))}
+              {selectedUsers.length > 3 && (
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  +{selectedUsers.length - 3} more
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1080,11 +1314,11 @@ const renderEventContent = (eventInfo: EventContentArg): JSX.Element => {
       arrow={false}
       delay={[100, 0]}
       interactive={true}
-      appendTo={() => document.body} // Add this to ensure tooltip is not constrained
-      zIndex={9999} // Add this to ensure tooltip appears above other elements
+      appendTo={() => document.body}
+      zIndex={9999}
     >
       <div
-        className={`event-fc-color flex fc-event-main ${colorClass} p-1 rounded-sm cursor-move`}
+        className={`fc-event-main flex items-center p-1 rounded border-2 ${borderColorClass} bg-gray-50 dark:bg-gray-200`}
         id={`event-${eventInfo.event.id}`}
       >
         <div className="fc-daygrid-event-dot"></div>

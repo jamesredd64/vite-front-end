@@ -15,7 +15,7 @@ const MarketingOverview: FC = () => {
   const { isLoading } = useAuth0();
   
   if (isLoading) {
-    return <Loader />;
+    return <Loader size="medium" />;
   }
 
 

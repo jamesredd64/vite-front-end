@@ -1,8 +1,9 @@
-## [2.0.34](https://github.com/jamesredd64/vite-front-end/compare/v2.0.18...v2.0.34) (2025-05-06)
+## [2.0.37](https://github.com/jamesredd64/vite-front-end/compare/v2.0.18...v2.0.37) (2025-05-06)
 
 
 ### Bug Fixes
 
+* added new initial function to insert mongodb user record more efficiently ([c76db3a](https://github.com/jamesredd64/vite-front-end/commit/c76db3a428a391119dcf174640ddcacbadf57b6a))
 * commented out ProtectedAdminRoute for now ([c075f06](https://github.com/jamesredd64/vite-front-end/commit/c075f06f78e14b1a36505d121dd28caa8ec37127))
 * css preload ([ca96c17](https://github.com/jamesredd64/vite-front-end/commit/ca96c17f3930c0c0d85f136777ecf8684443a9ee))
 * issue with userprofileview ([710be70](https://github.com/jamesredd64/vite-front-end/commit/710be70328b4e8df8789c233bb622321eba0d6b4))
@@ -18,6 +19,7 @@
 * removed duplicate preload styles ([635f64d](https://github.com/jamesredd64/vite-front-end/commit/635f64d658a544bb09ceb4ee3a6df909a84758d8))
 * Removed isAdmin ([c469bfe](https://github.com/jamesredd64/vite-front-end/commit/c469bfee8b2b15b145a18f78934cf64148aba9fd))
 * resolve build dependencies and remove package-lock.json ([7a8cbaa](https://github.com/jamesredd64/vite-front-end/commit/7a8cbaa86b7ec6e339a4b45aa5e8055e89e3c274))
+* set loaders to medium size ([ce6a171](https://github.com/jamesredd64/vite-front-end/commit/ce6a171c74659478110fb4c3b0b95637940277ff))
 * timeezone, profile page- reloading losing profile data fix ([e74ccd7](https://github.com/jamesredd64/vite-front-end/commit/e74ccd700bd57b59fba06f68c0506eeae80d0fff))
 * updated versioning files ([e18bef1](https://github.com/jamesredd64/vite-front-end/commit/e18bef1fb0b7bb1e6b8c864ca4465a31820bc569))
 * user routes and controller for new profileview ([53e21db](https://github.com/jamesredd64/vite-front-end/commit/53e21db9cc9eff3e6a6714718481f5caa30e69e5))

@@ -9,13 +9,23 @@ import { FC } from "react";
 // import StatsCard from "../../components/marketing/StatsCard";
 // import { getImageUrl } from '../../config/images.config';
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+import { useAuth0 } from "@auth0/auth0-react";
+import Loader from "../../components/common/Loader";
+
+
+
 
 const Marketing: FC = () => {
+  const { isLoading } = useAuth0();
+  if (isLoading) {
+    return <Loader size="medium" />;
+  }
+
   return (
     <>
       <PageMeta
-        title="React.js Marketing Dashboard | TailAdmin - React.js Admin Dashboard Template"
-        description="This is React.js Marketing Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+        title="React.js Marketing Dashboard | Admin Dashboard Template"
+        description="This is React.js Marketing Dashboard page Admin Dashboard Template"
       />
       <PageBreadcrumb pageTitle="Ecommerce" />
       <div className="grid grid-cols-12 gap-4 md:gap-6">

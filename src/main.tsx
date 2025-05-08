@@ -14,6 +14,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { SearchProvider } from './context/SearchContext';
 import { CalendarProvider } from './context/CalendarContext';
 import { UnsavedChangesProvider } from './context/UnsavedChangesContext';
+// import { useNavigate } from "react-router-dom";
 
 import { useAuth0} from '@auth0/auth0-react';
 import { useState } from 'react';
@@ -24,13 +25,27 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 const onRedirectCallback = (appState: any) => {
   const userRole = localStorage.getItem('userRole');
   const returnTo = appState?.returnTo || window.location.pathname;
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  // const navigate = useNavigate();  
+    
   
-  if (userRole === 'admin' || userRole === 'super-admin') {
-    window.location.href = returnTo.includes('/admin') ? returnTo : '/admin';
-  } else {
-    window.location.href = returnTo.includes('/admin') ? '/dashboard' : returnTo;
-  }
-};
+    
+  
+    if (userRole === 'admin' || userRole === 'super-admin') {
+      window.location.href = returnTo.includes('/admin') ? returnTo : '/admin';
+    } else {
+      window.location.href = returnTo.includes('/user') ? returnTo : '/user';
+    }
+  };
+
+  // if (userRole === 'admin' || userRole === 'super-admin') {
+  //   window.location.href = returnTo.includes('/admin') ? returnTo : '/admin';
+  //   // navigate(isAdminRoute && returnTo.includes('/admin') ? returnTo : '/admin');
+
+  // } else {
+  //   window.location.href = returnTo.includes('/admin') ? '/dashboard' : returnTo;
+  //   // navigate(isAdminRoute ? "/admin" : "/dashboard") 
+  // }
 
 
 

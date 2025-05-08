@@ -6,7 +6,10 @@ import React from "react";
 import { useGlobalStorage } from "../../hooks/useGlobalStorage";
 import UserMetadata from "../../types/user";
 import { UserIcon } from "../../icons";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+
+
+
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +17,7 @@ export default function UserDropdown() {
   const [userMetadata] = useGlobalStorage<UserMetadata | null>("userMetadata", null);
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const navigate = useNavigate();
 
   // Display name logic - use metadata first, fallback to Auth0 user info
   const displayName = useMemo(() => {
@@ -89,7 +93,7 @@ export default function UserDropdown() {
       });
     } catch (error) {
       console.error("Logout error:", error);
-      window.location.href = isAdminRoute ? '/admin/signed-out' : '/signed-out';
+      navigate(isAdminRoute ? "/admin/signed-out" : "/signed-out");
     }
   };
 

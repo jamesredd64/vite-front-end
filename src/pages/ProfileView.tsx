@@ -6,7 +6,7 @@ import { UserAddressCard } from "../components/UserProfile/UserAddressCard";
 import { UserMarketingCard } from "../components/UserProfile/UserMarketingCard";
 import PageMeta from "../components/common/PageMeta";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
-import Loader from "../components/common/Loader";
+import Loader from "../components/common/custom.loader";
 import { useMongoDbClient } from "../services/mongoDbClient";
 import UserMetadata from "../types/user";
 
@@ -59,52 +59,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
      * 
      * @returns {Promise<void>} A promise that resolves when the user data has been fetched and the state updated.
      */
-    // const fetchUserData = async () => {
-    //   if (!isAuthenticated || auth0Loading || !auth0Id) {
-    //     if (isMounted) setIsLoading(false);
-    //     return;
-    //   }
+    console.log('Fetching User Data...');
 
-    //   try {
-    //     const fetchedUserData = await getUserById(auth0Id);
-    //     if (!isMounted) return;
-
-    //     if (fetchedUserData) {
-    //       const restructuredData: UserMetadata = {
-    //         auth0Id: fetchedUserData.auth0Id,
-    //         email: fetchedUserData.email || '',
-    //         firstName: fetchedUserData.firstName || '',
-    //         lastName: fetchedUserData.lastName || '',
-    //         phoneNumber: fetchedUserData.phoneNumber || '',
-    //         profile: {
-    //           dateOfBirth: fetchedUserData.profile?.dateOfBirth || null,
-    //           gender: fetchedUserData.profile?.gender || '',
-    //           profilePictureUrl: fetchedUserData.profile?.profilePictureUrl || user?.picture || '',
-    //           role: fetchedUserData.profile?.role || 'user'
-    //         },
-    //         address: {
-    //           ...defaultAddress,
-    //           ...fetchedUserData.address
-    //         },
-    //         marketingBudget: {
-    //           ...defaultMarketingBudget,
-    //           ...fetchedUserData.marketingBudget
-    //         },
-    //         isActive: fetchedUserData.isActive ?? true
-    //       };
-    //       setUserData(restructuredData);
-    //     }
-    //   } catch (error) {
-    //     if (!isMounted) return;
-    //     console.error("Error fetching user data:", error);
-    //     setSaveStatus({
-    //       message: "Failed to load user data",
-    //       isError: true
-    //     });
-    //   } finally {
-    //     if (isMounted) setIsLoading(false);
-    //   }
-    // };
     const fetchUserData = async () => {
       if (!isAuthenticated || !auth0Id) {
         if (isMounted) setIsLoading(false);
@@ -191,6 +147,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
       isMounted = false;
     };
   }, [isAuthenticated, auth0Id, user]);
+
+
   // }, [isAuthenticated, auth0Loading, auth0Id, getUserById, user?.picture, defaultAddress, defaultMarketingBudget]);
 
   // Optimized update handlers with better error handling
@@ -316,9 +274,12 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
    *          application is in a loading state.
    */
   if (isLoading || auth0Loading) {
-    return <Loader size="medium" />;
-  }
+    // return <p>Loading...</p>; 
+    return <Loader />;
 
+    //return <p>Testing...</p>; 
+  }
+{/* <Loader size="medium" */}
   /**
    * Renders a message indicating that no user data is available.
    *
@@ -412,7 +373,52 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
 
 export default ProfileView;
 
+// const fetchUserData = async () => {
+    //   if (!isAuthenticated || auth0Loading || !auth0Id) {
+    //     if (isMounted) setIsLoading(false);
+    //     return;
+    //   }
 
+    //   try {
+    //     const fetchedUserData = await getUserById(auth0Id);
+    //     if (!isMounted) return;
+
+    //     if (fetchedUserData) {
+    //       const restructuredData: UserMetadata = {
+    //         auth0Id: fetchedUserData.auth0Id,
+    //         email: fetchedUserData.email || '',
+    //         firstName: fetchedUserData.firstName || '',
+    //         lastName: fetchedUserData.lastName || '',
+    //         phoneNumber: fetchedUserData.phoneNumber || '',
+    //         profile: {
+    //           dateOfBirth: fetchedUserData.profile?.dateOfBirth || null,
+    //           gender: fetchedUserData.profile?.gender || '',
+    //           profilePictureUrl: fetchedUserData.profile?.profilePictureUrl || user?.picture || '',
+    //           role: fetchedUserData.profile?.role || 'user'
+    //         },
+    //         address: {
+    //           ...defaultAddress,
+    //           ...fetchedUserData.address
+    //         },
+    //         marketingBudget: {
+    //           ...defaultMarketingBudget,
+    //           ...fetchedUserData.marketingBudget
+    //         },
+    //         isActive: fetchedUserData.isActive ?? true
+    //       };
+    //       setUserData(restructuredData);
+    //     }
+    //   } catch (error) {
+    //     if (!isMounted) return;
+    //     console.error("Error fetching user data:", error);
+    //     setSaveStatus({
+    //       message: "Failed to load user data",
+    //       isError: true
+    //     });
+    //   } finally {
+    //     if (isMounted) setIsLoading(false);
+    //   }
+    // };
 
 
 

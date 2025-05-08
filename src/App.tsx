@@ -10,7 +10,7 @@ import AdminLayout from "./layout/AdminLayout";
 import { useEffect, useRef, useState, useCallback } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
 // import UserProfileView from "./pages/UserProfileView";
-import  Calendar from "./pages/Calendar";
+import  Calendar from "./pages/CalendarPage";
 import DashboardHome from "./pages/Dashboard/Home";
 import React from "react";
 import SignedOut from "./pages/SignedOut";
@@ -34,6 +34,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminDashboard from "./components/AdminDashboard";
 import ComingSoon from "./pages/ComingSoon";
 import AdminSettings from "./pages/AdminSettings";
+import Home from "./pages/Dashboard/Home";
 
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
@@ -136,11 +137,13 @@ function App() {
             }
 
             // Navigate to signed-out page
-            window.location.href = '/signed-out';
+            // window.location.href = '/signed-out';
+            navigate('/signed-out');
           } catch (error) {
             console.error('Timeout logout error:', error);
             // Force navigation to signed-out page if token refresh fails
-            window.location.href = '/signed-out';
+            // window.location.href = '/signed-out';
+            navigate('/signed-out');
           }
         }
       });
@@ -444,6 +447,10 @@ function App() {
   // }, [isAuthenticated, user?.sub]);
 
   if (isLoading) {
+    // return (<span style={{ color: '#60a5fa', fontSize: '16px', marginTop: '10px' }}>
+    //     Loading...
+    //   </span>
+    // )
     return <Loader size="medium" />;
   }
 
@@ -459,16 +466,18 @@ function App() {
           <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           <Routes>
                 <Route path="/signed-out" element={<SignedOut />} />
-
+                {/* <Route path="/" element={<Home />} />
+                <Route path="/dashboard" element={<Dashboard />} /> */}
                 {/* Handle Role-Based Navigation */}
                 <Route path="/" element={<RoleBasedRoute />} />
 
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />}>
                   {/* Admin Routes */}
-                  <Route path="/admin/*" element={<AdminLayout />}>
+                  <Route path="/admin/*" element={<AppLayout />}>
                     <Route index element={<Navigate to="dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
+                    {/* <Route path="dashboard" element={<Home />} /> */}
                     <Route path="invite" element={<EventInvitation />} />
                     <Route path="userman" element={<UserManagement />} />
                     <Route path="profile" element={<ProfileView />} />

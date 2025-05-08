@@ -50,10 +50,15 @@ export const API_CONFIG = {
     USER_BY_ID: (id: string) => `/users/${encodeURIComponent(id)}`,
     USER_BY_EMAIL: (email: string) => `/users/email/${encodeURIComponent(email)}`,
     SAVE_USER_DATA: (id: string) => `/users/${encodeURIComponent(id)}`,
+    ALL_USERS: '/users',
     
     // Calendar endpoints
     CALENDAR: '/calendar',
     USER_CALENDAR_EVENTS: (id: string) => `/calendar/${encodeURIComponent(id)}`,
+
+    // Scheduled Events endpoints
+    SCHEDULED_EVENTS: '/events',
+    USER_SCHEDULED_EVENTS: (id: string) => `/scheduled-events/${encodeURIComponent(id)}`,
     
     // Notification endpoints
     NOTIFICATIONS: '/notifications',

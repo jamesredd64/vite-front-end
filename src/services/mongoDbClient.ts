@@ -178,6 +178,57 @@ export const useMongoDbClient = () => {
   }, [isAuthenticated, getAuthHeaders]);
 
 
+  const getAllUsers = useCallback(async () => {
+    if (!isAuthenticated) {
+      console.log("getAllUsers: Not authenticated, returning null");
+      return null;
+    }
+  
+    setLoading(true);
+    console.log("getAllUsers: Fetching all users...");
+  
+    try {
+      const headers = await getAuthHeaders();
+      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ALL_USERS}`;
+  
+      console.log("getAllUsers: Making request to:", url);
+  
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+  
+      console.log("getAllUsers: Response status:", response.status);
+  
+      if (response.status === 204) {
+        console.log("getAllUsers: No users found");
+        return [];
+      }
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log("getAllUsers: Received user list:", data);
+      return data;
+    } catch (error) {
+      console.error("getAllUsers: Error:", error);
+      setError({
+        message: error instanceof Error ? error.message : "Failed to fetch users",
+        status: error instanceof Response ? error.status : undefined,
+      });
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, getAuthHeaders]);
+
+  
   const checkAndInsertUser = useCallback(async (userId: string, userData: UserData) => {
     const cacheKey = `checkAndInsertUser-${userId}`;
     const cachedRequest = getCachedRequest(cacheKey);
@@ -358,8 +409,7 @@ export const useMongoDbClient = () => {
       console.error("Error checking user existence:", error);
       return false; // Assume user doesn't exist if there's an error
     }
-  };
-  
+  };  
 
   const saveUserData = async (auth0Id: string, data: Partial<UserMetadata>, section?: "meta" | "address" | "marketing") => {
     try {
@@ -393,39 +443,8 @@ export const useMongoDbClient = () => {
       console.error("Error in saveUserData:", error);
       throw error;
     }
-  };
-  
-  
-
-
-  // const saveUserData = async (auth0Id: string, data: Partial<UserMetadata>, section?: 'meta' | 'address' | 'marketing') => {
-  //   try {
-  //     let endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`;
-  //     if (section) {
-  //       endpoint += `?section=${section}`;
-  //     }
-
-  //     const headers = await getAuthHeaders();
-  //     const response = await fetch(endpoint, {
-  //       method: 'PUT',
-  //       headers: {
-  //         ...headers,
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(data)
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`Failed to save user data. Status: ${response.status}`);
-  //     }
-
-  //     const serverResponse = await response.json();
-  //     return serverResponse;
-  //   } catch (error) {
-  //     console.error('Error in saveUserData:', error);
-  //     throw error;
-  //   }
-  // };
+  };  
+ 
 
   const fetchWithTimeout = async (url: string, options: RequestInit) => {
     const controller = new AbortController();
@@ -528,6 +547,56 @@ export const useMongoDbClient = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getAccessTokenSilently]);
+
+  const getAllScheduledEvents = useCallback(async () => {
+    if (!isAuthenticated) {
+      console.log("getAllScheduledEvents: Not authenticated, returning null");
+      return null;
+    }
+  
+    setLoading(true);
+    console.log("getAllScheduledEvents: Fetching all scheduled events...");
+  
+    try {
+      const headers = await getAuthHeaders();
+      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULED_EVENTS}`;
+  
+      console.log("getAllScheduledEvents: Making request to:", url);
+  
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+  
+      console.log("getAllScheduledEvents: Response status:", response.status);
+  
+      if (response.status === 204) {
+        console.log("getAllScheduledEvents: No events found");
+        return [];
+      }
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const events = await response.json();
+      console.log("getAllScheduledEvents: Received event list:", events);
+      return events;
+    } catch (error) {
+      console.error("getAllScheduledEvents: Error:", error);
+      setError({
+        message: error instanceof Error ? error.message : "Failed to fetch scheduled events",
+        status: error instanceof Response ? error.status : undefined,
+      });
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, getAuthHeaders]);
+  
 
   const fetchCalendarEvents = useCallback(async (userId: string): Promise<CalendarEvent[]> => {
     const cacheKey = `fetchCalendarEvents-${userId}`;
@@ -646,10 +715,39 @@ export const useMongoDbClient = () => {
     fetchCalendarEvents,
     createCalendarEvent,
     updateCalendarEvent,
-    deleteCalendarEvent
+    deleteCalendarEvent,
+    getAllUsers,
+    getAllScheduledEvents
   };
 }; 
   
 
-  
+// const saveUserData = async (auth0Id: string, data: Partial<UserMetadata>, section?: 'meta' | 'address' | 'marketing') => {
+  //   try {
+  //     let endpoint = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(auth0Id)}`;
+  //     if (section) {
+  //       endpoint += `?section=${section}`;
+  //     }
+
+  //     const headers = await getAuthHeaders();
+  //     const response = await fetch(endpoint, {
+  //       method: 'PUT',
+  //       headers: {
+  //         ...headers,
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(data)
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to save user data. Status: ${response.status}`);
+  //     }
+
+  //     const serverResponse = await response.json();
+  //     return serverResponse;
+  //   } catch (error) {
+  //     console.error('Error in saveUserData:', error);
+  //     throw error;
+  //   }
+  // };
   

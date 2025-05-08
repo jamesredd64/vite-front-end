@@ -1,4 +1,5 @@
 import { Auth0Client } from '@auth0/auth0-spa-js';
+import { useNavigate } from "react-router-dom";
 
 export const forceLogout = async (auth0Client?: Auth0Client) => {
   // Cancel all pending requests
@@ -21,6 +22,7 @@ export const forceLogout = async (auth0Client?: Auth0Client) => {
 
   // Remove all event listeners (if any were set globally)
   const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    const navigate = useNavigate();
   events.forEach(event => {
     window.removeEventListener(event, () => {});
   });
@@ -39,6 +41,7 @@ export const forceLogout = async (auth0Client?: Auth0Client) => {
       window.location.href = '/signed-out';
     }
   } else {
-    window.location.href = '/signed-out';
+    // window.location.href = '/signed-out';
+    navigate('/signed-out');
   }
 };
