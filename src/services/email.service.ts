@@ -34,7 +34,7 @@ export class EmailService {
   }): Promise<void> {
     try {
       const response = await axios.post(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.EMAIL.EVENT_INVITATION}`,
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.EVENT_INVITATION}`,
         {
           eventData,
           mailOptions
@@ -60,7 +60,7 @@ export class EmailService {
   static async sendBulkEventInvitations(eventDetails: Omit<EventDetails, 'to'>, attendees: Attendee[]): Promise<void> {
     try {
       const response = await axios.post(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.EMAIL.BULK_EVENT_INVITATION}`,
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BULK_EVENT_INVITATION}`,
         {
           eventDetails,
           attendees

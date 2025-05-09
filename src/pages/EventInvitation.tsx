@@ -22,8 +22,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import '../styles/datepicker-custom.css';
 import Loader from '../components/common/Loader';
 
-
-
 interface EventFormData {
   title: string;
   start: string;
@@ -700,9 +698,9 @@ const EventInvitation: React.FC = () => {
                 type="button"
                 onClick={handleSendInvitations}
                 disabled={
-                  formData.sendLater 
+                  formData.sendLater
                     ? !formData.title || !formData.scheduledTime
-                    : !formData.title || selectedUsers.length === 0
+                    : !formData.title
                 }
                 className="w-full relative font-normal font-sans z-[1] bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300 disabled:cursor-not-allowed"
               >
