@@ -22,12 +22,14 @@ import "react-datepicker/dist/react-datepicker.css";
 import '../styles/datepicker-custom.css';
 import Loader from '../components/common/Loader';
 
+type CalendarType = 'primary' | 'success' | 'danger' | 'warning';
+
 interface EventFormData {
   title: string;
   start: string;
   end: string;
   allDay: boolean;
-  calendar: "primary" | "success" | "danger" | "warning";
+  calendar: CalendarType;
   description: string;
   location: string;
   sendLater: boolean;
@@ -37,6 +39,17 @@ interface EventFormData {
 interface SelectedUser {
   email: string;
   name: string;
+}
+
+interface EventTemplate {
+  name: string;
+  template: {
+    title: string;
+    description: string;
+    location: string;
+    calendar: CalendarType;
+    allDay: boolean;
+  };
 }
 
 const EventInvitation: React.FC = () => {
@@ -84,15 +97,15 @@ const EventInvitation: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Event templates for quick selection
-  const eventTemplates = [
+  // Default event templates for quick selection
+  const defaultEventTemplates: EventTemplate[] = [
     {
       name: 'Strategic Planning Meeting',
       template: {
         title: 'Strategic Planning Meeting',
         description: 'Q2 2024 strategic planning session with leadership team',
         location: 'Conference Room A',
-        calendar: 'primary' as const,
+        calendar: 'primary',
         allDay: false
       }
     },
@@ -102,7 +115,7 @@ const EventInvitation: React.FC = () => {
         title: 'Product Launch',
         description: 'Official launch of new product line',
         location: 'Main Auditorium',
-        calendar: 'success' as const,
+        calendar: 'success',
         allDay: true
       }
     },
@@ -112,11 +125,62 @@ const EventInvitation: React.FC = () => {
         title: 'Team Training Day',
         description: 'Full-day team training on new technologies',
         location: 'Training Center',
-        calendar: 'primary' as const,
+        calendar: 'primary',
         allDay: true
       }
     }
   ];
+
+  // State for event templates including user-created ones
+  const [eventTemplates, setEventTemplates] = useState<EventTemplate[]>(defaultEventTemplates);
+
+  // State for controlling the new template modal visibility
+  const [showNewTemplateModal, setShowNewTemplateModal] = useState(false);
+
+  // State for new template form inputs
+  const [newTemplateData, setNewTemplateData] = useState({
+    name: '',
+    title: '',
+    description: '',
+    location: '',
+    calendar: 'primary',
+    allDay: false
+  });
+
+  // Load saved templates from localStorage on mount and merge with defaults
+  useEffect(() => {
+    const savedTemplatesJson = localStorage.getItem('userEventTemplates');
+    if (savedTemplatesJson) {
+      try {
+        const savedTemplates = JSON.parse(savedTemplatesJson) as EventTemplate[];
+        if (Array.isArray(savedTemplates)) {
+          // Merge saved templates with default templates, avoiding duplicates by name
+          const mergedTemplates = [...defaultEventTemplates];
+          savedTemplates.forEach((savedTemplate) => {
+            if (!mergedTemplates.find(t => t.name === savedTemplate.name)) {
+              // Ensure calendar type is one of the allowed string literals
+              if (['primary', 'success', 'danger', 'warning'].includes(savedTemplate.template.calendar)) {
+                // Cast calendar to the narrower type to satisfy TypeScript
+                const castedTemplate: EventTemplate = {
+                  ...savedTemplate,
+                  template: {
+                    ...savedTemplate.template,
+                    calendar: savedTemplate.template.calendar as CalendarType
+                  }
+                };
+                mergedTemplates.push(castedTemplate);
+              } else {
+                console.warn(`Skipping template with invalid calendar value: ${savedTemplate.name}`);
+              }
+            }
+          });
+          setEventTemplates(mergedTemplates);
+        }
+      } catch (error) {
+        console.error('Failed to parse saved event templates from localStorage', error);
+      }
+    }
+  }, []);
 
   const handleTemplateSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = eventTemplates.find(t => t.name === e.target.value);
@@ -128,13 +192,61 @@ const EventInvitation: React.FC = () => {
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  // Handle input changes for new template form
+  const handleNewTemplateInputChange = (
+    name: string,
+    value: string | boolean
   ) => {
-    const { name, value, type } = e.target;
+    setNewTemplateData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Save new template to state and localStorage
+  const handleSaveNewTemplate = () => {
+    // Validate required fields
+    if (!newTemplateData.name.trim() || !newTemplateData.title.trim()) {
+      alert('Please provide both a name and title for the template.');
+      return;
+    }
+    // Check for duplicate template name
+    if (eventTemplates.find(t => t.name === newTemplateData.name.trim())) {
+      alert('A template with this name already exists. Please choose a different name.');
+      return;
+    }
+    const newTemplate = {
+      name: newTemplateData.name.trim(),
+      template: {
+        title: newTemplateData.title.trim(),
+        description: newTemplateData.description.trim(),
+        location: newTemplateData.location.trim(),
+        calendar: newTemplateData.calendar as 'primary' | 'success' | 'danger' | 'warning',
+        allDay: newTemplateData.allDay
+      }
+    };
+    const updatedTemplates = [...eventTemplates, newTemplate];
+    setEventTemplates(updatedTemplates);
+    localStorage.setItem('userEventTemplates', JSON.stringify(updatedTemplates));
+    setShowNewTemplateModal(false);
+    // Reset new template form
+    setNewTemplateData({
+      name: '',
+      title: '',
+      description: '',
+      location: '',
+      calendar: 'primary',
+      allDay: false
+    });
+  };
+
+  const handleInputChange = (
+    name: string,
+    value: string | boolean
+  ) => {
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      [name]: value
     }));
   };
 
@@ -364,10 +476,17 @@ const EventInvitation: React.FC = () => {
 
       <div className="flex justify-center">
         <div className="relative w-3/4 p-4 overflow-y-auto bg-white border border-gray-200 dark:border-gray-700 no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
-          <div className="mb-6">
+          <div className="mb-6 flex items-center justify-between">
             <h2 className="text-xl font-semibold text-black dark:text-white">
               Create Event Invitation
             </h2>
+            <Button
+              type="button"
+              onClick={() => setShowNewTemplateModal(true)}
+              className="bg-primary text-white hover:bg-opacity-90"
+            >
+              + New Template
+            </Button>
           </div>
 
           <div className="mb-4">
@@ -402,15 +521,15 @@ const EventInvitation: React.FC = () => {
                 type="text"
                 name="title"
                 value={formData.title}
-                onChange={handleInputChange}
+                onChange={(e) => handleInputChange(e.target.name, e.target.value)}
                 placeholder="Enter event title"
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3"
               />
             </div>
 
             <div className="flex gap-4 w-full">
-              <div className="w-1/2">
-                <label className="mb-2.5 block text-black dark:text-white">
+              <div className="w-1/2 text-black dark:text-white">
+                <label className="mb-2.5 block ">
                   Start Date & Time
                 </label>
                 <div className="relative">
@@ -428,7 +547,7 @@ const EventInvitation: React.FC = () => {
                       focus:border-brand-500 active:border-brand-500 
                       disabled:cursor-default disabled:bg-gray-50
                       dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-500
-                      placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                      placeholder:text-gray-500 dark:placeholder:text-gray-400 text-gray-800 dark:text-white/90"
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                     <svg
@@ -468,7 +587,7 @@ const EventInvitation: React.FC = () => {
                       focus:border-brand-500 active:border-brand-500 
                       disabled:cursor-default disabled:bg-gray-50
                       dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-500
-                      placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                      placeholder:text-gray-500 dark:placeholder:text-gray-400 text-gray-800 dark:text-white/90"
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                     <svg
@@ -492,35 +611,30 @@ const EventInvitation: React.FC = () => {
 
             <div className="flex items-center gap-4 w-full">
               <div className="flex items-center w-1/3">
-                <input
-                  type="checkbox"
-                  name="allDay"
-                  checked={formData.allDay}
-                  onChange={handleInputChange}
-                  className="h-5 w-5 rounded border-gray-300"
-                />
+            <input
+              type="checkbox"
+              name="allDay"
+              checked={formData.allDay}
+              onChange={(e) => handleInputChange('allDay', e.target.checked)}
+              className="h-5 w-5 rounded border-gray-300"
+            />
                 <label className="ml-2 text-black dark:text-white">
                   All Day Event
                 </label>
               </div>
 
               <div className="w-2/3">
-                <Select
-                  options={[
-                    { value: "primary", label: "Primary" },
-                    { value: "success", label: "Success" },
-                    { value: "danger", label: "Danger" },
-                    { value: "warning", label: "Warning" }
-                  ]}
-                  defaultValue={formData.calendar}
-                  onChange={(value) => handleInputChange({ 
-                    target: { 
-                      name: 'calendar', 
-                      value 
-                    }
-                  } as React.ChangeEvent<HTMLSelectElement>)}
-                  className="w-full dark:border-strokedark dark:bg-form-input"
-                />
+              <Select
+                options={[
+                  { value: "primary", label: "Primary" },
+                  { value: "success", label: "Success" },
+                  { value: "danger", label: "Danger" },
+                  { value: "warning", label: "Warning" }
+                ]}
+                defaultValue={formData.calendar}
+                onChange={(value: string) => handleInputChange('calendar', value)}
+                className="w-full dark:border-strokedark dark:bg-form-input"
+              />
               </div>
             </div>
 
@@ -530,7 +644,7 @@ const EventInvitation: React.FC = () => {
               </label>
               <Textarea
                 value={formData.description}
-                onChange={(value) => handleInputChange({ target: { name: 'description', value } } as React.ChangeEvent<HTMLTextAreaElement>)}
+                onChange={(value: string) => handleInputChange('description', value)}
                 rows={4}
                 placeholder="Enter event description"
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3"
@@ -541,14 +655,14 @@ const EventInvitation: React.FC = () => {
               <label className="mb-2.5 block text-black dark:text-white">
                 Location
               </label>
-              <Input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                placeholder="Enter event location"
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3"
-              />
+            <Input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={(e) => handleInputChange('location', e.target.value)}
+              placeholder="Enter event location"
+              className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3"
+            />
             </div>
 
             <div className="w-full">
@@ -660,7 +774,7 @@ const EventInvitation: React.FC = () => {
                         focus:border-brand-500 active:border-brand-500 
                         disabled:cursor-default disabled:bg-gray-50
                         dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-500
-                        placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                        placeholder:text-gray-500 dark:placeholder:text-gray-400 text-gray-800 dark:text-white/90"
                     />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <svg
@@ -702,7 +816,7 @@ const EventInvitation: React.FC = () => {
                     ? !formData.title || !formData.scheduledTime
                     : !formData.title
                 }
-                className="w-full relative font-normal font-sans z-[1] bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300 disabled:cursor-not-allowed"
+                className="w-full relative font-normal font-sans z-[1] text-gray-700 dark:hover:bg-primary/70 dark:text-gray-300 hover:bg-primary/70 disabled:cursor-not-allowed"
               >
                 {formData.sendLater ? 'Schedule Invitations' : 'Send Invitations'}
               </Button>
@@ -723,6 +837,103 @@ const EventInvitation: React.FC = () => {
             onUserSelect={handleUserSelect}
             onClose={() => setShowUserLookup(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* New Template Modal */}
+      <Dialog
+        isOpen={showNewTemplateModal}
+        onClose={() => setShowNewTemplateModal(false)}
+        title="Create New Event Template"
+        size="md"
+      >
+        <DialogContent>
+          <div className="flex flex-col gap-4">
+            <div>
+              <label className="block mb-1 text-black dark:text-white">Template Name *</label>
+              <Input
+                type="text"
+                name="name"
+                value={newTemplateData.name}
+                onChange={(e) => handleNewTemplateInputChange(e.target.name, e.target.value)}
+                placeholder="Enter template name"
+                className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-black dark:text-white">Title *</label>
+              <Input
+                type="text"
+                name="title"
+                value={newTemplateData.title}
+                onChange={(e) => handleNewTemplateInputChange(e.target.name, e.target.value)}
+                placeholder="Enter event title"
+                className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-black dark:text-white">Description</label>
+              <Textarea
+                value={newTemplateData.description}
+                onChange={(value: string) => handleNewTemplateInputChange('description', value)}
+                placeholder="Enter event description"
+                rows={3}
+                className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-black dark:text-white">Location</label>
+              <Input
+                type="text"
+                name="location"
+                value={newTemplateData.location}
+                onChange={(e) => handleNewTemplateInputChange(e.target.name, e.target.value)}
+                placeholder="Enter event location"
+                className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-black dark:text-white">Calendar</label>
+            <Select
+              options={[
+                { value: 'primary', label: 'Primary' },
+                { value: 'success', label: 'Success' },
+                { value: 'danger', label: 'Danger' },
+                { value: 'warning', label: 'Warning' }
+              ]}
+              defaultValue={newTemplateData.calendar}
+              onChange={(value: string) => handleNewTemplateInputChange('calendar', value)}
+              className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3"
+            />
+            </div>
+            <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="allDayCheckbox"
+              name="allDay"
+              checked={newTemplateData.allDay}
+              onChange={(e) => handleNewTemplateInputChange(e.target.name, (e.target as HTMLInputElement).checked)}
+              className="h-5 w-5 rounded border-gray-300"
+            />
+              <label htmlFor="allDayCheckbox" className="text-black dark:text-white">All Day Event</label>
+            </div>
+            <div className="flex justify-end gap-4 mt-4">
+              <Button
+                type="button"
+                onClick={() => setShowNewTemplateModal(false)}
+                className="bg-gray-300 text-black hover:bg-gray-400"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSaveNewTemplate}
+                className="bg-primary text-white hover:bg-opacity-90"
+              >
+                Save Template
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>

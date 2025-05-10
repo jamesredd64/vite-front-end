@@ -475,7 +475,7 @@ function App() {
                 <Route element={<ProtectedRoute />}>
                   {/* Admin Routes */}
                   <Route path="/admin/*" element={<AdminLayout />}>
-                    <Route index element={<Navigate to="marketing" replace />} />
+                    <Route index element={<Navigate to="adm-dashboard" replace />} />
                     <Route path="adm-dashboard" element={<AdminDashboard />} />
                     <Route path="dashboard" element={<Home />} />
                     <Route path="invite" element={<EventInvitation />} />
