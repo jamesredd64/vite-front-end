@@ -12,32 +12,22 @@ interface EventDetails {
   summary: string;
   description: string;
   location: string;
-  organizer: {
+  organizer?: { // Make organizer optional as it might not be needed for every attendee in bulk
     name: string;
-    email: string;
+    email: string | undefined; // Allow email to be undefined
   };
-  to: Attendee;
+  // 'to' is not needed in the bulk send eventDetails
 }
 
 export class EmailService {
-  static async sendEventInvitation(eventData: EventDetails, mailOptions: {
-    from: string;
-    to: string;
-    subject: string;
-    text: string;
-    html: string;
-    icalEvent?: {
-      filename: string;
-      method: string;
-      content: string;
-    };
-  }): Promise<void> {
+  // Updated to match the backend's bulk send endpoint expectations
+  static async sendEventInvitation(eventDetails: EventDetails, attendees: Attendee[] = []): Promise<void> {
     try {
       const response = await axios.post(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.EVENT_INVITATION}`,
         {
-          eventData,
-          mailOptions
+          eventDetails,
+          attendees // Send the attendees array (will be empty array if not provided)
         },
         {
           headers: {
@@ -50,9 +40,9 @@ export class EmailService {
         throw new Error(response.data.message || 'Failed to send invitation');
       }
 
-      console.log(`Email sent to ${eventData.to.email}`);
+      console.log(`Event invitation process initiated successfully.`);
     } catch (error) {
-      console.error(`Error sending email to ${eventData.to.email}:`, error);
+      console.error(`Error sending event invitation:`, error);
       throw error;
     }
   }

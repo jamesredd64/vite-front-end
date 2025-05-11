@@ -328,23 +328,23 @@ const EventInvitation: React.FC = () => {
         }
       };
 
-      await EmailService.sendEventInvitation({
-        ...eventDetails,
-        to: {
-          name: selectedUsers[0]?.name || 'Recipient',
-          email: selectedUsers[0]?.email || ''
-        },
-        organizer: {
-          name: user?.name || user?.email?.split('@')[0] || 'Unknown User',
-          email: user?.email || 'noreply@yourdomain.com'  // Provide default value
-        }
-      }, mailOptions);
+      // Call the updated EmailService function with eventDetails and selectedUsers
+      // Set success message immediately
+      setStatusMessage({
+        type: 'success',
+        title: 'Sending...',
+        message: 'Initiating invitation process...'
+      });
 
+      await EmailService.sendEventInvitation(eventDetails, selectedUsers);
+
+      // Optionally update message on successful completion if needed, or rely on the initial message
       setStatusMessage({
         type: 'success',
         title: 'Success',
         message: 'Invitations sent successfully!'
       });
+
 
       // Clear form after successful send
       setFormData({
