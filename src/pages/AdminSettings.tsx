@@ -2,38 +2,43 @@ import React, { useState } from 'react';
 import PageMeta from '../components/common/PageMeta';
 import PageBreadcrumb from '../components/common/PageBreadCrumb';
 import { UserIcon, MailIcon, CalenderIcon } from '../icons';
+import Checkbox from '../components/form/input/Checkbox';
+import type { AdminSettings, RoleBasedAccess, RolePermissions, RbacAppTypePermissions, AccessFunction } from '../types/rbac.types';
 
-const initialSettings = {
+export const initialSettings: AdminSettings = {
   roleBasedAccess: [
     {
       role: 'admin',
       permissions: {
-        dashboard: {
-          name: 'Dashboard Access',
-          description: 'Access to main dashboard',
-          access: { read: true, write: true, delete: false },
+        dashboard: { // rbac app type
+          read: { access: true }, // access function
+          write: { access: true },
+          delete: { access: false },
         },
-        users: {
-          name: 'User Management',
-          description: 'Manage system users',
-          access: { read: true, write: true, delete: true },
+        users: { // rbac app type
+          read: { access: true }, // access function
+          write: { access: true },
+          delete: { access: true },
         },
-        settings: {
-          name: 'System Settings',
-          description: 'Manage system configuration',
-          access: { read: true, write: true, delete: true },
+        settings: { // rbac app type
+          read: { access: true }, // access function
+          write: { access: true },
+          delete: { access: true },
         },
+        // Add other rbac app types and access functions as needed
       },
+      // features might need to be re-evaluated or removed depending on how granular permissions are used
       features: ['dashboard', 'users', 'settings'],
     },
     {
       role: 'user',
       permissions: {
-        dashboard: {
-          name: 'Dashboard Access',
-          description: 'Limited dashboard access',
-          access: { read: true, write: false, delete: false },
+        dashboard: { // rbac app type
+          read: { access: true }, // access function
+          write: { access: false },
+          delete: { access: false },
         },
+        // Add other rbac app types and access functions as needed
       },
       features: ['dashboard'],
     },
@@ -64,13 +69,14 @@ const initialSettings = {
 };
 
 const AdminSettings: React.FC = () => {
-  const [settings, setSettings] = useState(initialSettings);
+  const [settings, setSettings] = useState<AdminSettings>(initialSettings);
 
   // Handlers for role permissions toggles
-  const handlePermissionChange = (roleIndex: number, permissionKey: string, accessType: string) => {
+  // Handlers for role permissions toggles
+  const handlePermissionChange = (roleIndex: number, appTypeKey: string, accessFunctionKey: string) => {
     const updatedSettings = { ...settings };
-    const currentValue = updatedSettings.roleBasedAccess[roleIndex].permissions[permissionKey].access[accessType];
-    updatedSettings.roleBasedAccess[roleIndex].permissions[permissionKey].access[accessType] = !currentValue;
+    const currentValue = updatedSettings.roleBasedAccess[roleIndex].permissions[appTypeKey][accessFunctionKey].access;
+    updatedSettings.roleBasedAccess[roleIndex].permissions[appTypeKey][accessFunctionKey].access = !currentValue;
     setSettings(updatedSettings);
   };
 
@@ -152,30 +158,29 @@ const AdminSettings: React.FC = () => {
             <UserIcon className="size-5" />
             Role Based Access
           </h2>
-          {settings.roleBasedAccess.map((roleAccess, roleIndex) => (
+          {settings.roleBasedAccess.map((roleAccess: RoleBasedAccess, roleIndex: number) => (
             <div key={roleAccess.role} className="mb-6">
               <h3 className="text-md font-semibold text-gray-700 dark:text-white/80 mb-2">{roleAccess.role}</h3>
               <div className="space-y-4">
-                {Object.entries(roleAccess.permissions).map(([key, perm]) => (
-                  <div key={key} className="border border-gray-300 dark:border-gray-700 rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <div>
-                        <p className="font-semibold text-gray-800 dark:text-white/90">{perm.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{perm.description}</p>
-                      </div>
-                      <div className="flex gap-4">
-                        {['read', 'write', 'delete'].map((accessType) => (
-                          <label key={accessType} className="flex items-center gap-1 cursor-pointer select-none">
-                            <input
-                              type="checkbox"
-                              checked={perm.access[accessType]}
-                              onChange={() => handlePermissionChange(roleIndex, key, accessType)}
-                              className="form-checkbox h-5 w-5 text-indigo-600"
-                            />
-                            <span className="text-sm capitalize">{accessType}</span>
+                {Object.entries(roleAccess.permissions as RolePermissions).map(([appTypeKey, accessFunctions]: [string, RbacAppTypePermissions]) => (
+                  <div key={appTypeKey} className="border border-gray-300 dark:border-gray-700 rounded-lg p-4 mb-4">
+                    <h4 className="font-semibold text-gray-800 dark:text-white/90 mb-2 capitalize">{appTypeKey}</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-gray-800 dark:text-white">
+                      {Object.entries(accessFunctions).map(([accessFunctionKey, access]: [string, AccessFunction]) => (
+                        <div key={accessFunctionKey} className="flex items-center gap-1">
+                          <Checkbox
+                            id={`permission-${roleAccess.role}-${appTypeKey}-${accessFunctionKey}`}
+                            checked={access.access}
+                            onChange={() => handlePermissionChange(roleIndex, appTypeKey, accessFunctionKey)}
+                          />
+                          <label
+                            htmlFor={`permission-${roleAccess.role}-${appTypeKey}-${accessFunctionKey}`}
+                            className="text-sm capitalize text-gray-800 dark:text-white select-none cursor-pointer"
+                          >
+                            {accessFunctionKey.replace(/([A-Z])/g, ' $1').trim()} {/* Basic formatting for display */}
                           </label>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -258,15 +263,19 @@ const AdminSettings: React.FC = () => {
               />
             </div>
             {['requireSpecialChar', 'requireNumber', 'requireUppercase'].map((key) => (
-              <div key={key} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
+              <div key={key} className="flex items-center gap-2"> {/* Keep the wrapper div */}
+                <Checkbox
                   id={key}
+                  // Remove label prop to suppress internal label
                   checked={settings.security.passwordPolicy[key]}
-                  onChange={(e) => handlePasswordPolicyChange(key, e.target.checked)}
-                  className="form-checkbox h-5 w-5 text-indigo-600"
+                  onChange={(checked) => handlePasswordPolicyChange(key, checked)}
+                  // Custom Checkbox component handles its own styling
                 />
-                <label htmlFor={key} className="text-gray-700 dark:text-white/90 font-semibold select-none">
+                {/* Manual label with explicit dark mode styling */}
+                <label
+                  htmlFor={key}
+                  className="text-sm font-semibold select-none cursor-pointer text-gray-800 dark:text-white/90"
+                >
                   {key.replace('require', 'Require ')}
                 </label>
               </div>
@@ -281,16 +290,22 @@ const AdminSettings: React.FC = () => {
             Calendar Settings
           </h2>
           <div className="flex items-center gap-4 mb-4">
-            <input
-              type="checkbox"
-              id="showAllEvents"
-              checked={settings.calendar.showAllEvents}
-              onChange={(e) => handleCalendarChange('showAllEvents', e.target.checked)}
-              className="form-checkbox h-5 w-5 text-indigo-600"
-            />
-            <label htmlFor="showAllEvents" className="text-gray-700 dark:text-white/90 font-semibold select-none">
-              Show All Events
-            </label>
+            <div className="flex items-center gap-1"> {/* Wrap Checkbox and label */}
+              <Checkbox
+                id="showAllEvents"
+                // Remove label prop to suppress internal label
+                checked={settings.calendar.showAllEvents}
+                onChange={(checked) => handleCalendarChange('showAllEvents', checked)}
+                // Custom Checkbox component handles its own styling
+              />
+              {/* Manual label with explicit dark mode styling */}
+              <label
+                htmlFor="showAllEvents"
+                className="text-gray-700 dark:text-white/90 font-semibold select-none cursor-pointer"
+              >
+                Show All Events
+              </label>
+            </div>
           </div>
           <div className="mb-4">
             <label htmlFor="defaultView" className="block text-gray-700 dark:text-white/90 font-semibold mb-1">

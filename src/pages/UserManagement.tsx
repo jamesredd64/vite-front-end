@@ -12,7 +12,7 @@ import ProfileView from './ProfileView';
 import Loader from '../components/common/Loader';
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMongoDbClient } from "../services/mongoDbClient";
-  
+import useRbac from "../hooks/useRbac";
 
 interface TabProps {
   label: string;
@@ -85,8 +85,9 @@ export default function UserManagement() {
   const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const isInitialMount = useRef(true);
   const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const { canAccess, loading: rbacLoading } = useRbac(userMetadata?.profile?.role || 'user'); // Assuming 'user' as a default role
   const { getAllUsers, saveUserData } = useMongoDbClient();
-  
+
   const [state, setState] = useState({
     isLoading: true,
     users: [] as User[],
@@ -350,6 +351,10 @@ export default function UserManagement() {
   }
 
   const handleViewDetails = (userId: string) => {
+    if (!canAccess('users', 'read')) {
+      alert('You do not have permission to view user details.');
+      return;
+    }
     console.log('Viewing details for user:', userId);  // Add logging for debugging
     setSelectedUserId(userId);
     // setViewMode('profile');
@@ -507,12 +512,14 @@ export default function UserManagement() {
                 </TableCell>
                 <TableCell className="py-3">
                   <div className="flex space-x-2">
-                    <button 
-                      onClick={() => handleViewDetails(user.auth0Id)}
-                      className="px-3 py-1 text-xs text-primary hover:text-primary-dark border border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
-                    >
-                      View Details
-                    </button>
+                    {canAccess('users', 'read') && (
+                      <button
+                        onClick={() => handleViewDetails(user.auth0Id)}
+                        className="px-3 py-1 text-xs text-primary hover:text-primary-dark border border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
+                      >
+                        View Details
+                      </button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -587,28 +594,36 @@ export default function UserManagement() {
                 </div>
                 <div className="flex items-center justify-between">
                     <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                    <div className="flex items-center">
-                    <Switch
-                      label={user.isActive ? 'Active' : 'Inactive'}
-                      defaultChecked={user.isActive}
-                      onChange={(checked) => handleStatusToggle(user.auth0Id, checked)}
-                      color={user.isActive ? 'blue' : 'gray'}
-                    />
-                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
+                    {canAccess('users', 'write') ? ( // Check write permission for status toggle
+                      <div className="flex items-center">
+                        <Switch
+                          label={user.isActive ? 'Active' : 'Inactive'}
+                          defaultChecked={user.isActive}
+                          onChange={(checked) => handleStatusToggle(user.auth0Id, checked)}
+                          color={user.isActive ? 'blue' : 'gray'}
+                        />
+                        <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
+                          {user.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="font-medium text-gray-700 dark:text-gray-300">
                         {user.isActive ? 'Active' : 'Inactive'}
                       </span>
-                    </div>
+                    )}
                 </div>
            </div>
 
            {/* Actions Section */}
            <div className="mt-4 border-t border-gray-200 pt-3 dark:border-gray-700">
-                <button
-                    onClick={() => handleViewDetails(user.auth0Id)}
-                    className="w-full rounded-md border border-primary px-3 py-1.5 text-center text-xs font-medium text-primary transition-colors hover:bg-primary/10 dark:hover:bg-primary/20"
-                >
-                    View Details
-                </button>
+                {canAccess('users', 'read') && ( // Check read permission for view details button
+                  <button
+                      onClick={() => handleViewDetails(user.auth0Id)}
+                      className="w-full rounded-md border border-primary px-3 py-1.5 text-center text-xs font-medium text-primary transition-colors hover:bg-primary/10 dark:hover:bg-primary/20"
+                  >
+                      View Details
+                  </button>
+                )}
            </div>
         </div>
       ))}
@@ -654,12 +669,13 @@ export default function UserManagement() {
                 Switch to {viewMode === "table" ? "Card" : "Table"} View
               </button>
              
-              <button
-                onClick={() => setShowNotificationModal(true)}
-                disabled={selectedUsers.length === 0}
-                className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2
-                  ${
-                    selectedUsers.length === 0
+              {canAccess('users', 'write') && ( // Check write permission for send notification button
+                  <button
+                    onClick={() => setShowNotificationModal(true)}
+                    disabled={selectedUsers.length === 0}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2
+                      ${
+                        selectedUsers.length === 0
                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                       : "bg-primary text-white hover:bg-primary-dark"
                   }`}
@@ -674,7 +690,8 @@ export default function UserManagement() {
                 </svg>
                 Send Notification ({selectedUsers.length})
               </button>
-            </div>
+          )}
+        </div>
           </div>
         </div>
         {renderTabs()}
@@ -700,8 +717,7 @@ export default function UserManagement() {
             status: user.isActive ? "active" : "inactive",
           },
         }))}
-        onNotificationSent={handleNotificationSent}
-        // userProfilePic={users[0]?.profile?.profilePictureUrl}
+        onNotificationSent={handleNotificationSent}        
         userProfilePic={userMetadata?.profile?.profilePictureUrl}
       />
     </div>

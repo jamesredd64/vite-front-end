@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 interface TimeoutClient {
   logout: () => Promise<void>;
@@ -10,7 +10,7 @@ let timeoutId: NodeJS.Timeout;
 let client: TimeoutClient | undefined;
 
 const handleTimeout = async () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
   // import {useNavigate } from "react-router-dom";
   // const navigate = useNavigate();
 
@@ -43,8 +43,8 @@ const handleTimeout = async () => {
       
     } catch (error) {
       console.error('Session timeout error:', error);
-      // window.location.href = '/signed-out';
-      navigate('/signed-out');
+      window.location.href = '/signed-out';
+      // navigate('/signed-out');
     }
   }
 };

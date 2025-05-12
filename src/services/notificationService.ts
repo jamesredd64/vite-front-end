@@ -59,7 +59,7 @@ export const notificationService = {
           }
         }
       );
-
+      console.log('Fetched all Notifications:');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
