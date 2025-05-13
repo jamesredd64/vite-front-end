@@ -8,6 +8,7 @@ const fetchUserPermissions = (userRole: string): RolePermissions | undefined => 
   const roleAccess = initialSettings.roleBasedAccess.find(
     (rbac) => rbac.role === userRole
   );
+  
   return roleAccess?.permissions;
 };
 
@@ -22,28 +23,45 @@ const useRbac = (userRole: string) => {
     setPermissions(userPermissions);
     setLoading(false);
   }, [userRole]);
-
   const canAccess = (rbacAppType: string, accessFunction: string): boolean => {
     if (loading || !permissions) {
-      return false; // Or handle loading state as needed
+      return false;
     }
-
-    // Check if the rbacAppType exists
+    
     const appTypePermissions = permissions[rbacAppType];
     if (!appTypePermissions) {
       return false;
     }
-
-    // Check if the accessFunction exists and has access set to true
-    const accessFunctionPermission = appTypePermissions[accessFunction];
-    if (!accessFunctionPermission || !accessFunctionPermission.access) {
-      return false;
+    // Allow combined 'read-write' access check
+    if (accessFunction === 'read-write') {
+      return !!appTypePermissions.read?.access && !!appTypePermissions.write?.access;
     }
-
-    return true;
+    return !!appTypePermissions[accessFunction]?.access;
   };
+  console.log("User Permissions:", permissions);
+  console.log("Checking read-write access:", canAccess("users", "read-write"));
 
   return { canAccess, loading };
 };
 
 export default useRbac;
+  // const canAccess = (rbacAppType: string, accessFunction: string): boolean => {
+  //   if (loading || !permissions) {
+  //     return false; // Or handle loading state as needed
+  //   }
+
+  //   // Check if the rbacAppType exists
+  //   const appTypePermissions = permissions[rbacAppType];
+  //   if (!appTypePermissions) {
+  //     return false;
+  //   }
+
+  //   // Check if the accessFunction exists and has access set to true
+  //   const accessFunctionPermission = appTypePermissions[accessFunction];
+  //   if (!accessFunctionPermission || !accessFunctionPermission.access) {
+  //     return false;
+  //   }
+
+  //   return true;
+  // };
+

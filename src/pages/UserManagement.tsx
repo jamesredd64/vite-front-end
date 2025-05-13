@@ -13,6 +13,7 @@ import Loader from '../components/common/Loader';
 import { useAuth0 } from "@auth0/auth0-react";
 import { useMongoDbClient } from "../services/mongoDbClient";
 import useRbac from "../hooks/useRbac";
+import UserUpdateModal from '../components/UserUpdateModal'; // Import the new modal component
 
 interface TabProps {
   label: string;
@@ -87,6 +88,7 @@ export default function UserManagement() {
   const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
   const { canAccess, loading: rbacLoading } = useRbac(userMetadata?.profile?.role || 'user'); // Assuming 'user' as a default role
   const { getAllUsers, saveUserData } = useMongoDbClient();
+    const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
 
   const [state, setState] = useState({
     isLoading: true,
@@ -351,13 +353,15 @@ export default function UserManagement() {
   }
 
   const handleViewDetails = (userId: string) => {
-    if (!canAccess('users', 'read')) {
-      alert('You do not have permission to view user details.');
-      return;
-    }
+    // if (!canAccess('users', 'read') || !canAccess('users', 'write')) {
+    //   alert('You do not have permission to view user details.');
+    //   return;
+    // }
     console.log('Viewing details for user:', userId);  // Add logging for debugging
+    
     setSelectedUserId(userId);
-    // setViewMode('profile');
+   // setIsModalOpen(true);
+    setViewMode('profile');
     setActiveTab('current');
     navigate(`${location.pathname}`, {
       state: { userId , viewMode: "profile"  },
@@ -512,8 +516,8 @@ export default function UserManagement() {
                 </TableCell>
                 <TableCell className="py-3">
                   <div className="flex space-x-2">
-                    {canAccess('users', 'read') && (
-                      <button
+                    {/* {canAccess('users', 'read') && ( */}
+                     { (<button
                         onClick={() => handleViewDetails(user.auth0Id)}
                         className="px-3 py-1 text-xs text-primary hover:text-primary-dark border border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
                       >
