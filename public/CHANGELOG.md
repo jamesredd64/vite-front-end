@@ -1,4 +1,4 @@
-## [2.0.39](https://github.com/jamesredd64/vite-front-end/compare/v2.0.18...v2.0.39) (2025-05-08)
+## [2.0.42](https://github.com/jamesredd64/vite-front-end/compare/v2.0.18...v2.0.42) (2025-05-13)
 
 
 ### Bug Fixes
@@ -16,14 +16,17 @@
 * Preload css files ([2617bfa](https://github.com/jamesredd64/vite-front-end/commit/2617bfa0dbd0b6c216fd7c54ae6211d506abd6ae))
 * react svg issue ([8e00439](https://github.com/jamesredd64/vite-front-end/commit/8e004392912a0889120f56b9233e38b648e88ef5))
 * rem ProfilePage, UserPRofileView ([3cceb61](https://github.com/jamesredd64/vite-front-end/commit/3cceb618a3855bb9dc023f61d1442983df1bef19))
+* Rem refresh token req, updated logic for submit enable/disable, changed url for route, config-added new routes for email invites ([41cdfe7](https://github.com/jamesredd64/vite-front-end/commit/41cdfe7299ea0bc8958dde47fb20a8497821968b))
 * rem userprofileview from app ([6356760](https://github.com/jamesredd64/vite-front-end/commit/6356760c3ffe633c7a31ed281cb2d075b9f93daa))
 * removed duplicate preload styles ([635f64d](https://github.com/jamesredd64/vite-front-end/commit/635f64d658a544bb09ceb4ee3a6df909a84758d8))
 * Removed isAdmin ([c469bfe](https://github.com/jamesredd64/vite-front-end/commit/c469bfee8b2b15b145a18f78934cf64148aba9fd))
 * resolve build dependencies and remove package-lock.json ([7a8cbaa](https://github.com/jamesredd64/vite-front-end/commit/7a8cbaa86b7ec6e339a4b45aa5e8055e89e3c274))
+* revamped user fetch to be faster ([e9a0838](https://github.com/jamesredd64/vite-front-end/commit/e9a08387d2a386adf06c1cd0c8c8c74d7cc919d8))
 * set loaders to medium size ([ce6a171](https://github.com/jamesredd64/vite-front-end/commit/ce6a171c74659478110fb4c3b0b95637940277ff))
 * timeezone, profile page- reloading losing profile data fix ([e74ccd7](https://github.com/jamesredd64/vite-front-end/commit/e74ccd700bd57b59fba06f68c0506eeae80d0fff))
 * updated versioning files ([e18bef1](https://github.com/jamesredd64/vite-front-end/commit/e18bef1fb0b7bb1e6b8c864ca4465a31820bc569))
 * user routes and controller for new profileview ([53e21db](https://github.com/jamesredd64/vite-front-end/commit/53e21db9cc9eff3e6a6714718481f5caa30e69e5))
+* UserManagement page fixed isActive switch ([2e3668d](https://github.com/jamesredd64/vite-front-end/commit/2e3668dafcf4c04e190a149a0ab436156a462e1d))
 * UserMeta Card flash full page loading ([d82ac6c](https://github.com/jamesredd64/vite-front-end/commit/d82ac6c8a57b83b04354477022b47e7620cc159a))
 * yarn ([40d5b87](https://github.com/jamesredd64/vite-front-end/commit/40d5b874cbd8d45e234e9dd6e58552815f8cd18e))
 

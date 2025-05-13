@@ -468,7 +468,7 @@ export default function UserManagement() {
                   </div>
                 </TableCell>
                 <TableCell className="py-7">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-4">
                     <div className="h-[50px] w-[50px] overflow-hidden rounded-full">
                       {user.profile?.profilePictureUrl ? (
                         <img
