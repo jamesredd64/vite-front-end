@@ -161,7 +161,7 @@ const AppHeader: React.FC = () => {
             {/* Cross Icon */}
           </button>
 
-          <Link to="/" className="lg:hidden">
+          {/* <Link to="/" className="lg:hidden">
             <img
               className="dark:hidden"
               src="/images/logo/logo.svg"
@@ -172,7 +172,16 @@ const AppHeader: React.FC = () => {
               src="/images/logo/logo-dark.svg"
               alt="Logo"
             />
-          </Link>
+          </Link> */}
+
+          {/* Stagholme Logo */}
+          {/* <Link to="/" className="lg:hidden">
+            <img
+              src="/images/logo/stagholme.svg"
+              alt="Stagholme Logo"
+              className="w-auto h-8" // Adjust size as needed
+            />
+          </Link> */}
 
           <button
             onClick={toggleApplicationMenu}
@@ -240,8 +249,8 @@ const AppHeader: React.FC = () => {
                       />
                     </svg>
                   </button>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="inline-flex items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400"
                   >
                     <span>⌘</span>
@@ -270,8 +279,8 @@ const AppHeader: React.FC = () => {
                       {result.title}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {result.start 
-                        ? new Date(result.start).toLocaleDateString() 
+                      {result.start
+                        ? new Date(result.start).toLocaleDateString()
                         : 'No date'
                       }
                     </div>

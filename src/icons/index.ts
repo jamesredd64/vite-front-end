@@ -52,6 +52,9 @@ import MailIcon from "./mail-line.svg?react";
 import HorizontaLDots from "./horizontal-dots.svg?react";
 import ChatIcon from "./chat.svg?react";
 import ChevronUpIcon from "./chevron-up.svg?react";
+import PdfIcon from "./pdf.svg?react";
+import LightPdfIcon from "./light-pdf.svg?react";
+import DarkPdfIcon from "./dark-pdf.svg?react";
 
 import { type SVGProps } from 'react';
 
@@ -119,4 +122,6 @@ export {
   ChatIcon,
   ShieldIcon,
   BellIcon,
+  PdfIcon,
+  LightPdfIcon,
 };

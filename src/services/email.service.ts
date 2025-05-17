@@ -70,10 +70,29 @@ export class EmailService {
       throw error;
     }
   }
+
+  // static async getAllScheduledEvents(): Promise<any[]> { // Adjust return type as needed
+  //   try {
+  //     const response = await axios.get(
+  //       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULED_EVENTS}`
+  //     );
+
+  //     if (!response.data) {
+  //       throw new Error('Failed to fetch scheduled events: No data received');
+  //     }
+
+  //     // Assuming the backend returns an array of events directly
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error('Error fetching scheduled events:', error);
+  //     throw error;
+  //   }
+  // }
 }
 
-
-
+// Note: You might want to create a separate service file (e.g., scheduledEvents.service.ts)
+// for fetching scheduled events to keep your services organized.
+// If you do, remember to update the import path for API_CONFIG.
 
 
 

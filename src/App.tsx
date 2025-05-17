@@ -35,7 +35,7 @@ import AdminDashboard from "./components/AdminDashboard";
 import ComingSoon from "./pages/ComingSoon";
 import AdminSettings from "./pages/AdminSettings";
 import Home from "./pages/Dashboard/Home";
-
+import ScheduledEventsPage from "./pages/ScheduledEventsPage";
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -489,6 +489,7 @@ function App() {
                     <Route path="changelog" element={<Changelog />} />
                     <Route path="welcome" element={<NewUserWelcome />} />
                     <Route path="settings" element={<AdminSettings />} />
+                    <Route path="sch-events" element={<ScheduledEventsPage />} />
                     
                     
                   </Route>

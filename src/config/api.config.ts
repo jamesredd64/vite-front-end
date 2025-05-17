@@ -61,6 +61,7 @@ export const API_CONFIG = {
     USER_SCHEDULED_EVENTS: (id: string) => `/scheduled-events/${encodeURIComponent(id)}`,
     EVENT_INVITATION: '/email/event-invitation',
     BULK_EVENT_INVITATION: '/email/bulk-event-invitation',
+    
 
     
     // Notification endpoints
