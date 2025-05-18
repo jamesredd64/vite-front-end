@@ -11,10 +11,11 @@ interface EventDetails {
   endTime: Date;
   summary: string;
   description: string;
-  location: string;
+  location: string;  
   organizer?: { 
     name: string;
     email?: string; // Optional email
+ 
   };
 }
 
@@ -48,7 +49,9 @@ export class EmailService {
       }
 
       console.log('Event invitation process initiated successfully.');
+      console.log('Event invitation process initiated successfully.');
     } catch (error) {
+      console.error('Error sending event invitation:', error);
       console.error('Error sending event invitation:', error);
       throw error;
     }
@@ -58,8 +61,15 @@ export class EmailService {
     try {
       const response = await axios.post(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BULK_EVENT_INVITATION}`,
-        { eventDetails, attendees },
-        { headers: { 'Content-Type': 'application/json' } }
+        {
+          eventDetails,
+          attendees
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
       );
 
       if (!response.data.success) {
@@ -70,6 +80,7 @@ export class EmailService {
       throw error;
     }
   }
+
 
   static async sendBulkEmails(emails: string[], subject: string, body: string): Promise<void> {
     try {
@@ -90,6 +101,9 @@ export class EmailService {
     }
   }
 }
+
+
+
 
 
 
