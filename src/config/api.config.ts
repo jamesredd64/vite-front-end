@@ -45,6 +45,15 @@ export const API_CONFIG = {
       LOGOUT: '/auth/logout',
       REFRESH: '/auth/refresh',
     },
+    // Admin endpoints
+    ADMIN: {
+      GENERATE_CODE: '/admin/generate-code',
+      VERIFY_CODE: '/admin/verify-code',
+      SETTINGS: '/admin/settings', // New endpoint for admin settings
+    },
+    // Email endpoints
+    EMAIL: '/email',
+    SEND_BULK_EMAIL: (email: string) => `/email/send-bulk-email${encodeURIComponent(email)}`,
     // User endpoints
     USERS: '/users',
     USER_BY_ID: (id: string) => `/users/${encodeURIComponent(id)}`,

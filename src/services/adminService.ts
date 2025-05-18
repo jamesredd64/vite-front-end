@@ -1,4 +1,6 @@
 import { API_CONFIG } from '../config/api.config';
+import { useApi } from '../services/api.service'; // Import useApi hook
+import type { AdminSettings } from '../types/rbac.types'; // Import AdminSettings type
 
 export const adminService = {
   async generateAdminCode(email: string): Promise<{ success: boolean; message: string }> {
@@ -59,6 +61,17 @@ export const adminService = {
     } catch (error) {
       console.error('Error verifying admin code:', error);
       throw new Error(error instanceof Error ? error.message : 'Failed to verify admin code');
+    }
+  },
+
+  // New function to fetch admin settings
+  async getAdminSettings(fetchWithAuth: (url: string, options?: RequestInit) => Promise<any>): Promise<AdminSettings> {
+    try {
+      const response = await fetchWithAuth(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ADMIN.SETTINGS}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching admin settings:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to fetch admin settings');
     }
   }
 };
