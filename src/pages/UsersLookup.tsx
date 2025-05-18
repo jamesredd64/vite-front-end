@@ -10,9 +10,10 @@ interface UsersLookupProps {
   isModal?: boolean;
   onUserSelect?: (selectedUsers: string[], users: User[]) => void;
   onClose?: () => void;
+  fetchOnLoad?: boolean;
 }
 
-const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect, onClose }) => {
+const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect, onClose, fetchOnLoad = true }) => {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -69,8 +70,10 @@ const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect
   }, [isAuthenticated, getAccessTokenSilently]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    if (fetchOnLoad) {
+      fetchUsers();
+    }
+  }, [fetchUsers, fetchOnLoad]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -118,30 +121,28 @@ const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect
   }
 
   const content = (
-    <div className={`rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 ${isModal ? 'border-0 shadow-none' : ''}`}>
+    <div className={`rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-gray-900 sm:px-7.5 xl:pb-1 ${isModal ? 'border-0 shadow-none' : ''}`}>
       <div className="mb-6">
         <input
           type="text"
           value={searchTerm}
           onChange={handleSearch}
           placeholder="Search users..."
-          className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+          className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
         />
       </div>
 
-      <div className="mb-4">
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={selectedUsers.length === users.length}
-            onChange={handleSelectAll}
-            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-          />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Select All Users
-          </span>
-        </label>
-      </div>
+      {!fetchOnLoad && users.length === 0 && !loading && (
+        <div className="mb-6 text-center">
+          <button
+            onClick={fetchUsers}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? 'Loading Users...' : 'Load All Users'}
+          </button>
+        </div>
+      )}
 
       {loading && <Loader />}
       
@@ -149,44 +150,66 @@ const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect
         <div className="mb-6 text-danger">{error.message}</div>
       )}
 
-      <div className="space-y-2">
-        {filteredUsers.map(user => (
-          <div 
-            key={user.auth0Id}
-            className="p-2 border rounded flex justify-between items-center"
-          >
-            <div>
-              <div>{user.firstName} {user.lastName}</div>
-              <div className="text-sm text-gray-600">{user.email}</div>
-            </div>
-            <input
-              type="checkbox"
-              checked={selectedUsers.includes(user.auth0Id)}
-              onChange={() => handleUserSelect(user.auth0Id)}
-            />
+      {users.length > 0 && (
+        <>
+          <div className="mb-4 flex items-center justify-between"> {/* Use flex to align items */}
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={selectedUsers.length === users.length && users.length > 0} 
+                onChange={handleSelectAll}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
+              />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Select All Users
+              </span>
+            </label>
+            {isModal && (
+              <button
+                onClick={handleConfirmSelection}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50"
+                disabled={selectedUsers.length === 0}
+              >
+                Select ({selectedUsers.length})
+              </button>
+            )}
           </div>
-        ))}
-      </div>
 
-      {filteredUsers.length === 0 && !loading && (
-        <div className="text-center text-gray-500">No users found</div>
+          <div className="space-y-2">
+            {filteredUsers.map(user => (
+              <div
+                key={user.auth0Id}
+                className="p-2 border rounded flex items-center gap-4 dark:border-strokedark" // Use flex and gap
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedUsers.includes(user.auth0Id)}
+                  onChange={() => handleUserSelect(user.auth0Id)}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
+                />
+                <div>
+                  <div className="text-gray-900 dark:text-white">{user.firstName} {user.lastName}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{user.email}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredUsers.length === 0 && !loading && (
+            <div className="text-center text-gray-500 dark:text-gray-400">No users found matching your search.</div>
+          )}
+        </>
       )}
 
       {isModal && (
         <div className="mt-6 flex justify-end gap-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-stroke rounded-lg hover:bg-gray-100 dark:hover:bg-meta-4"
+            className="px-4 py-2 border border-stroke rounded-lg hover:bg-gray-100 dark:border-strokedark dark:hover:bg-meta-4 dark:text-gray-300"
           >
             Cancel
           </button>
-          <button
-            onClick={handleConfirmSelection}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90"
-            disabled={selectedUsers.length === 0}
-          >
-            Select ({selectedUsers.length})
-          </button>
+          {/* Select button moved to the top */}
         </div>
       )}
     </div>

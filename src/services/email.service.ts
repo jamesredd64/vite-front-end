@@ -12,26 +12,33 @@ interface EventDetails {
   summary: string;
   description: string;
   location: string;
-  organizer?: { // Make organizer optional as it might not be needed for every attendee in bulk
+  organizer?: { 
     name: string;
-    email: string | undefined; // Allow email to be undefined
+    email?: string; // Optional email
   };
-  // 'to' is not needed in the bulk send eventDetails
 }
 
 export class EmailService {
-  // Updated to match the backend's bulk send endpoint expectations
-  static async sendEventInvitation(eventDetails: EventDetails, attendees: Attendee[] = []): Promise<void> {
+  static async sendEventInvitation(eventDetails: EventDetails, attendees: Attendee[] = [], getAccessTokenSilently: () => Promise<string>): Promise<void> {
+    if (!attendees || attendees.length === 0) {
+      throw new Error('No attendees provided for event invitation');
+    }
+
+    if (!eventDetails.summary || !eventDetails.description) {
+      throw new Error('Event details must include both summary and description');
+    }
     try {
       const response = await axios.post(
-        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.EVENT_INVITATION}`,
-        {
-          eventDetails,
-          attendees // Send the attendees array (will be empty array if not provided)
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SEND_BULK_EMAIL}`,
+        { 
+          emails: attendees.map(attendee => attendee.email),
+          subject: eventDetails.summary,
+          body: eventDetails.description
         },
-        {
-          headers: {
-            'Content-Type': 'application/json'
+        { 
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await getAccessTokenSilently()}`
           }
         }
       );
@@ -40,9 +47,9 @@ export class EmailService {
         throw new Error(response.data.message || 'Failed to send invitation');
       }
 
-      console.log(`Event invitation process initiated successfully.`);
+      console.log('Event invitation process initiated successfully.');
     } catch (error) {
-      console.error(`Error sending event invitation:`, error);
+      console.error('Error sending event invitation:', error);
       throw error;
     }
   }
@@ -51,15 +58,8 @@ export class EmailService {
     try {
       const response = await axios.post(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BULK_EVENT_INVITATION}`,
-        {
-          eventDetails,
-          attendees
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
+        { eventDetails, attendees },
+        { headers: { 'Content-Type': 'application/json' } }
       );
 
       if (!response.data.success) {
@@ -71,28 +71,29 @@ export class EmailService {
     }
   }
 
-  // static async getAllScheduledEvents(): Promise<any[]> { // Adjust return type as needed
-  //   try {
-  //     const response = await axios.get(
-  //       `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SCHEDULED_EVENTS}`
-  //     );
+  static async sendBulkEmails(emails: string[], subject: string, body: string): Promise<void> {
+    try {
+      const response = await axios.post(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SEND_BULK_EMAIL}`,
+        { emails, subject, body },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
 
-  //     if (!response.data) {
-  //       throw new Error('Failed to fetch scheduled events: No data received');
-  //     }
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to send bulk emails');
+      }
 
-  //     // Assuming the backend returns an array of events directly
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error('Error fetching scheduled events:', error);
-  //     throw error;
-  //   }
-  // }
+      console.log('Bulk emails sent successfully.');
+    } catch (error) {
+      console.error('Error sending bulk emails:', error);
+      throw error;
+    }
+  }
 }
 
-// Note: You might want to create a separate service file (e.g., scheduledEvents.service.ts)
-// for fetching scheduled events to keep your services organized.
-// If you do, remember to update the import path for API_CONFIG.
+
+
+
 
 
 

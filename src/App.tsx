@@ -24,6 +24,7 @@ import Changelog from "./pages/Changelog/index";
 import UserManagement from "./pages/UserManagement";
 import { initSessionTimeout } from './utils/sessionTimeout';
 import { IdleTimeoutHandler } from "./components/IdleTimeoutHandler";
+import AdminSettingsTest from './components/AdminSettingsTest';
 import EventInvitation from "./pages/EventInvitation";
 import UserAdmin from './pages/admin/Users';
 // Add this to your imports
@@ -36,6 +37,7 @@ import ComingSoon from "./pages/ComingSoon";
 import AdminSettings from "./pages/AdminSettings";
 import Home from "./pages/Dashboard/Home";
 import ScheduledEventsPage from "./pages/ScheduledEventsPage";
+import SendEmailPage from "./pages/SendEmailPage";
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -190,9 +192,8 @@ function App() {
               dateOfBirth: "",
               gender: "",
               profilePictureUrl: user.picture || "",
-              role: "user",
+              role: user['https://dev-uizu7j8qzflxzjpy.jr.com/roles']?.[0] || "user",
               timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,            
-            
             },
             isActive: true,
           };
@@ -218,8 +219,8 @@ function App() {
             dateOfBirth: mongoUser.profile.dateOfBirth || "",
             gender: mongoUser.profile.gender || "",
             profilePictureUrl: user.picture || mongoUser.profile.profilePictureUrl,
-            role: mongoUser.profile.role || "",
-            timezone: mongoUser.profile.role || "user",
+            role: user['https://dev-uizu7j8qzflxzjpy.jr.com/roles']?.[0] || mongoUser.profile.role || "user",
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           },
           isActive: mongoUser.isActive || true,
         };
@@ -256,8 +257,8 @@ function App() {
   //             dateOfBirth: '',
   //             gender: '',
   //             profilePictureUrl: user.picture || '',
-  //             role: '',
-  //             timezone: '',
+  //             role: 'user' as 'user' | 'admin' | 'manager' | 'super-admin',
+  //             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   //           },
   //           marketingBudget: {
   //             adBudget: user.marketingBudget?.adBudget || 0,
@@ -490,6 +491,8 @@ function App() {
                     <Route path="welcome" element={<NewUserWelcome />} />
                     <Route path="settings" element={<AdminSettings />} />
                     <Route path="sch-events" element={<ScheduledEventsPage />} />
+                    <Route path="send-email" element={<SendEmailPage />} />
+                    
                     
                     
                   </Route>
@@ -501,6 +504,7 @@ function App() {
                     <Route path="profile" element={<ProfileView />} />
                     
                   </Route>
+                  <Route path="/test-admin-settings" element={<AdminSettingsTest />} />
                 </Route>
 
                 {/* Catch All Route */}

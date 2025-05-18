@@ -673,7 +673,7 @@ export default function UserManagement() {
                 Switch to {viewMode === "table" ? "Card" : "Table"} View
               </button>
              
-              {canAccess('users', 'write') && ( // Check write permission for send notification button
+              {/* {canAccess('users', 'write') && ( // Check write permission for send notification button */}
                   <button
                     onClick={() => setShowNotificationModal(true)}
                     disabled={selectedUsers.length === 0}
@@ -694,7 +694,7 @@ export default function UserManagement() {
                 </svg>
                 Send Notification ({selectedUsers.length})
               </button>
-          )}
+          )
         </div>
           </div>
         </div>

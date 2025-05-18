@@ -55,6 +55,8 @@ import ChevronUpIcon from "./chevron-up.svg?react";
 import PdfIcon from "./pdf.svg?react";
 import LightPdfIcon from "./light-pdf.svg?react";
 import DarkPdfIcon from "./dark-pdf.svg?react";
+import EmailIcon from "./email.svg?react";
+
 
 import { type SVGProps } from 'react';
 
@@ -124,4 +126,5 @@ export {
   BellIcon,
   PdfIcon,
   LightPdfIcon,
+  EmailIcon,
 };

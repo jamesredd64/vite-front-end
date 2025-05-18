@@ -16,6 +16,11 @@ export type RoleBasedAccess = {
   features?: string[]; // Keep features for now, but might be deprecated
 };
 
+export type AdminSettingsResponse = {
+  success: boolean;
+  data: AdminSettings;
+};
+
 export type AdminSettings = {
   roleBasedAccess: RoleBasedAccess[];
   emailTemplates: {
