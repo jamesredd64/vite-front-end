@@ -101,21 +101,6 @@ export default function UserManagement() {
     setSelectedUsers([]);  // Reset selected users
   }, []); // Empty dependency array since it only uses setState
 
-  // Fetch users only once on mount
-  // useEffect(() => {
-  //   const fetchUsers = async () => {
-  //     const users = await fetchAllUsers();
-  //     // if (users) {
-  //     //   setState(prev => ({
-  //     //     ...prev,
-  //     //     users: users,
-  //     //     isLoading: false
-  //     //   }));
-  //     // }
-  //   };
-  //   fetchUsers();
-  // }, []); // Empty dependency array ensures it runs only once on mount
-
     const fetchAllUsers = useCallback(async () => {
       if (!isAuthenticated) {
         console.log("fetchAllUsers: Not authenticated, returning null");

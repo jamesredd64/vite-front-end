@@ -122,13 +122,13 @@ const UsersLookup: React.FC<UsersLookupProps> = ({ isModal = false, onUserSelect
 
   const content = (
     <div className={`rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-gray-900 sm:px-7.5 xl:pb-1 ${isModal ? 'border-0 shadow-none' : ''}`}>
-      <div className="mb-6">
+      <div className="mb-2">
         <input
           type="text"
           value={searchTerm}
           onChange={handleSearch}
           placeholder="Search users..."
-          className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
         />
       </div>
 

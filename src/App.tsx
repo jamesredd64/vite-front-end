@@ -33,11 +33,11 @@ import ProfileView from "./pages/ProfileView";
 import RoleBasedRoute from "./routes/RoleBasedRoute";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminDashboard from "./components/AdminDashboard";
-import ComingSoon from "./pages/ComingSoon";
-import AdminSettings from "./pages/AdminSettings";
 import Home from "./pages/Dashboard/Home";
 import ScheduledEventsPage from "./pages/ScheduledEventsPage";
 import SendEmailPage from "./pages/SendEmailPage";
+import SettingsAdmin from "./pages/SettingsAdmin";
+
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -488,13 +488,10 @@ function App() {
                     <Route path="marketing-overview" element={<MarketingOverview />} />
                     <Route path="customer-demographics" element={<CustomerDemographics />} />
                     <Route path="changelog" element={<Changelog />} />
-                    <Route path="welcome" element={<NewUserWelcome />} />
-                    <Route path="settings" element={<AdminSettings />} />
+                    <Route path="welcome" element={<NewUserWelcome />} />                    
                     <Route path="sch-events" element={<ScheduledEventsPage />} />
                     <Route path="send-email" element={<SendEmailPage />} />
-                    
-                    
-                    
+                    <Route path="settings-admin" element={<SettingsAdmin />} />            
                   </Route>
 
                   {/* User Routes */}

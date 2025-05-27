@@ -53,6 +53,7 @@ interface EventTemplate {
 }
 
 const EventInvitation: React.FC = () => {
+const { getAccessTokenSilently } = useAuth0();
   const { user } = useAuth0();
   const [showUserLookup, setShowUserLookup] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<SelectedUser[]>([]);
@@ -336,7 +337,7 @@ const EventInvitation: React.FC = () => {
         message: 'Initiating invitation process...'
       });
 
-      await EmailService.sendEventInvitation(eventDetails, selectedUsers);
+      await EmailService.sendEventInvitation(eventDetails, selectedUsers, getAccessTokenSilently);
 
       // Optionally update message on successful completion if needed, or rely on the initial message
       setStatusMessage({
@@ -941,6 +942,8 @@ const EventInvitation: React.FC = () => {
 };
 
 export default EventInvitation;
+
+
 
 
 

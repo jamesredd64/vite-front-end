@@ -20,6 +20,7 @@ interface EventDetails {
 }
 
 export class EmailService {
+
   static async sendEventInvitation(eventDetails: EventDetails, attendees: Attendee[] = [], getAccessTokenSilently: () => Promise<string>): Promise<void> {
     if (!attendees || attendees.length === 0) {
       throw new Error('No attendees provided for event invitation');
@@ -80,7 +81,6 @@ export class EmailService {
       throw error;
     }
   }
-
 
   static async sendBulkEmails(emails: string[], subject: string, body: string): Promise<void> {
     try {

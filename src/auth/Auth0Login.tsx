@@ -16,25 +16,6 @@ const Auth0Login: React.FC<Auth0LoginProps> = () => {
   const [customClaims, setCustomClaims] = useState<CustomClaims>({});
   const navigate = useNavigate();
   console.log("Auth0Login running");
-  // useEffect(() => {
-  //   if (!isAuthenticated || !user) return; // Ensure authentication is completed
-  
-  //   const roles = user?.["https://dev-uizu7j8qzflxzjpy.jr.com/roles"] || []; // Correct namespace
-  
-  //   // Ensure roles are defined before navigating
-  //   if (roles.length === 0) return;
-  
-  //   // Redirect based on role
-  //   if (roles.includes("admin") && window.location.pathname !== "/admin") {
-  //     console.log("Navigating to /admin...");
-  //     navigate("/admin", { replace: true });
-  //   } else if (window.location.pathname !== "/user") {
-  //     console.log("Navigating to /user...");
-  //     navigate("/user", { replace: true });
-  //   }
-  // }, [isAuthenticated, user, navigate]);
-  
-
 
   useEffect(() => {
     const getCustomClaims = async () => {

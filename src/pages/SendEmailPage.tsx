@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import UsersLookup from './UsersLookup';
 import { EmailService } from '../services/email.service';
 import { adminService } from '../services/adminService'; // Import adminService
@@ -20,9 +20,16 @@ const SendEmailPage: React.FC = () => {
 
   const [useTemplate, setUseTemplate] = useState(false); // State for "Use Template" checkbox
   const [selectedTemplateKey, setSelectedTemplateKey] = useState(''); // State for selected template key
-  const [emailTemplates, setEmailTemplates] = useState<{ [key: string]: string }>({}); // State for email templates
+  const [emailTemplates, setEmailTemplates] = useState<{ [key: string]: { subject: string, body: string } }>({}); // State for email templates
   const [loadingTemplates, setLoadingTemplates] = useState(true); // Add loading state
   const [templateError, setTemplateError] = useState<string | null>(null); // Add error state
+
+  const availableTags = [
+    "{{firstName}}",
+    "{{lastName}}",
+    "{{title}}",
+    "{{email}}",
+  ];
 
   // Monitor template state changes
   useEffect(() => {
@@ -37,22 +44,22 @@ const SendEmailPage: React.FC = () => {
         setLoadingTemplates(true);
         const response = await adminService.getAdminSettings(getAccessTokenSilently);
         console.log('Fetched admin settings response:', response);
-        
+
         if (!response?.success) {
           throw new Error('Failed to fetch admin settings');
         }
-        
+
         const settings = response.data || {};
         console.log('Extracted settings:', settings);
-        
+
         // Ensure we have valid templates
         const validTemplates = settings?.emailTemplates || {};
         console.log('Extracted email templates:', validTemplates);
-        
+
         // Update state
         setEmailTemplates(validTemplates);
         setSelectedTemplateKey('');
-        setBody('');
+        // Removed clearing subject and body here to prevent controlled input warning
         setTemplateError(null);
       } catch (error) {
         console.error('Error fetching email templates:', error);
@@ -67,6 +74,38 @@ const SendEmailPage: React.FC = () => {
     }
   }, [isAuthenticated, getAccessTokenSilently]); // Update dependency array
 
+  // useEffect(() => {
+  //   if (useTemplate && selectedTemplateKey) {
+  //     console.log('Fetching template for:', selectedTemplateKey);
+  
+  //     const template = emailTemplates[selectedTemplateKey];
+  
+  //     if (template) {
+  //       console.log('Applying template xxxx:', template);
+  //       setSubject(template.subject);
+  //       setBody(template.body);
+  //     } else {
+  //       console.warn('Template not found for key:', selectedTemplateKey);
+  //     }
+  //   }
+  // }, [useTemplate, selectedTemplateKey, emailTemplates]); 
+  
+  // useEffect(() => {
+  //   console.log('Rendered subject:', subject);
+  //   console.log('Rendered body:', body);
+  // }, [subject, body]);
+
+  
+  // useEffect(() => {
+  //   console.log('Email templates fetched:', emailTemplates);
+  // }, [emailTemplates]);
+  
+  // useEffect(() => {
+  //   console.log('Final subject after template selection:', subject);
+  //   console.log('Final body after template selection:', body);
+  // }, [subject, body]);
+
+  
   const handleCloseLookup = () => {
     setShowUserLookup(false);
   };
@@ -89,28 +128,162 @@ const SendEmailPage: React.FC = () => {
 
   const handleUseTemplateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
+    console.log('Use Template checkbox changed to:', checked);
     setUseTemplate(checked);
     if (!checked) {
-      // Clear selected template and body if checkbox is unchecked
+      // Clear selected template, subject, and body if checkbox is unchecked
       setSelectedTemplateKey('');
+      setSubject(''); // Clear subject
       setBody('');
-    } else {
-      // If checked, set body to the currently selected template if any
-      if (selectedTemplateKey && emailTemplates[selectedTemplateKey]) {
-        setBody(emailTemplates[selectedTemplateKey]);
-      }
     }
+    // The useEffect hook will handle applying the template if checked
   };
 
+  // const handleTemplateSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const key = e.target.value;
+  //   setSelectedTemplateKey(key);
+  
+  //   setTimeout(() => {
+  //     const selectedTemplate = emailTemplates[key];
+  
+  //     if (selectedTemplate) {
+  //       if (allUsers.length > 0) {
+  //         const firstUser = allUsers[0]; // Use first user for preview
+  //         setSubject(replaceMergeFields(selectedTemplate.subject, firstUser));
+  //         setBody(replaceMergeFields(selectedTemplate.body, firstUser));
+  //       } else {
+  //         setSubject(selectedTemplate.subject);
+  //         setBody(selectedTemplate.body);
+  //       }
+  //     }
+  //   }, 0);
+  // };
+
+  
+  // const handleTemplateSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const key = e.target.value;
+  //   console.log('Template selected:', key);
+  //   setSelectedTemplateKey(key);
+
+  //   setTimeout(() => {
+  //     const selectedTemplate = emailTemplates[key];
+  //     console.log('Retrieved template:', selectedTemplate);
+
+  //     if (selectedTemplate) {
+  //       if (allUsers.length > 0) {
+  //         const firstUser = allUsers[0]; // Use the first user to preview merge fields
+  //         const processedSubject = replaceMergeFields(selectedTemplate.subject, firstUser);
+  //         const processedBody = replaceMergeFields(selectedTemplate.body, firstUser);
+
+  //         setSubject(processedSubject);
+  //         setBody(processedBody);
+  //         console.log('Updated Subject:', processedSubject);
+  //         console.log('Updated Body:', processedBody);
+  //       } else {
+  //         setSubject(selectedTemplate.subject);
+  //         setBody(selectedTemplate.body);
+  //       }
+  //     } else {
+  //       console.warn('No template found for key:', key);
+  //     }
+  //   }, 0);
+  // };
+  
+  
+  
+  
+
+  // const handleTemplateSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const key = e.target.value;
+  //   console.log('Template selected zzzz:', key);
+  //   setSelectedTemplateKey(key);
+  
+  //   setTimeout(() => {
+  //     const selectedTemplate = emailTemplates[key]; // Store the selected template locally
+  //     console.log('Retrieved template:', selectedTemplate);
+  
+  //     if (selectedTemplate) {
+  //       setSubject(selectedTemplate.subject);
+  //       setBody(selectedTemplate.body);
+  //       console.log('Updated Subject---:', selectedTemplate.subject);
+  //       console.log('Updated Body----:', selectedTemplate.body);
+  //     } else {
+  //       console.warn('No template found for key:', key);
+  //     }
+  //   }, 0); // Ensures React processes the state update
+  // };
+  
   const handleTemplateSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const key = e.target.value;
     setSelectedTemplateKey(key);
-    if (key && emailTemplates[key]) {
-      setBody(emailTemplates[key]);
-    } else {
-      setBody(''); // Clear body if no template is selected
-    }
+  
+    setTimeout(() => {
+      const selectedTemplate = emailTemplates[key];
+  
+      if (selectedTemplate) {
+        if (allUsers.length > 0) {
+          const firstUser = allUsers[0]; // Preview using first user
+          setSubject(replaceMergeFields(selectedTemplate.subject, firstUser));
+          setBody(replaceMergeFields(selectedTemplate.body, firstUser));
+        } else {
+          setSubject(selectedTemplate.subject);
+          setBody(selectedTemplate.body);
+        }
+      }
+    }, 0);
   };
+  
+  const generateResponsiveEmail = (body: string) => {
+    return `
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+            @media screen and (max-width: 480px) {
+              body { width: 100% !important; padding: 10px; }
+            }
+          </style>
+        </head>
+        <body class="email-container">
+          ${body}
+        </body>
+      </html>
+    `;
+  };   
+  
+  // Helper function to safely access nested properties
+  // const getNestedValue = (obj: any, path: string): any => {
+  //   return path.split('.').reduce((acc, part) => {
+  //     if (acc && typeof acc === 'object' && part in acc) {
+  //       return acc[part];
+  //     }
+  //     return undefined;
+  //   }, obj);
+  // };
+
+  const replaceMergeFields = (template: string, user: User): string => {
+    return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => {
+      const value = getNestedValue(user, key);
+      return value !== undefined ? value.toString() : `{{${key}}}`; // Preserve if not found
+    });
+  };
+  
+  // Helper function to access nested values like profile.firstName
+  const getNestedValue = (obj: any, key: string) => {
+    return key.split('.').reduce((acc, part) => acc?.[part], obj);
+  };
+  
+  
+  // const replaceMergeFields = (template: string, user: User): string => {
+  //   return template.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_, key) => {
+  //     const value = key.split('.').reduce((acc: any, part) => acc && acc[part] !== undefined ? acc[part] : null, user);
+  //     return value !== null ? value.toString() : `{{${key}}}`; // Preserve if missing
+  //   });
+  // };
+  
+  
+  
+  
 
   const handleSendEmail = async () => {
     if (selectedUsers.length === 0) {
@@ -121,20 +294,39 @@ const SendEmailPage: React.FC = () => {
       setMessage('Please enter both subject and body.');
       return;
     }
-
+  
     setIsSending(true);
     setMessage(null);
-
+  
     try {
-      const recipientEmails = allUsers.map(user => user.email);
-      await EmailService.sendBulkEmails(recipientEmails, subject, body);
-
+      // Process subject and body replacements for each user
+      const emails = allUsers.map(user => {
+      //   const processedSubject = replaceMergeFields(subject, user);
+      //   const processedBody = generateResponsiveEmail(replaceMergeFields(body, user));
+  
+        return {
+          email: user.email,
+          subject: subject,
+          body: body
+        };
+      });
+  
+      // Extract only email addresses & correctly formatted email bodies
+      const emailAddresses = emails.map(email => email.email);
+      const emailBody = body;
+  
+      console.log('Processed Subjects:', emails.map(e => e.subject));
+      console.log('Processed Bodies:', emailBody);
+  
+      // Send emails (now correctly passing formatted subject & body)
+      await EmailService.sendBulkEmails(emailAddresses, subject, emailBody);
+  
       setMessage('Emails sent successfully!');
       setSelectedUsers([]);
       setAllUsers([]);
       setSubject('');
       setBody('');
-      setUseTemplate(false); // Reset template selection
+      setUseTemplate(false);
       setSelectedTemplateKey('');
     } catch (error: any) {
       setMessage(`Failed to send emails: ${error.message || 'Unknown error'}`);
@@ -143,6 +335,38 @@ const SendEmailPage: React.FC = () => {
       setIsSending(false);
     }
   };
+ 
+  // const handleSendEmail = async () => {
+  //   if (selectedUsers.length === 0) {
+  //     setMessage('Please select at least one user.');
+  //     return;
+  //   }
+  //   if (!subject || !body) {
+  //     setMessage('Please enter both subject and body.');
+  //     return;
+  //   }
+
+  //   setIsSending(true);
+  //   setMessage(null);
+
+  //   try {
+  //     const recipientEmails = allUsers.map(user => user.email);
+  //     await EmailService.sendBulkEmails(recipientEmails, subject, body);
+
+  //     setMessage('Emails sent successfully!');
+  //     setSelectedUsers([]);
+  //     setAllUsers([]);
+  //     setSubject('');
+  //     setBody('');
+  //     setUseTemplate(false); // Reset template selection
+  //     setSelectedTemplateKey('');
+  //   } catch (error: any) {
+  //     setMessage(`Failed to send emails: ${error.message || 'Unknown error'}`);
+  //     console.error('Error sending emails:', error);
+  //   } finally {
+  //     setIsSending(false);
+  //   }
+  // };
 
   return (
     <div className="send-email-page bg-white px-5 pt-5 dark:border-gray-800 dark:text-gray-200 dark:bg-white/[0.02]">
@@ -232,9 +456,11 @@ const SendEmailPage: React.FC = () => {
           <input
             type="text"
             id="subject"
-            value={subject}
+            value={subject || ''} // Add fallback to empty string
             onChange={(e) => setSubject(e.target.value)}
+            // readOnly={useTemplate} 
             className="mt-1 block w-full rounded-md p-4 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            // disabled={useTemplate} // Make subject input disabled if using template
           />
         </div>
 
@@ -245,10 +471,11 @@ const SendEmailPage: React.FC = () => {
           <textarea
             id="body"
             rows={10}
-            value={body}
+            value={body || ''} // Add fallback to empty string
             onChange={(e) => setBody(e.target.value)}
+            // readOnly={useTemplate} // Field is readonly but can be updated programmatically
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            disabled={useTemplate} // Disable textarea if using template
+            // disabled={useTemplate} // Make textarea disabled if using template
           ></textarea>
         </div>
 

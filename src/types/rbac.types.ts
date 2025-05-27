@@ -19,12 +19,16 @@ export type RoleBasedAccess = {
 export type AdminSettingsResponse = {
   success: boolean;
   data: AdminSettings;
+  message?: string; // Added optional message property
 };
 
 export type AdminSettings = {
   roleBasedAccess: RoleBasedAccess[];
   emailTemplates: {
-    [key: string]: string;
+    [key: string]: {
+      subject: string;
+      body: string;
+    };
   };
   security: {
     sessionTimeout: number;

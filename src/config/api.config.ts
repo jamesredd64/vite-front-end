@@ -49,7 +49,8 @@ export const API_CONFIG = {
     ADMIN: {
       GENERATE_CODE: '/admin/generate-code',
       VERIFY_CODE: '/admin/verify-code',
-      SETTINGS: '/admin/settings'
+      SETTINGS: '/admin/settings',
+      OVERWRITE_ALL: '/admin/settings/overwriteAll'
     },
     // Email endpoints
     EMAIL: '/email',

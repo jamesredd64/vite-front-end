@@ -93,11 +93,6 @@ const generatePDF = (events: ScheduledEvent[]) => {
   doc.save("scheduled-events.pdf");
 };
 
-
-
-
-
-
 const ScheduledEventsPage: React.FC = () => {
   const [allEvents, setAllEvents] = useState<ScheduledEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<ScheduledEvent | null>(null);
