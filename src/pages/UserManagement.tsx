@@ -415,11 +415,11 @@ export default function UserManagement() {
               <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 User
               </TableCell>
-              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                Email
+              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 hidden sm:table-cell">
+              Email
               </TableCell>
-              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                Phone
+              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 hidden sm:table-cell">
+              Phone
               </TableCell>
               <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Role
@@ -503,7 +503,7 @@ export default function UserManagement() {
                   <div className="flex space-x-2">
                     {/* {canAccess('users', 'read') && ( */}
                      { (<button
-                        onClick={() => handleViewDetails(user.auth0Id)}
+                        onClick={(e) => { e.stopPropagation(); handleViewDetails(user.auth0Id); }}
                         className="px-3 py-1 text-xs text-primary hover:text-primary-dark border border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
                       >
                         View Details
