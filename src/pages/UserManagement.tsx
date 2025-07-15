@@ -434,7 +434,7 @@ export default function UserManagement() {
           </TableHeader>
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
             {filteredUsers.map((user) => (
-              <TableRow key={user.auth0Id}>
+              <TableRow key={user.auth0Id} onClick={() => handleViewDetails(user.auth0Id)} className="cursor-pointer">
                 <TableCell className="py-3">
                   <div className="flex items-center gap-2">
                     <input

@@ -537,6 +537,7 @@ const { getAccessTokenSilently } = useAuth0();
                   <DatePicker
                     selected={formData.start ? new Date(formData.start) : null}
                     onChange={(date) => handleDateChange(date, 'start')}
+                    onSelect={(date) => handleDateChange(date, 'start')}
                     showTimeSelect
                     dateFormat="MMMM d, yyyy h:mm aa" // This format shows 12-hour time with AM/PM
                     placeholderText="Select date and time"
@@ -771,7 +772,7 @@ const { getAccessTokenSilently } = useAuth0();
                       timeCaption="Time"
                       
                       minDate={new Date()}
-                      className="w-full rounded-lg border-[1.5px] border-gray-200 bg-transparent px-5 py-3 outline-none transition 
+                      className="w-full sm:w-3/4 rounded-lg border-[1.5px] border-gray-200 bg-transparent px-5 py-3 outline-none transition 
                         focus:border-brand-500 active:border-brand-500 
                         disabled:cursor-default disabled:bg-gray-50
                         dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-500
