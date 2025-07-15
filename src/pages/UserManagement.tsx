@@ -15,6 +15,17 @@ import { useMongoDbClient } from "../services/mongoDbClient";
 import useRbac from "../hooks/useRbac";
 import UserUpdateModal from '../components/UserUpdateModal'; // Import the new modal component
 
+function formatPhoneNumber(phoneNumber: string): string {
+  // Remove all non-numeric characters
+  const cleaned = ('' + phoneNumber).replace(/\D/g, '');
+  // Check if the cleaned number has the correct length
+  const match = cleaned.match(/^1?(\d{3})(\d{3})(\d{4})$/);
+  if (match) {
+    return ['1-', '(', match[1], ') ', match[2], '-', match[3]].join('');
+  }
+  return phoneNumber; // Return the original if it doesn't match the expected format
+}
+
 interface TabProps {
   label: string;
   isActive: boolean;
@@ -391,7 +402,7 @@ export default function UserManagement() {
   );
 
   const renderTableView = () => (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-3 sm:pt-6">
       <div className="max-w-full overflow-x-auto p-2">
         <Table>
           <TableHeader>
@@ -481,7 +492,7 @@ export default function UserManagement() {
                   {user.email}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {user.phoneNumber}
+                  {formatPhoneNumber(user.phoneNumber)}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   {user.profile?.role || 'User'}
