@@ -57,6 +57,8 @@ import LightPdfIcon from "./light-pdf.svg?react";
 import DarkPdfIcon from "./dark-pdf.svg?react";
 import EmailIcon from "./email.svg?react";
 
+import LogoDarkIcon from  "./logos/showcase_logo_full_light.svg?react";
+import LogoLightIcon from "./logos/showcase_logo_full_dark.svg?react";
 
 import { type SVGProps } from 'react';
 
@@ -127,4 +129,6 @@ export {
   PdfIcon,
   LightPdfIcon,
   EmailIcon,
+  LogoDarkIcon,
+  LogoLightIcon,
 };

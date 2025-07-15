@@ -476,7 +476,7 @@ const { getAccessTokenSilently } = useAuth0();
       <PageBreadcrumb pageTitle="Create and send event invitations" />
 
       <div className="flex justify-center">
-        <div className="relative w-3/4 p-4 overflow-y-auto bg-white border border-gray-200 dark:border-gray-700 no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
+        <div className="relative w-full p-4 overflow-y-auto bg-white border border-gray-200 dark:border-gray-700 no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-xl font-semibold text-black dark:text-white">
               Create Event Invitation

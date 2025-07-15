@@ -56,7 +56,7 @@ const AppHeader: React.FC = () => {
         id: event.id,
         title: event.title,
         type: 'event' as const, // Add type assertion to ensure it matches SearchResult type
-        url: `/calendar/${event.id}`,
+        url: `/admin/calendar/${event.id}`,
         start: event.start,
         end: event.end,
         extendedProps: event.extendedProps

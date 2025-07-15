@@ -6,7 +6,8 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useAdmin } from './hooks/useAdmin';
 import { useGlobalStorage } from './hooks/useGlobalStorage';
 import AppLayout from "./layout/AppLayout";
-import AdminLayout from "./layout/AdminLayout";
+// import AdminLayout from "./layout/AdminLayout";
+import CustomAppLayout from "./layout/CustomAppLayout";
 import { useEffect, useRef, useState, useCallback } from 'react';
 import NotFound from "./pages/OtherPage/NotFound";
 // import UserProfileView from "./pages/UserProfileView";
@@ -475,7 +476,7 @@ function App() {
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />}>
                   {/* Admin Routes */}
-                  <Route path="/admin/*" element={<AdminLayout />}>
+                  <Route path="/admin/*" element={<CustomAppLayout />}>
                     <Route index element={<Navigate to="adm-dashboard" replace />} />
                     <Route path="adm-dashboard" element={<AdminDashboard />} />
                     <Route path="dashboard" element={<Home />} />

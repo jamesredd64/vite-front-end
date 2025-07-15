@@ -11,6 +11,9 @@ import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import "../styles/calendar.css";
+import { useRef } from "react";
+import { useSearch } from "../context/SearchContext";
+import { useNavigate } from "react-router-dom";
 
 import type { CalendarEvent } from "../types/calendar.types";
 
@@ -21,6 +24,16 @@ const CalendarPage: () => JSX.Element = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  // const inputRef = useRef<HTMLInputElement>(null);
+  // const { searchQuery, setSearchQuery, searchResults, setSearchResults } = useSearch();
+  // const [isSearching, setIsSearching] = useState(false);
+  //  const navigate = useNavigate();
+
+  //  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const query = e.target.value;
+  //   setSearchQuery(query);
+  //   handleSearch(query); // Search on each keystroke
+  // };
 
   const mapToCalendarEvent = (scheduledEvent: any) => {
     return {
@@ -81,6 +94,7 @@ const CalendarPage: () => JSX.Element = () => {
       statusColorMap[status as keyof typeof statusColorMap] || "border-gray-500";
     const eventDetails = eventInfo.event.extendedProps.eventDetails;
     const selectedUsers = eventInfo.event.extendedProps.selectedUsers || [];
+   
 
     const tooltipContent = (
       <div className="p-3 max-w-xs">
@@ -201,11 +215,71 @@ const CalendarPage: () => JSX.Element = () => {
       return <div>No events to display.</div>;
   }
 
+  // const handleSearch = async (query: string) => {
+  //   if (!query.trim()) {
+  //     setSearchResults([]);
+  //     return;
+  //   }
+
+  //   setIsSearching(true);
+  //   try {
+  //     const searchTerm = query.trim().toLowerCase();
+  //     console.log('Searching for:', searchTerm);
+  //     console.log('Total events available in context:', events.length);
+      
+  //     const filteredEvents = events.filter((event) => {
+  //       const title = (event.title || '').toLowerCase();
+  //       const description = (event.extendedProps?.description || '').toLowerCase();
+  //       const isMatch = title.includes(searchTerm) || description.includes(searchTerm);
+  //       if (isMatch) {
+  //         console.log('Found matching event:', event.title);
+  //       }
+  //       return isMatch && event.id !== undefined; // Only include events with defined IDs
+  //     });
+      
+  //     console.log('Filtered events:', filteredEvents);
+  //     const formattedResults = filteredEvents.map(event => ({
+  //       id: event.id!, // Use non-null assertion since we filtered undefined IDs
+  //       title: event.title,
+  //       type: 'event' as const,
+  //       url: `/calendar/${event.id}`,
+  //       start: event.start,
+  //       end: event.end,
+  //       extendedProps: event.extendedProps
+  //     }));
+  //     setSearchResults(formattedResults);
+  //   } finally {
+  //     setIsSearching(false);
+  //   }
+  // };
+ 
+
+
+  // const handleResultClick = (eventId: string) => {
+  //   console.log('Navigating to event:', eventId); // Add logging
+    
+  //   // Navigate to calendar page with the selected event
+  //   navigate('/calendar', { 
+  //     state: { 
+  //       selectedEventId: eventId,
+  //       scrollToEvent: true
+  //     } 
+  //   });
+    
+  //   // Clear the search
+  //   if (inputRef.current) {
+  //     inputRef.current.value = '';
+  //   }
+  //   setSearchQuery('');
+  //   setSearchResults([]);
+  // };
+
   return (
     <>
       <PageMeta title="Calendar Display" description="Display-only Calendar Page" />
       <PageBreadcrumb pageTitle="Calendar Display" />
       <div className="p-2 md:p-6 2xl:p-3">
+      
         <div className="mx-auto max-w-full">
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin]}

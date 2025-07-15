@@ -1,3 +1,4 @@
+import React from 'react';
 import { SidebarProvider, useSidebar } from "../context/SidebarContext";
 import { useGlobalStorage } from '../hooks/useGlobalStorage';
 import { UserMetadata } from '../types/user';
@@ -16,14 +17,11 @@ const LayoutContent: React.FC = () => {
 
   const isAdminUser = isAdmin;
 
-  console.log("************************isAdminUser************", isAdminUser);
-
   return (
     <div className="min-h-screen flex flex-col xl:flex-row">
       <div>
         {/* Conditionally render the correct sidebar */}
-        {isAdminUser ? <AdminSidebar /> : <AppSidebar />}       
-        {/* <AppSidebar /> */}
+        {isAdminUser ? <AdminSidebar /> : <AppSidebar />}
         <Backdrop />
       </div>
       <div
@@ -31,17 +29,20 @@ const LayoutContent: React.FC = () => {
           isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"
         } ${isMobileOpen ? "ml-0" : ""}`}
       >
-        <AppHeader />
-        <main className="p-4 mx-auto pt-1 max-w-screen-3xl md:p-6">
-          <Outlet />
-        </main>
-        <AppFooter />
-      </div> 
+        {/* Wrap header and main content in a container with controlled spacing */}
+        <div className="pt-1"> {/* Adjust padding-top here to control gap */}
+          <AppHeader />
+          <main className="p-4 mx-auto max-w-screen-3xl md:p-6">
+            <Outlet />
+          </main>
+          <AppFooter />
+        </div>
+      </div>
     </div>
   );
 };
 
-const AppLayout: React.FC = () => {
+const CustomAppLayout: React.FC = () => {
   return (
     <SidebarProvider>
       <LayoutContent />
@@ -49,6 +50,4 @@ const AppLayout: React.FC = () => {
   );
 };
 
-export default AppLayout;
-
-
+export default CustomAppLayout;
