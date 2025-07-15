@@ -432,14 +432,14 @@ export default function UserManagement() {
               <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 hidden sm:table-cell">
               Phone
               </TableCell>
-              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+              <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 hidden sm:table-cell">
                 Role
               </TableCell>
               <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                 Status
               </TableCell>
               <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                Actions
+                Details
               </TableCell>
             </TableRow>
           </TableHeader>
@@ -517,7 +517,7 @@ export default function UserManagement() {
                         onClick={(e) => { e.stopPropagation(); handleViewDetails(user.auth0Id); }}
                         className="px-3 py-1 text-xs text-primary hover:text-primary-dark border border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
                       >
-                        View Details
+                        Details
                       </button>
                     )}
                   </div>
@@ -666,7 +666,7 @@ export default function UserManagement() {
                 }
                 className="px-4 py-2 text-sm font-medium text-brand-500 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/[0.12] dark:text-brand-400 dark:hover:bg-brand-500/[0.18]"
               >
-                Switch to {viewMode === "table" ? "Card" : "Table"} View
+                 {viewMode === "table" ? "Card" : "Table"} View
               </button>
              
               {/* {canAccess('users', 'write') && ( // Check write permission for send notification button */}
