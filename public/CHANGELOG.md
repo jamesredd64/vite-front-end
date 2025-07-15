@@ -1,4 +1,4 @@
-## [2.0.42](https://github.com/jamesredd64/vite-front-end/compare/v2.0.18...v2.0.42) (2025-05-13)
+## [2.0.45](https://github.com/jamesredd64/vite-front-end/compare/v2.0.18...v2.0.45) (2025-07-15)
 
 
 ### Bug Fixes
@@ -8,6 +8,7 @@
 * commented out ProtectedAdminRoute for now ([c075f06](https://github.com/jamesredd64/vite-front-end/commit/c075f06f78e14b1a36505d121dd28caa8ec37127))
 * css preload ([ca96c17](https://github.com/jamesredd64/vite-front-end/commit/ca96c17f3930c0c0d85f136777ecf8684443a9ee))
 * issue with userprofileview ([710be70](https://github.com/jamesredd64/vite-front-end/commit/710be70328b4e8df8789c233bb622321eba0d6b4))
+* margin adj on left of profile pic * ver update ([35e77e1](https://github.com/jamesredd64/vite-front-end/commit/35e77e1dcd7368398513adcc2527bbf17fc286cf))
 * Merge Conflicts ([4d5c223](https://github.com/jamesredd64/vite-front-end/commit/4d5c2234cdb5cc67aa12246b526fd050ef4542c8))
 * mongodbClient and user saving issues ([1b31461](https://github.com/jamesredd64/vite-front-end/commit/1b31461653c58fc6386a44ab53a4ce44155ce348))
 * mongodbClient, update ui: signout page-added version info back ([3023b6e](https://github.com/jamesredd64/vite-front-end/commit/3023b6e74fb448486510ac6eefdb4bef98ddffb7))
