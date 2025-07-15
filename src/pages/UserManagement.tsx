@@ -488,13 +488,13 @@ export default function UserManagement() {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 hidden sm:table">
                   {user.email}
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 hidden sm:table">
                   {formatPhoneNumber(user.phoneNumber)}
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 hidden sm:table">
                   {user.profile?.role || 'User'}
                 </TableCell>
                 <TableCell className="py-3">
