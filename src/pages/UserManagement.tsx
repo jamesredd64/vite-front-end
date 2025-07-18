@@ -610,7 +610,7 @@ export default function UserManagement() {
                   User Management
                 </h4>
               </div>
-              <div className="sm:hidden flex justify-between items-center px-4 py-2 border-b border-gray-300 dark:border-gray-700 mb-2">
+              <div className="sm:hidden flex justify-between items-center gap-8 px-2 py-2 border-b border-gray-300 dark:border-gray-700 mb-2">
                 <Switch
                   key={selectedUsers.join(',')}
                   label="Select All"
