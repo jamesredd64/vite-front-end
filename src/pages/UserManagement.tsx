@@ -85,6 +85,8 @@ export default function UserManagement() {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(8);
   const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const isInitialMount = useRef(true);
   const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -236,6 +238,17 @@ export default function UserManagement() {
     return validUsers;
   }, [users, activeTab, selectedUserId]);
 
+  // Calculate paged users for current page
+  const pagedUsers = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filteredUsers.slice(startIndex, startIndex + pageSize);
+  }, [filteredUsers, currentPage, pageSize]);
+
+  // Reset current page to 1 when pageSize changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [pageSize]);
+
   // Memoize notification modal props to prevent unnecessary re-renders
   const notificationModalProps = useMemo(() => ({
     isOpen: showNotificationModal,
@@ -354,6 +367,8 @@ export default function UserManagement() {
     };
   };
 
+  console.log("viewMode", viewMode);
+  
   const renderTableView = () => (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-2 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-2 sm:pt-6">
       <div className="max-w-full overflow-x-auto p-2">
@@ -397,7 +412,7 @@ export default function UserManagement() {
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800 ">
-            {filteredUsers.map((user) => (
+            {pagedUsers.map((user) => (
               <TableRow key={user.auth0Id}  className="cursor-pointer">
                 <TableCell className="py-3">
                   <div className="flex items-center gap-2">
@@ -488,7 +503,7 @@ export default function UserManagement() {
   // ************************************
   const renderCardView = () => (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {filteredUsers.map((user) => (
+      {pagedUsers.map((user) => (
         <div key={user.auth0Id} className="flex flex-col rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-start justify-between">
             {/* Profile Pic and Name/Email Block */}
@@ -596,6 +611,7 @@ export default function UserManagement() {
     }
 
   return (
+    
     <div className="relative font-normal font-sans z-[1] bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300">
       <div className="p-1 md:p-1 2xl:p-1">
         {" "}
@@ -696,6 +712,45 @@ export default function UserManagement() {
           {viewMode === 'card' && <div className="block">{renderCardView()}</div>}
           {viewMode === 'profile' && selectedUserId && (
              <ProfileView userId={selectedUserId} />
+          )}
+          {(viewMode === 'table' || viewMode === 'card') && filteredUsers.length > pageSize && (
+            <div className="flex justify-center items-center gap-4 mt-4">
+              <label htmlFor="pageSizeSelect" className="text-sm text-gray-700 dark:text-gray-300">
+                Page Size:
+              </label>
+              <select
+                id="pageSizeSelect"
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-300 px-2 py-1"
+              >
+                <option value={5}>5</option>
+                <option value={8}>8</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+              </select>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 rounded-md border border-gray-300 dark:border-gray-700 text-sm font-medium ${
+                  currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-primary hover:bg-primary/10 dark:hover:bg-primary/20'
+                }`}
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                Page {currentPage} of {Math.ceil(filteredUsers.length / pageSize)}
+              </span>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(filteredUsers.length / pageSize)))}
+                disabled={currentPage === Math.ceil(filteredUsers.length / pageSize)}
+                className={`px-3 py-1 rounded-md border border-gray-300 dark:border-gray-700 text-sm font-medium ${
+                  currentPage === Math.ceil(filteredUsers.length / pageSize) ? 'text-gray-400 cursor-not-allowed' : 'text-primary hover:bg-primary/10 dark:hover:bg-primary/20'
+                }`}
+              >
+                Next
+              </button>
+            </div>
           )}
         </div>
       </div>
