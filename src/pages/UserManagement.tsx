@@ -605,49 +605,24 @@ export default function UserManagement() {
           {/* Changed from mb-1 to mb-2 to double the space */}
           <div className="flex justify-between items-center">
             <div>
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                User Management
-              </h4>
-              <p className="hidden sm:block text-sm mb-2 p-4 text-gray-500 dark:text-gray-400">
-                Manage and view all users in the system
-              </p>
-            </div>
-            <div className="flex gap-4 items-center">
-              <div className="hidden sm:block">
-                <button
-                  onClick={() =>
-                    setViewMode(viewMode === "table" ? "card" : "table")
-                  }
-                  className="px-4 py-2 text-sm font-medium text-brand-500 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/[0.12] dark:text-brand-400 dark:hover:bg-brand-500/[0.18]"
-                >
-                  Switch to {viewMode === "table" ? "Card" : "Table"} View
-                </button>
+              <div className="text-center sm:hidden mb-2">
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  User Management
+                </h4>
               </div>
-              <div className="hidden sm:block">
-                {/* Hide send notification button on sm and above here */}
-                <button
-                  onClick={() => setShowNotificationModal(true)}
-                  disabled={selectedUsers.length === 0}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2
-                    ${
-                      selectedUsers.length === 0
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "bg-primary text-white hover:bg-primary-dark"
-                    }`}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                  </svg>
-                  Send Notification ({selectedUsers.length})
-                </button>
-              </div>
-              <div className="sm:hidden">
-                {/* Show send notification button only on sm and below */}
+              <div className="sm:hidden flex justify-between items-center px-4 py-2 border-b border-gray-300 dark:border-gray-700 mb-2">
+                <Switch
+                  key={selectedUsers.join(',')}
+                  label="Select All"
+                  defaultChecked={filteredUsers.length > 0 && filteredUsers.every(user => selectedUsers.includes(user.auth0Id))}
+                  onChange={(checked) => {
+                    if (checked) {
+                      setSelectedUsers(filteredUsers.map(user => user.auth0Id));
+                    } else {
+                      setSelectedUsers([]);
+                    }
+                  }}
+                />
                 <button
                   onClick={() => setShowNotificationModal(true)}
                   disabled={selectedUsers.length === 0}
@@ -668,6 +643,48 @@ export default function UserManagement() {
                   </svg>
                   Send Notification ({selectedUsers.length})
                 </button>
+              </div>
+              <div className="hidden sm:block">
+                <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  User Management
+                </h4>
+                <p className="text-sm mb-2 p-4 text-gray-500 dark:text-gray-400">
+                  Manage and view all users in the system
+                </p>
+              </div>
+              <div className="flex gap-4 items-center hidden sm:flex">
+                <div>
+                  <button
+                    onClick={() =>
+                      setViewMode(viewMode === "table" ? "card" : "table")
+                    }
+                    className="px-4 py-2 text-sm font-medium text-brand-500 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/[0.12] dark:text-brand-400 dark:hover:bg-brand-500/[0.18]"
+                  >
+                    Switch to {viewMode === "table" ? "Card" : "Table"} View
+                  </button>
+                </div>
+                <div>
+                  <button
+                    onClick={() => setShowNotificationModal(true)}
+                    disabled={selectedUsers.length === 0}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2
+                      ${
+                        selectedUsers.length === 0
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-primary text-white hover:bg-primary-dark"
+                      }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                    </svg>
+                    Send Notification ({selectedUsers.length})
+                  </button>
+                </div>
               </div>
             </div>
         </div>

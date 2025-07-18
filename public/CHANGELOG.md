@@ -1,4 +1,4 @@
-## [2.0.45](https://github.com/jamesredd64/vite-front-end/compare/v2.0.18...v2.0.45) (2025-07-15)
+## [2.0.52](https://github.com/jamesredd64/vite-front-end/compare/v2.0.18...v2.0.52) (2025-07-18)
 
 
 ### Bug Fixes
@@ -7,6 +7,8 @@
 * admin/user route in main, version, etc ([f6f380e](https://github.com/jamesredd64/vite-front-end/commit/f6f380e6c7ceea9590cac28faa5d62dd7cf73b09))
 * commented out ProtectedAdminRoute for now ([c075f06](https://github.com/jamesredd64/vite-front-end/commit/c075f06f78e14b1a36505d121dd28caa8ec37127))
 * css preload ([ca96c17](https://github.com/jamesredd64/vite-front-end/commit/ca96c17f3930c0c0d85f136777ecf8684443a9ee))
+* hid email and phone table headers and data in mobil view ([5e9adeb](https://github.com/jamesredd64/vite-front-end/commit/5e9adebe19674413336edcfd1baec351512de8e3))
+* hiding email, role, phone ([bdf6f00](https://github.com/jamesredd64/vite-front-end/commit/bdf6f002ca44915874c1d0d83e7ebba672b2b28a))
 * issue with userprofileview ([710be70](https://github.com/jamesredd64/vite-front-end/commit/710be70328b4e8df8789c233bb622321eba0d6b4))
 * margin adj on left of profile pic * ver update ([35e77e1](https://github.com/jamesredd64/vite-front-end/commit/35e77e1dcd7368398513adcc2527bbf17fc286cf))
 * Merge Conflicts ([4d5c223](https://github.com/jamesredd64/vite-front-end/commit/4d5c2234cdb5cc67aa12246b526fd050ef4542c8))
@@ -21,6 +23,7 @@
 * rem userprofileview from app ([6356760](https://github.com/jamesredd64/vite-front-end/commit/6356760c3ffe633c7a31ed281cb2d075b9f93daa))
 * removed duplicate preload styles ([635f64d](https://github.com/jamesredd64/vite-front-end/commit/635f64d658a544bb09ceb4ee3a6df909a84758d8))
 * Removed isAdmin ([c469bfe](https://github.com/jamesredd64/vite-front-end/commit/c469bfee8b2b15b145a18f78934cf64148aba9fd))
+* removed onClick for mobile view for details ([82da960](https://github.com/jamesredd64/vite-front-end/commit/82da9608e7f460aa661d4e83dd7661f9a6d2cc71))
 * resolve build dependencies and remove package-lock.json ([7a8cbaa](https://github.com/jamesredd64/vite-front-end/commit/7a8cbaa86b7ec6e339a4b45aa5e8055e89e3c274))
 * revamped user fetch to be faster ([e9a0838](https://github.com/jamesredd64/vite-front-end/commit/e9a08387d2a386adf06c1cd0c8c8c74d7cc919d8))
 * set loaders to medium size ([ce6a171](https://github.com/jamesredd64/vite-front-end/commit/ce6a171c74659478110fb4c3b0b95637940277ff))

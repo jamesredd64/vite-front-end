@@ -1,7 +1,7 @@
 {
   "name": "vite-admin-app",
   "private": true,
-  "version": "2.0.51",
+  "version": "2.0.52",
   "scripts": {
     "prebuild": "node src/config/update-version.js",
     "build": "vite build && node src/config/update-version.js",
