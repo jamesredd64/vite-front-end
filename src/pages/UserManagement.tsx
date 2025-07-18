@@ -290,7 +290,7 @@ export default function UserManagement() {
   };
 
   const renderTabs = () => (
-    <div className="flex gap-2 mb-4">
+    <div className="flex gap-2 mb-4 mt-4">
       <Tab
         label="All Users"
         isActive={activeTab === 'all'}
@@ -396,7 +396,7 @@ export default function UserManagement() {
               </TableCell>
             </TableRow>
           </TableHeader>
-          <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+          <TableBody className="divide-y divide-gray-100 dark:divide-gray-800 ">
             {filteredUsers.map((user) => (
               <TableRow key={user.auth0Id}  className="cursor-pointer">
                 <TableCell className="py-3">
