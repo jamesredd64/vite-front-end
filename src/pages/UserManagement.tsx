@@ -626,7 +626,7 @@ export default function UserManagement() {
                 <button
                   onClick={() => setShowNotificationModal(true)}
                   disabled={selectedUsers.length === 0}
-                  className={`px-2 py-1 text-xs font-medium rounded-lg flex items-center gap-1
+                  className={`px-2 py-1 text-xs font-medium rounded-lg flex items-center gap-4
                     ${
                       selectedUsers.length === 0
                         ? "bg-gray-100 text-gray-400 cursor-not-allowed"
