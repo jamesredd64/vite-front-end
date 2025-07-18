@@ -5,6 +5,7 @@ import { Table, TableHeader, TableBody, TableRow, TableCell } from "../component
 import Switch from "../components/form/switch/Switch";
 import NotificationModal from "../components/modals/NotificationModal";
 import { useNavigate, useLocation } from "react-router-dom";
+import { UserManagementHelper } from "../helpers/UserManagementHelper";
 // import UserProfileView from './UserProfileView';
 import { useGlobalStorage } from "../hooks/useGlobalStorage";
 import UserMetadata from "../types/user";
@@ -15,20 +16,6 @@ import { useMongoDbClient } from "../services/mongoDbClient";
 import useRbac from "../hooks/useRbac";
 import UserUpdateModal from '../components/UserUpdateModal'; // Import the new modal component
 
-function capitalizeFirstLetter(string: string): string {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-function formatPhoneNumber(phoneNumber: string): string {
-  // Remove all non-numeric characters
-  const cleaned = ('' + phoneNumber).replace(/\D/g, '');
-  // Check if the cleaned number has the correct length
-  const match = cleaned.match(/^1?(\d{3})(\d{3})(\d{4})$/);
-  if (match) {
-    return ['1-', '(', match[1], ') ', match[2], '-', match[3]].join('');
-  }
-  return phoneNumber; // Return the original if it doesn't match the expected format
-}
 
 interface TabProps {
   label: string;
@@ -116,99 +103,99 @@ export default function UserManagement() {
     setSelectedUsers([]);  // Reset selected users
   }, []); // Empty dependency array since it only uses setState
 
-    const fetchAllUsers = useCallback(async () => {
-      if (!isAuthenticated) {
-        console.log("fetchAllUsers: Not authenticated, returning null");
-        return null;
-      }
-    
-      setLoading(true);
-      console.log("fetchAllUsers: Fetching all users...");
-    
-      try {
-        // const headers = await getAuthHeaders();
-        const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ALL_USERS}`;
-    
-        console.log("fetchAllUsers: Making request to:", url);
-    
-        const response = await fetch(url, {
-          method: "GET",
-          credentials: "include", // Keep this if your API requires authentication cookies
-          headers: {
-            "Content-Type": "application/json", // Retain this if the API expects JSON format
-          },
-        });
-        
-    
-        console.log("fetchAllUsers: Response status:", response.status);
-    
-        if (response.status === 204) {
-          console.log("fetchAllUsers: No users found");
-          return [];
-        }
-    
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-    
-        const users = await response.json();
-        console.log("fetchAllUsers: Received user list:", users);
-        return users;
-      } catch (error) {
-        console.error("fetchAllUsers: Error:", error);
-        const errorMessage = error instanceof Error ? error.message : "Failed to fetch users";
-        const status = error instanceof Response ? error.status : undefined;
-        
-        const apiError = new Error(errorMessage) as ApiError;
-        if (status !== undefined) {
-          apiError.status = status;
-        }
-        
-        setState(prev => ({
-          ...prev,
-          error: apiError,
-          isLoading: false
-        }));
-
-        setError(apiError);
+  const fetchAllUsers = useCallback(async () => {
+    if (!isAuthenticated) {
+      console.log("fetchAllUsers: Not authenticated, returning null");
+      return null;
+    }
+  
+    setLoading(true);
+    console.log("fetchAllUsers: Fetching all users...");
+  
+    try {
+      // const headers = await getAuthHeaders();
+      const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ALL_USERS}`;
+  
+      console.log("fetchAllUsers: Making request to:", url);
+  
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include", // Keep this if your API requires authentication cookies
+        headers: {
+          "Content-Type": "application/json", // Retain this if the API expects JSON format
+        },
+      });
+      
+  
+      console.log("fetchAllUsers: Response status:", response.status);
+  
+      if (response.status === 204) {
+        console.log("fetchAllUsers: No users found");
         return [];
-      } finally {
-        setLoading(false);
       }
   
-    }, []);
-
-    useEffect(() => {
-      let isMounted = true;
-
-      const getUsers = async () => {
-        const fetchedUsers = await fetchAllUsers();
-        if (!isMounted) return;
-
-        if (fetchedUsers) {
-          setUsers(fetchedUsers);
-        }
-      };
-
-      getUsers();
-
-      return () => {
-        isMounted = false;
-      };
-    }, [fetchAllUsers]); // Added fetchAllUsers to dependencies as it's used inside
-
-    // Add effect to handle navigation state
-    useEffect(() => {
-      const state = location.state as { userId?: string; viewMode?: ViewMode } | null;
-      
-      if (state?.userId && state.userId !== selectedUserId) {
-        setSelectedUserId(state.userId);
-        console.log("Setting selected user ID:", state.userId);
-    
-        // Ensure viewMode updates only when needed
-        setViewMode((prev) => state.viewMode ?? prev);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    }, [location.state]);   
+  
+      const users = await response.json();
+      console.log("fetchAllUsers: Received user list:", users);
+      return users;
+    } catch (error) {
+      console.error("fetchAllUsers: Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch users";
+      const status = error instanceof Response ? error.status : undefined;
+      
+      const apiError = new Error(errorMessage) as ApiError;
+      if (status !== undefined) {
+        apiError.status = status;
+      }
+      
+      setState(prev => ({
+        ...prev,
+        error: apiError,
+        isLoading: false
+      }));
+
+      setError(apiError);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const getUsers = async () => {
+      const fetchedUsers = await fetchAllUsers();
+      if (!isMounted) return;
+
+      if (fetchedUsers) {
+        setUsers(fetchedUsers);
+      }
+    };
+
+    getUsers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchAllUsers]); // Added fetchAllUsers to dependencies as it's used inside
+
+  // Add effect to handle navigation state
+  useEffect(() => {
+    const state = location.state as { userId?: string; viewMode?: ViewMode } | null;
+    
+    if (state?.userId && state.userId !== selectedUserId) {
+      setSelectedUserId(state.userId);
+      console.log("Setting selected user ID:", state.userId);
+  
+      // Ensure viewMode updates only when needed
+      setViewMode((prev) => state.viewMode ?? prev);
+    }
+  }, [location.state]);     
     
   
   // Memoize filtered users
@@ -264,84 +251,7 @@ export default function UserManagement() {
     onNotificationSent: handleNotificationSent,
     userProfilePic: userMetadata?.profile?.profilePictureUrl
   }), [showNotificationModal, selectedUsers, users, userMetadata?.profile?.profilePictureUrl, handleNotificationSent]);
-
-  // const handleStatusToggle = async (userId: string, currentStatus: boolean) => {
-  //   try {
-  //     // Optimistically update the UI
-  //     setUsers(prevUsers => 
-  //       prevUsers.map(user => 
-  //         user.auth0Id === userId 
-  //           ? { ...user, isActive: !currentStatus } 
-  //           : user
-  //       )
-  //     );
-
-  //     // Call your API to update the status
-  //     const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SAVE_USER_DATA(userId)}`, {
-  //       method: 'PUT',
-  //       headers: await getAuthHeaders(),
-  //       body: JSON.stringify({ isActive: !currentStatus })
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error('Failed to update user status');
-  //     }
-
-  //     // Refresh the user list to ensure consistency
-  //     // fetchUsers();
-  //   } catch (error) {
-  //     console.error('Error toggling user status:', error);
-  //     // Revert the UI change on error
-  //     setUsers(prevUsers => 
-  //       prevUsers.map(user => 
-  //         user.auth0Id === userId 
-  //           ? { ...user, isActive: currentStatus } 
-  //           : user
-  //       )
-  //     );
-  //   }
-  // };
-
-  const handleStatusToggle = async (userId: string, currentStatus: boolean) => {
-    try {
-      // Optimistically update UI before API call
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.auth0Id === userId ? { ...user, isActive: currentStatus } : user
-        )
-      );
   
-      // 🔹 Call your frontend service instead of direct API fetch
-      const updatedUser = await saveUserData(userId, { isActive: currentStatus });
-  
-      if (!updatedUser) {
-        throw new Error("Failed to update user status");
-      }
-  
-      console.log("User status updated successfully:", updatedUser);
-    } catch (error) {
-      console.error("Error toggling user status:", error);
-  
-      // 🔹 Revert UI changes if API call fails
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.auth0Id === userId ? { ...user, isActive: currentStatus } : user
-        )
-      );
-    }
-  };
-  
-
-  const getAuthHeaders = async () => {
-    const token = await getAccessTokenSilently();
-    console.log("getAuthHeaders just ran: ", token);
-    return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    };
-  };
-
-
   if (error) {
     return (
       <div className="p-6 bg-white rounded-lg shadow-md">
@@ -405,16 +315,55 @@ export default function UserManagement() {
     </div>
   );
 
+  const handleStatusToggle = async (userId: string, currentStatus: boolean) => {
+    try {
+      // Optimistically update UI before API call
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.auth0Id === userId ? { ...user, isActive: currentStatus } : user
+        )
+      );
+  
+      // 🔹 Call your frontend service instead of direct API fetch
+      const updatedUser = await saveUserData(userId, { isActive: currentStatus });
+  
+      if (!updatedUser) {
+        throw new Error("Failed to update user status");
+      }
+  
+      console.log("User status updated successfully:", updatedUser);
+    } catch (error) {
+      console.error("Error toggling user status:", error);
+  
+      // 🔹 Revert UI changes if API call fails
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.auth0Id === userId ? { ...user, isActive: currentStatus } : user
+        )
+      );
+    }
+  };
+  
+
+  const getAuthHeaders = async () => {
+    const token = await getAccessTokenSilently();
+    console.log("getAuthHeaders just ran: ", token);
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  };
+
   const renderTableView = () => (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-3 sm:pt-6">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-2 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-2 sm:pt-6">
       <div className="max-w-full overflow-x-auto p-2">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                <div className="flex items-center gap-2">
+              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 ">
+                <div className="flex items-start gap-3 px-4">
                   <Switch
-                    label=""
+                    label="All"
                     defaultChecked={false}
                     onChange={(checked) => {
                       if (checked) {
@@ -424,7 +373,7 @@ export default function UserManagement() {
                       }
                     }}
                   />
-                  <span className="text-sm">Select All</span>
+                  {/* <span className="text-sm">Select All</span> */}
                 </div>
               </TableCell>
               <TableCell isHeader className="py-6 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
@@ -447,10 +396,10 @@ export default function UserManagement() {
               </TableCell>
             </TableRow>
           </TableHeader>
-          <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+          <TableBody className="divide-y divide-gray-100 dark:divide-gray-800 ">
             {filteredUsers.map((user) => (
               <TableRow key={user.auth0Id}  className="cursor-pointer">
-                <TableCell className="py-3">
+                <TableCell className="py-3  px-4">
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -467,9 +416,9 @@ export default function UserManagement() {
                     />
                   </div>
                 </TableCell>
-                <TableCell className="py-7">
-                  <div className="flex items-center gap-4">
-                    <div className="h-[50px] w-[50px] overflow-hidden rounded-full">
+                <TableCell className="py-5 px-4">
+                  <div className="flex items-center gap-2 p-2 sm: gap-2">
+                    <div className="h-[50px] w-[50px] overflow-hidden rounded-full hidden sm:table-cell">
                       {user.profile?.profilePictureUrl ? (
                         <img
                           src={user.profile.profilePictureUrl}
@@ -477,29 +426,32 @@ export default function UserManagement() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center bg-gray-200 text-gray-600 font-bold">
+                        <div className="h-full w-full flex items-center justify-center bg-gray-200 text-gray-600 font-bold sm:table-cell">
                           {user.firstName.charAt(0)}{user.lastName.charAt(0)}
                         </div>
                       )}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                        {user.firstName} {user.lastName}
+                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90 ">
+                        {user.firstName} 
                       </p>
-                      <span className="text-gray-500 text-theme-xs dark:text-gray-400">
+                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90 ">
+                         {user.lastName}
+                      </p>
+                      <span className="text-gray-500 text-theme-xs dark:text-gray-400 hidden sm:table-cell">
                         {user.profile?.gender || 'N/A'}
                       </span>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 hidden sm:table-cell">
                   {user.email}
                 </TableCell>
-                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {formatPhoneNumber(user.phoneNumber)}
+                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 hidden sm:table-cell">
+                  {UserManagementHelper.formatPhoneNumber(user.phoneNumber)}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {capitalizeFirstLetter(user.profile?.role || 'User')}
+                  {UserManagementHelper.capitalizeFirstLetter(user.profile?.role || 'User')}
                 </TableCell>
                 <TableCell className="py-3">
                   <div className="flex items-center">

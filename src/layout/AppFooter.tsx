@@ -93,7 +93,7 @@ const AppFooter: React.FC = () => {
         <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 w-full">
           <div className="flex flex-col items-center justify-center space-y-2">
             <p className="text-sm text-center text-gray-500 dark:text-gray-400">
-              &copy; {new Date().getFullYear()} Stagholme Inc. All rights reserved.
+              &copy; {new Date().getFullYear()} Showcase. All rights reserved.
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500">
               Version {VERSION.number} 
