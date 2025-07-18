@@ -25,8 +25,7 @@ interface TabProps {
 }
 
 const Tab: React.FC<TabProps> = ({ label, isActive, onClick, disabled }) => (
-  <button
-    className={`px-4 py-2 font-medium text-sm rounded-lg transition-colors ${
+  <button className={`hidden sm:block px-4 py-2 font-medium text-sm rounded-lg transition-colors ${
       isActive 
         ? 'bg-primary text-white' 
         : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
@@ -40,6 +39,7 @@ const Tab: React.FC<TabProps> = ({ label, isActive, onClick, disabled }) => (
   >
     {label}
   </button>
+             
 );
 
 interface User {
@@ -81,7 +81,7 @@ export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [viewMode, setViewMode] = useState<ViewMode>('card');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -360,10 +360,10 @@ export default function UserManagement() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 ">
-                <div className="flex items-start gap-3 px-4">
+              <TableCell isHeader className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                <div className="flex items-center gap-2">
                   <Switch
-                    label="All"
+                    label="Select All"
                     defaultChecked={false}
                     onChange={(checked) => {
                       if (checked) {
@@ -396,10 +396,10 @@ export default function UserManagement() {
               </TableCell>
             </TableRow>
           </TableHeader>
-          <TableBody className="divide-y divide-gray-100 dark:divide-gray-800 ">
+          <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
             {filteredUsers.map((user) => (
               <TableRow key={user.auth0Id}  className="cursor-pointer">
-                <TableCell className="py-3  px-4">
+                <TableCell className="py-3">
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -416,8 +416,8 @@ export default function UserManagement() {
                     />
                   </div>
                 </TableCell>
-                <TableCell className="py-5 px-4">
-                  <div className="flex items-center gap-2 p-2 sm: gap-2">
+                <TableCell className="py-7">
+                  <div className="flex items-center gap-4">
                     <div className="h-[50px] w-[50px] overflow-hidden rounded-full hidden sm:table-cell">
                       {user.profile?.profilePictureUrl ? (
                         <img
@@ -426,17 +426,14 @@ export default function UserManagement() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center bg-gray-200 text-gray-600 font-bold sm:table-cell">
+                        <div className="h-full w-full flex items-center justify-center bg-gray-200 text-gray-600 font-bold">
                           {user.firstName.charAt(0)}{user.lastName.charAt(0)}
                         </div>
                       )}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90 ">
-                        {user.firstName} 
-                      </p>
-                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90 ">
-                         {user.lastName}
+                      <p className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                        {user.firstName} {user.lastName}
                       </p>
                       <span className="text-gray-500 text-theme-xs dark:text-gray-400 hidden sm:table-cell">
                         {user.profile?.gender || 'N/A'}
@@ -611,51 +608,75 @@ export default function UserManagement() {
               <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                 User Management
               </h4>
-              <p className="text-sm mb-2 p-4 text-gray-500 dark:text-gray-400">
+              <p className="hidden sm:block text-sm mb-2 p-4 text-gray-500 dark:text-gray-400">
                 Manage and view all users in the system
               </p>
             </div>
-            <div className="flex gap-4">              
-              <button
-                onClick={() =>
-                  setViewMode(viewMode === "table" ? "card" : "table")
-                }
-                className="px-4 py-2 text-sm font-medium text-brand-500 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/[0.12] dark:text-brand-400 dark:hover:bg-brand-500/[0.18]"
-              >
-                Switch to {viewMode === "table" ? "Card" : "Table"} View
-              </button>
-             
-              {/* {canAccess('users', 'write') && ( // Check write permission for send notification button */}
-                  <button
-                    onClick={() => setShowNotificationModal(true)}
-                    disabled={selectedUsers.length === 0}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2
-                      ${
-                        selectedUsers.length === 0
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : "bg-primary text-white hover:bg-primary-dark"
-                  }`}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+            <div className="flex gap-4 items-center">
+              <div className="hidden sm:block">
+                <button
+                  onClick={() =>
+                    setViewMode(viewMode === "table" ? "card" : "table")
+                  }
+                  className="px-4 py-2 text-sm font-medium text-brand-500 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-500/[0.12] dark:text-brand-400 dark:hover:bg-brand-500/[0.18]"
                 >
-                  <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                </svg>
-                Send Notification ({selectedUsers.length})
-              </button>
-          )
-        </div>
-          </div>
+                  Switch to {viewMode === "table" ? "Card" : "Table"} View
+                </button>
+              </div>
+              <div className="hidden sm:block">
+                {/* Hide send notification button on sm and above here */}
+                <button
+                  onClick={() => setShowNotificationModal(true)}
+                  disabled={selectedUsers.length === 0}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2
+                    ${
+                      selectedUsers.length === 0
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-primary text-white hover:bg-primary-dark"
+                    }`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                  </svg>
+                  Send Notification ({selectedUsers.length})
+                </button>
+              </div>
+              <div className="sm:hidden">
+                {/* Show send notification button only on sm and below */}
+                <button
+                  onClick={() => setShowNotificationModal(true)}
+                  disabled={selectedUsers.length === 0}
+                  className={`px-2 py-1 text-xs font-medium rounded-lg flex items-center gap-1
+                    ${
+                      selectedUsers.length === 0
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-primary text-white hover:bg-primary-dark"
+                    }`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                  </svg>
+                  Send Notification ({selectedUsers.length})
+                </button>
+              </div>
+            </div>
         </div>
         {renderTabs()}
         <div className="mt-1">
           {" "}
           {/* Further reduced top margin */}
-          {viewMode === 'table' && renderTableView()}
-          {viewMode === 'card' && renderCardView()}
+          {viewMode === 'table' && <div className="hidden sm:block">{renderTableView()}</div>}
+          {viewMode === 'card' && <div className="block">{renderCardView()}</div>}
           {viewMode === 'profile' && selectedUserId && (
              <ProfileView userId={selectedUserId} />
           )}
@@ -676,6 +697,8 @@ export default function UserManagement() {
         onNotificationSent={handleNotificationSent}        
         userProfilePic={userMetadata?.profile?.profilePictureUrl}
       />
+      </div>
     </div>
+      
   );
 }
