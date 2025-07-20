@@ -71,7 +71,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
         // First try to get the user
         const fetchedUserData = await getUserById(auth0Id);
         console.log("Fetched User Data jim:", fetchedUserData);
-
+        console.log("Fetched profile pic:", fetchedUserData.profile?.profilePictureUrl);
         // If user doesn't exist, create a new one
         if (!fetchedUserData && isMounted) {
           console.log('User not found, creating new user...');
@@ -94,7 +94,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
             address: defaultAddress,
             isActive: true
           };
-
+          
           try {
             // Use POST instead of PUT for new user creation
             const createdUser = await saveUserData(auth0Id, newUserData, undefined);
@@ -123,7 +123,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
             ...fetchedUserData,
             profile: {
               ...fetchedUserData.profile,
-              profilePictureUrl: user?.picture || fetchedUserData.profile.profilePictureUrl
+              profilePictureUrl: fetchedUserData.profile.profilePictureUrl || ""
             },
             address: { ...defaultAddress, ...fetchedUserData.address },
             marketingBudget: { ...defaultMarketingBudget, ...fetchedUserData.marketingBudget },
@@ -341,7 +341,11 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
               {/* User metadata section (basic info) */}
               <UserMetaCard
                 // onUpdate={handleMetaUpdate}
-                onUpdate={(data: unknown) => handleMetaUpdate(data as Partial<UserMetadata>)}
+                onUpdate={(data: unknown) => {
+                  const typedData = data as Partial<UserMetadata>;
+                  console.log("Profile picture sent to UserMetaCard:", typedData.profile?.profilePictureUrl);
+                  handleMetaUpdate(typedData);
+                }}
                 initialData={{
                   email: userData.email,
                   firstName: userData.firstName,
