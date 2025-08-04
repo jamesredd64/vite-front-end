@@ -9,7 +9,7 @@ const NewUserWelcome: React.FC = () => {
   const { user } = useAuth0();
   
   const handleProfileClick = () => {
-    navigate('/user/profile');
+    navigate('/attendee/profile');
   };
 
   return (

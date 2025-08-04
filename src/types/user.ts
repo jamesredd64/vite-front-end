@@ -38,7 +38,7 @@ export interface UserMetadata {
     dateOfBirth: string | null;
     gender: string;
     profilePictureUrl: string;
-    role: 'admin' | 'user' | 'manager' | 'super-admin';
+    role: 'showcase_attendee' | 'showcase_agent' | 'showcase_team' | 'showcase_admin';
     timezone: string;
   };
   marketingBudget: {

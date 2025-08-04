@@ -1,0 +1,1 @@
+export type UserRoles = "showcase_attendee" | "showcase_agent" | "showcase_team" | "showcase_admin";

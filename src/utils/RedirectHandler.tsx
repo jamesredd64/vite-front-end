@@ -9,7 +9,8 @@ export default function RedirectHandler({ appState }: { appState: any }) {
     const userRole = localStorage.getItem("userRole");
     const returnTo = appState?.returnTo || location.pathname;
 
-    if (userRole === "admin" || userRole === "super-admin") {
+    // if (userRole === "admin" || userRole === "super-admin") {
+    if (userRole === "showcase_admin") {
       navigate(returnTo.includes("/admin") ? returnTo : "/admin");
     } else {
       navigate(returnTo.includes("/admin") ? "/dashboard" : returnTo);

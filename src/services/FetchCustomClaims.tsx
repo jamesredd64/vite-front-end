@@ -20,7 +20,9 @@ const FetchCustomClaims = () => {
   const fetchCustomClaims = async () => {
     try {
       const claims = await getIdTokenClaims();
-      const namespace = 'https://dev-uizu7j8qzflxzjpy.jr.com';
+      const namespace = 'https://dev-rq8rokyotwtjem12.jr.com/roles/roles';
+      // const namespace = 'https://dev-rq8rokyotwtjem12.jr.com';
+    
       
       if (!claims) {
         throw new Error('Failed to fetch claims');

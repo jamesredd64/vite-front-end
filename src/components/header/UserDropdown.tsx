@@ -16,7 +16,7 @@ export default function UserDropdown() {
   const { logout, user, isAuthenticated } = useAuth0();
   const [userMetadata] = useGlobalStorage<UserMetadata | null>("userMetadata", null);
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAdminRoute = location.pathname.startsWith('/showcase_admin');
   const navigate = useNavigate();
 
   // Display name logic - use metadata first, fallback to Auth0 user info
@@ -93,7 +93,7 @@ export default function UserDropdown() {
       });
     } catch (error) {
       console.error("Logout error:", error);
-      navigate(isAdminRoute ? "/admin/signed-out" : "/signed-out");
+      navigate(isAdminRoute ? "/showcase_admin/signed-out" : "/signed-out");
     }
   };
 

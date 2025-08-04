@@ -87,7 +87,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ userId, onClose }) => {
               dateOfBirth: '',
               gender: '',
               profilePictureUrl: user?.picture || '',
-              role: 'user' as const,
+              role: 'showcase_attendee' as const,
               timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             },
             marketingBudget: defaultMarketingBudget,

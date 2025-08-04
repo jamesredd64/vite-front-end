@@ -78,7 +78,7 @@ export const useMongoDbClient = () => {
   const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const token = await getAccessTokenSilently({
       authorizationParams: {
-        audience: 'https://dev-uizu7j8qzflxzjpy.us.auth0.com/api/v2/',
+        audience: 'https://dev-rq8rokyotwtjem12.us.auth0.com/api/v2/',
         scope: 'openid profile email'
       }
     });
@@ -336,7 +336,7 @@ export const useMongoDbClient = () => {
       // dateOfBirth?: string | null;
       // gender?: string;
       profilePictureUrl?: string;
-      role?: 'admin' | 'user' | 'manager' | 'super-admin';
+      role?: 'showcase_attendee' | 'showcase_agent' | 'showcase_team' | 'showcase_admin';
       // timezone?: string;
     };
     
@@ -375,7 +375,7 @@ export const useMongoDbClient = () => {
         profile: {
           ...existingUser?.profile,
           ...userData.profile,
-          role: userData.profile?.role || existingUser?.profile?.role || 'user',
+          role: userData.profile?.role || existingUser?.profile?.role || 'showcase_attendee',
         },
         // marketingBudget: userData.marketingBudget,
         // address: userData.address ,

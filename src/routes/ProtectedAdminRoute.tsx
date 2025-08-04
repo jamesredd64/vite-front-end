@@ -10,7 +10,8 @@ const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({ children }) =
   const { user, isAuthenticated } = useAuth0();
 
   // Check if user is authenticated and has admin role
-  const isAdmin = isAuthenticated && user?.['https://dev-uizu7j8qzflxzjpy.jr.com/roles']?.includes('admin');
+  const isAdmin = isAuthenticated && user?.['https://dev-rq8rokyotwtjem12.jr.com/roles/roles']?.includes('showcase_admin');
+  // const isAdmin = isAuthenticated && user?.['https://dev-rq8rokyotwtjem12/roles']?.includes('showcase_admin');
 
   if (!isAuthenticated) {
     return <Navigate to="/signed-out" replace />;

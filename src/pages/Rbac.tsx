@@ -30,9 +30,9 @@ const UserManagement: React.FC = () => {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000));
         const dummyUsers: User[] = [
-          { id: '1', name: 'Alice Smith', email: 'alice@example.com', role: 'User' },
-          { id: '2', name: 'Bob Johnson', email: 'bob@example.com', role: 'Admin' },
-          { id: '3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'User' },
+          { id: '1', name: 'Alice Smith', email: 'alice@example.com', role: 'showcase_attendee' },
+          { id: '2', name: 'Bob Johnson', email: 'bob@example.com', role: 'showcase_admin' },
+          { id: '3', name: 'Charlie Brown', email: 'charlie@example.com', role: 'showcase_attendee' },
         ];
         setUsers(dummyUsers);
       } catch (err) {

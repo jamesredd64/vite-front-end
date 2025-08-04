@@ -9,18 +9,18 @@ const LoginPage = () => {
     useEffect(() => {
         if (isAuthenticated) {
             // Redirect based on role after login
-            const roles = user?.["https://dev-uizu7j8qzflxzjpy.jr.com/roles"] || []; // Correct namespace
+            const roles = user?.["https://dev-rq8rokyotwtjem12.jr.com/roles/roles"] || []; // Correct namespace
   
     // Ensure roles are defined before navigating
     if (roles.length === 0) return;
   
     // Redirect based on role
-    if (roles.includes("admin") && window.location.pathname !== "/admin") {
+    if (roles.includes("showcase_admin") && window.location.pathname !== "/admin") {
       console.log("Navigating to /admin...");
       navigate("/admin", { replace: true });
-    } else if (window.location.pathname !== "/user") {
-      console.log("Navigating to /user...");
-      navigate("/user", { replace: true });
+    } else if (window.location.pathname !== "/attendee") {
+      console.log("Navigating to /attendee...");
+      navigate("/attendee", { replace: true });
     }
         }
     }, [isAuthenticated, user, navigate]);

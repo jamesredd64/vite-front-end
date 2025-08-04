@@ -14,7 +14,7 @@ export const useApiClient = () => {
   const getAuthHeaders = async () => {
     const token = await getAccessTokenSilently({
       authorizationParams: {
-        audience: 'https://dev-uizu7j8qzflxzjpy.us.auth0.com/api/v2/',
+        audience: 'https://dev-rq8rokyotwtjem12.us.auth0.com/api/v2/',
         scope: 'openid profile email'
       }
     });

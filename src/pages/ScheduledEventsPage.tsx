@@ -18,8 +18,8 @@ interface Attendee {
 }
 
 interface EventDetails {
-  startTime: string;
-  endTime: string;
+  scheduledTime: string;
+  // endTime: string;
   summary: string;
   description: string;
   location: string;
@@ -34,7 +34,7 @@ interface ScheduledEvent {
   eventDetails: EventDetails;
   selectedUsers: Attendee[];
   scheduledTime: string;
-  createdAt: string;
+  // createdAt: string;
   status: string;
 }
 // const generatePDF = (data) => {
@@ -81,8 +81,8 @@ const generatePDF = (events: ScheduledEvent[]) => {
 
     yPosition += 10;
     doc.text(`Description: ${event.eventDetails.description}`, margin, yPosition);
-    doc.text(`Start Time: ${format(new Date(event.eventDetails.startTime), "yyyy-MM-dd HH:mm")}`, margin, yPosition + 10);
-    doc.text(`End Time: ${format(new Date(event.eventDetails.endTime), "yyyy-MM-dd HH:mm")}`, margin, yPosition + 20);
+    doc.text(`DateTime Scheduled: ${format(new Date(event.eventDetails.scheduledTime), "yyyy-MM-dd hh:mm a")}`, margin, yPosition + 10);
+    // doc.text(`End Time: ${format(new Date(event.eventDetails.endTime), "yyyy-MM-dd HH:mm")}`, margin, yPosition + 20);
     doc.text(`Location: ${event.eventDetails.location}`, margin, yPosition + 30);
     doc.text(`Organizer: ${event.eventDetails.organizer?.name} (${event.eventDetails.organizer?.email})`, margin, yPosition + 40);
     doc.text(`Status: ${event.status}`, margin, yPosition + 50);
@@ -190,14 +190,13 @@ console.log("All Events ", allEvents);
             <thead>
               <tr>
                 <th className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 flex items-center gap-5" title="Download Scheduled Events as PDF">
-                  Summary
+                  Event Name
                   <LightPdfIcon className="w-10 h-10 text-gray-500 dark:text-gray-400" aria-label="PDF Icon" onClick={handleClick }/>
                 </th>
-                <th className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Start Time</th>
-                <th className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">End Time</th>
-                <th className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Scheduled Time</th>
-                <th className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Created On</th>
-                <th className="py-3 text-gray-800 dark:text-white/90">Status</th>
+                
+                <th className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Location</th>
+                <th className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Scheduled Date/Time</th>                
+                <th className="py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -212,7 +211,13 @@ console.log("All Events ", allEvents);
                     onClick={() => handleRowClick(event)}
                     className={`cursor-pointer ${selectedEvent?._id === event._id ? 'bg-blue-100 dark:bg-blue-900' : ''}`} // Added selected row styling
                   >
-                    <td className="py-3 text-gray-800 dark:text-white/90">{event.eventDetails.summary}</td><td className="py-3 text-gray-500 dark:text-gray-400">{format(new Date(event.eventDetails.startTime), 'yyyy-MM-dd hh:mm a')}</td><td className="py-3 text-gray-500 dark:text-gray-400">{format(new Date(event.eventDetails.endTime), 'yyyy-MM-dd hh:mm a')}</td><td className="py-3 text-gray-500 dark:text-gray-400">{format(new Date(event.scheduledTime), 'yyyy-MM-dd hh:mm a')}</td><td className="py-3 text-gray-500 dark:text-gray-400">{format(new Date(event.createdAt), 'yyyy-MM-dd hh:mm a')}</td><td className="py-3 text-gray-800 dark:text-white/90">{event.status}</td>
+                    {/* <td className="py-3 text-gray-800 dark:text-white/90">{event.eventDetails.summary}</td><td className="py-3 text-gray-500 dark:text-gray-400">{format(new Date(event.eventDetails.startTime), 'yyyy-MM-dd hh:mm a')}</td><td className="py-3 text-gray-500 dark:text-gray-400">{format(new Date(event.eventDetails.endTime), 'yyyy-MM-dd hh:mm a')}</td><td className="py-3 text-gray-500 dark:text-gray-400">{format(new Date(event.scheduledTime), 'yyyy-MM-dd hh:mm a')}</td><td className="py-3 text-gray-500 dark:text-gray-400">{format(new Date(event.createdAt), 'yyyy-MM-dd hh:mm a')}</td><td className="py-3 text-gray-800 dark:text-white/90">{event.status}</td> */}
+                    <td className="py-3 text-gray-800 dark:text-white/90">{event.eventDetails.summary}</td>                    
+                    <td className="py-3 text-gray-800 dark:text-white/90">{event.eventDetails.location}</td>                      
+                    <td className="py-3 text-gray-500 dark:text-gray-400">{format(new Date(event.eventDetails.scheduledTime), 'yyyy-MM-dd hh:mm a')}</td>                    
+                    <td className="py-3 text-gray-800 dark:text-white/90">{event.status}</td>                     
+                      
+                      
                   </tr>
                 ))
               )}
@@ -269,7 +274,7 @@ console.log("All Events ", allEvents);
                       </td>
                       {/* <td className="py-3 text-gray-800 dark:text-white/90">{user.lastName || '-'}</td> Keep last name column for consistency, though it might be redundant if using full name from 'name' */}
                       <td className="py-3 text-gray-500 dark:text-gray-400 w-1/3">{user.email}</td>
-                      <td className="py-3 text-gray-500 dark:text-gray-400 w-1/3">{format(new Date(selectedEvent.createdAt), 'yyyy-MM-dd hh:mm a')}</td>
+                      {/* <td className="py-3 text-gray-500 dark:text-gray-400 w-1/3">{format(new Date(selectedEvent.createdAt), 'yyyy-MM-dd hh:mm a')}</td> */}
                     </tr>
                   ))
                 )}

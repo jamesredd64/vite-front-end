@@ -1,4 +1,5 @@
-type UserRole = "user" | "admin" | "manager" | "super-admin";
+type UserRole = "showcase_attendee" | "showcase_agent" | "showcase_team" | "showcase_admin";
+
 
 interface UserRoleMap {
     [email: string]: UserRole;

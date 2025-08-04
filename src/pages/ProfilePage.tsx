@@ -186,7 +186,7 @@ interface ProfilePageProps {
               dateOfBirth: null,
               gender: '',
               profilePictureUrl: user?.picture || '',
-              role: 'user',
+              role: 'showcase_attendee',
               timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             },
             address: { ...defaultAddress },
@@ -206,7 +206,7 @@ interface ProfilePageProps {
               dateOfBirth: fetchedUserData.profile?.dateOfBirth || null,
               gender: fetchedUserData.profile?.gender || '',
               profilePictureUrl: fetchedUserData.profile?.profilePictureUrl || user?.picture || '',
-              role: fetchedUserData.profile?.role || 'user',
+              role: fetchedUserData.profile?.role || 'showcase_attendee',
               timezone: fetchedUserData.profile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
             },
             address: {
@@ -396,7 +396,7 @@ interface ProfilePageProps {
           profilePictureUrl: auth0Id ? userData.profile.profilePictureUrl : (user?.picture || userData.profile.profilePictureUrl),
           dateOfBirth: userData.profile.dateOfBirth || '',
           gender: userData.profile.gender,
-          role: (userData.profile.role as 'user' | 'admin' | 'manager') || 'user',
+          role: (userData.profile.role as 'showcase_attendee' | 'showcase_agent' | 'showcase_team') || 'showcase_admin',
           timezone: userData.profile.timezone,
         },
         address: userData.address,
@@ -475,7 +475,9 @@ interface ProfilePageProps {
                   dateOfBirth: newInfo.profile?.dateOfBirth || userData.profile.dateOfBirth || '',
                   gender: newInfo.profile?.gender || userData.profile.gender || '',
                   profilePictureUrl: newInfo.profile?.profilePictureUrl || userData.profile.profilePictureUrl || (user?.picture || ''),
-                  role: (newInfo.profile?.role as 'user' | 'admin' | 'manager') || userData.profile.role || 'user',
+                  role: (newInfo.profile?.role as 'showcase_attendee' | 'showcase_agent' | 'showcase_team' | 'showcase_admin') || 'showcase_attendee',
+
+                  // role: (newInfo.profile?.role as 'user' | 'admin' | 'manager') || userData.profile.role || 'user',
                   timezone: newInfo.profile?.timezone || userData.profile.timezone,  // Fixed: Preserve timezone
                 },
                 isActive: newInfo?.isActive ?? false,
@@ -490,7 +492,8 @@ interface ProfilePageProps {
                 dateOfBirth: userData?.profile?.dateOfBirth || "",
                 gender: userData?.profile?.gender || "",
                 profilePictureUrl: auth0Id ? (userData?.profile?.profilePictureUrl || "") : (user?.picture || userData?.profile?.profilePictureUrl || ""),
-                role: (userData?.profile?.role as 'user' | 'admin' | 'manager' | 'super-admin') || 'user',
+                role: (userData?.profile?.role as 'showcase_attendee' | 'showcase_agent' | 'showcase_team') || 'showcase_attendee',
+
                 timezone: userData?.profile?.timezone || "America/New_York",  // Fixed: Set default timezone
               },     
               isActive: userData?.isActive ?? false,

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
-
+import { buildUserMetadata } from './utils/buildUserMetadata';
 import { Routes, Route, Navigate, useNavigate, useParams, Outlet } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useAdmin } from './hooks/useAdmin';
@@ -57,7 +57,7 @@ import SettingsAdmin from "./pages/SettingsAdmin";
 // import Privacy from "./pages/Legal/Privacy";
 // import Terms from "./pages/Legal/Terms";
 
-type UserRole = "user" | "admin" | "manager" | "super-admin";
+type UserRole = "showcase_attendee" | "showcase_agent" | "showcase_team" | "showcase_admin";
 
 interface UserMetadata {
   auth0Id: string;
@@ -174,7 +174,17 @@ function App() {
   useEffect(() => {
     const initializeUserMetadata = async () => {
       if (!isAuthenticated || !user?.sub) return;
-  
+         
+          // In your initializeUserMetadata or similar:
+          // const metadata = buildUserMetadata(user, {
+          //   adBudget: 5000,
+          //   roiTarget: 120,
+          //   preferredCuisine: 'Thai',
+          // });
+
+          // Then insert into MongoDB or whatever backend logic you’ve got:
+          // await createUserInMongo(metadata);
+            
       try {
         const auth0Id = user.sub;
         let mongoUser = await getUserById(auth0Id);
@@ -193,7 +203,8 @@ function App() {
               dateOfBirth: "",
               gender: "",
               profilePictureUrl: user.picture || "",
-              role: user['https://dev-uizu7j8qzflxzjpy.jr.com/roles']?.[0] || "user",
+              role: user['https://dev-rq8rokyotwtjem12.jr.com/roles']?.[0] ,
+              // || "showcase_attendee",
               timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,            
             },
             isActive: true,
@@ -220,7 +231,8 @@ function App() {
             dateOfBirth: mongoUser.profile.dateOfBirth || "",
             gender: mongoUser.profile.gender || "",
             profilePictureUrl: user.picture || mongoUser.profile.profilePictureUrl,
-            role: user['https://dev-uizu7j8qzflxzjpy.jr.com/roles']?.[0] || mongoUser.profile.role || "user",
+            role: user['https://dev-rq8rokyotwtjem12.jr.com/roles']?.[0] || mongoUser.profile.role || "showcase_attendee",
+            
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           },
           isActive: mongoUser.isActive || true,
@@ -231,7 +243,7 @@ function App() {
         console.error("Error initializing user metadata:", error);
       }
     };
-  
+    
     initializeUserMetadata();
   }, [isAuthenticated, user, getUserById]);
   
@@ -384,9 +396,12 @@ function App() {
 
   // Add this function to check if user is admin
   const isAdmin = () => {
-    return userMetadata?.profile?.role === 'admin' || userMetadata?.profile?.role === 'super-admin';
+    return userMetadata?.profile?.role === 'showcase_admin';
+      // || userMetadata?.profile?.role === 'super-admin';
   };
 
+  console.log("userMetadata?.profile?.role Is", userMetadata?.profile?.role);
+  
   // Handle authentication state changes
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -496,7 +511,7 @@ function App() {
                   </Route>
 
                   {/* User Routes */}
-                  <Route path="/user/*" element={<AppLayout />}>
+                  <Route path="/attendee/*" element={<AppLayout />}>
                     <Route index element={<Navigate to="dashboard" replace />} />
                     <Route path="dashboard" element={<NewUserWelcome />} />
                     <Route path="profile" element={<ProfileView />} />

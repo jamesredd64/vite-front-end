@@ -90,7 +90,7 @@ export default function UserManagement() {
   const [userMetadata] = useGlobalStorage<UserMetadata | null>('userMetadata', null);
   const isInitialMount = useRef(true);
   const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
-  const { canAccess, loading: rbacLoading } = useRbac(userMetadata?.profile?.role || 'user'); // Assuming 'user' as a default role
+  const { canAccess, loading: rbacLoading } = useRbac(userMetadata?.profile?.role || 'showcase_attendee'); // Assuming 'user' as a default role
   const { getAllUsers, saveUserData } = useMongoDbClient();
     const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
 
@@ -463,7 +463,7 @@ export default function UserManagement() {
                   {UserManagementHelper.formatPhoneNumber(user.phoneNumber)}
                 </TableCell>
                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {UserManagementHelper.capitalizeFirstLetter(user.profile?.role || 'User')}
+                  {UserManagementHelper.capitalizeFirstLetter(user.profile?.role || 'showcase_attendee')}
                 </TableCell>
                 <TableCell className="py-3">
                   <div className="flex items-center">
@@ -558,7 +558,7 @@ export default function UserManagement() {
                 </div>
                  <div className="flex justify-between">
                     <span className="text-gray-500 dark:text-gray-400">Role:</span>
-                    <span className="font-medium text-gray-700 dark:text-gray-300">{user.profile?.role || 'User'}</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">{user.profile?.role || 'showcase_attendee'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                     <span className="text-gray-500 dark:text-gray-400">Status:</span>

@@ -3,6 +3,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useState, useEffect, useCallback } from "react";
 import UserMetadata from "../../types/user.js";
+import { UserRoles } from "../../types/types";
 import Button from "../ui/button/Button.js";
 import { useAuth0 } from "@auth0/auth0-react";
 import Input from "../form/input/InputField.js";
@@ -18,6 +19,8 @@ import { useAdmin } from "../../hooks/useAdmin.js";
 import  Switch  from '../../components/form/switch/Switch';
 // import Select from "../form/input/Select";
 
+type UserRole = "showcase_attendee" | "showcase_agent" | "showcase_team" | "showcase_admin";
+
 interface UserMetaCardProps {
   onUpdate: (newInfo: Partial<UserMetadata>) => void;
   initialData: {
@@ -29,14 +32,14 @@ interface UserMetaCardProps {
       dateOfBirth: string | null;
       gender: string;
       profilePictureUrl: string;
-      role: 'admin' | 'user' | 'manager' | 'super-admin';
+      role: UserRole;
       timezone: string;
     };
     isActive: boolean;
   };
 }
 
-const roleOptions = ["admin", "user", "manager", "super-admin"] as const;
+const roleOptions: UserRole[] = ["showcase_attendee", "showcase_agent", "showcase_team", "showcase_admin"];
 const genderOptions = ["male", "female", "prefer_not_to_say"] as const;
 
 const timezoneOptions = [
@@ -72,7 +75,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
       dateOfBirth: initialData.profile.dateOfBirth || "",
       gender: initialData.profile.gender || "",
       profilePictureUrl: initialData.profile.profilePictureUrl || user?.picture || "",
-      role: initialData.profile.role || 'user',
+      role: initialData.profile.role || 'showcase_attendee',
       timezone: initialData.profile.timezone || "America/New_York",
     },
     isActive: initialData.isActive,
@@ -85,7 +88,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
       route: '', // Added route to state
     });
 
-     console.log("State is admin", state.isAdmin);
+    //  console.log("State is admin", state.isAdmin);
 
   const handleIsActiveChange = (checked: boolean) => {
     console.log("Is checked " , checked);
@@ -220,7 +223,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
         profile: {
           ...formData.profile,
           timezone: formData.profile.timezone,
-          role: (formData.profile.role as 'user' | 'admin' | 'manager') || 'user'
+          role: formData.profile.role as UserRole
         }
       };
       
@@ -488,7 +491,7 @@ export const UserMetaCard: React.FC<UserMetaCardProps> = ({
           </button>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={closeModal} className="max-w-[700px] m-4">
+      <Modal isOpen={isModalOpen} onClose={closeModal} className="max-w-[780px] m-4">
         <div className="relative w-full p-4 overflow-y-auto bg-white border border-gray-200 dark:border-gray-700 no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">

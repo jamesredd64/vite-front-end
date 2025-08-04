@@ -114,8 +114,10 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ user, isOpen, onClose
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               >
                 {/* Replace with actual roles from your application */}
-                <option value="User">User</option>
-                <option value="Admin">Admin</option>
+                <option value="showcase_attendee">User</option>
+                <option value="showcase_agent">Admin</option>
+                <option value="showcase_team">Admin</option>
+                <option value="showcase_admin">Admin</option>
                 {/* Add other roles as needed */}
               </select>
             </div>

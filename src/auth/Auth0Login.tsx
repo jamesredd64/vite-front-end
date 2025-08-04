@@ -21,7 +21,7 @@ const Auth0Login: React.FC<Auth0LoginProps> = () => {
     const getCustomClaims = async () => {
       try {
         const token = await getAccessTokenSilently();
-        const response = await fetch(`${'dev-uizu7j8qzflxzjpy.us.auth0.com'}/userinfo`, {
+        const response = await fetch(`${'dev-rq8rokyotwtjem12.us.auth0.com'}/userinfo`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -13,17 +13,17 @@ const Callback: React.FC = () => {
       if (!isAuthenticated || !user) return; // Ensure authentication is complete
 
       // Retrieve user roles from Auth0 token
-      const roles = user?.["https://dev-uizu7j8qzflxzjpy.jr.com/roles"] || [];
+      const roles = user?.["https://dev-rq8rokyotwtjem12.jr.com/roles"] || [];
 
       if (roles.length === 0) return; // Prevent redirects before roles are available
 
       // Redirect based on user role
-      if (roles.includes("admin")) {
+      if (roles.includes("showcase_admin")) {
         console.log("Navigating to /admin...");
         navigate("/admin", { replace: true });
       } else {
-        console.log("Navigating to /user...");
-        navigate("/user", { replace: true });
+        console.log("Navigating to /attendee...");
+        navigate("/attendee", { replace: true });
       }
     };
 

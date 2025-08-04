@@ -22,11 +22,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element, requireAdmin =
         if (isAuthenticated) {
           const userRole = user?.email ? UserRoleStorage.getRole(user.email) : null;
 
-          if (userRole === 'admin') {
+          if (userRole === 'showcase_admin') {
             
-            navigate('/admin');
+            navigate('/showcase_admin');
           } else {
-            navigate('/user');
+            navigate('/showcase_attendee');
+            // navigate('/user');
           }
         } else {
           navigate('/login');
