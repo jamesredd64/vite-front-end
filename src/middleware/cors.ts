@@ -7,6 +7,7 @@ export const corsMiddleware = cors({
     'http://localhost:5173',
     'http://localhost:5000',
     'https://vite-front-end.vercel.app',
+    'https://showcase-fe-app.vercel.app',
     'https://admin-backend-eta.vercel.app'
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Added PATCH
