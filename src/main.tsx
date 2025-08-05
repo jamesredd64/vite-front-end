@@ -72,7 +72,7 @@ const onRedirectCallback = (appState: any) => {
 //   }
 // }, [useAuth0()]);
 console.log("hello from main");
-
+console.log("Redirect URI Is ", window.location.origin);
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>
@@ -82,7 +82,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             domain={import.meta.env.VITE_AUTH0_DOMAIN}
             clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
             authorizationParams={{
-              redirect_uri: window.location.origin,
+              redirect_uri: `${window.location.origin}`,              
               audience: import.meta.env.VITE_AUTH0_AUDIENCE,
               scope: 'openid profile email'
             }}
@@ -104,6 +104,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </BrowserRouter>
       </ThemeProvider>
     </HelmetProvider>
-   </React.StrictMode>
+  </React.StrictMode>
+  
 );
 
