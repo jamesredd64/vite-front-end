@@ -9,7 +9,8 @@ export const getBaseApiUrl = (): string => {
   
   // Remove '/api' if it exists in the URL
   const apiUrl = import.meta.env.VITE_API_URL || '';
-  return apiUrl.replace('/api', '');
+  return apiUrl;
+  // return apiUrl.replace('/api', '');
 };
 
 // Get the full API URL including the /api path
