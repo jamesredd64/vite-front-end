@@ -68,6 +68,7 @@ const onRedirectCallback = (appState: any) => {
 //   }
 // }, [useAuth0()]);
 console.log("hello from main");
+console.log("redirect_uri ", window.location.origin);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
