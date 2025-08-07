@@ -63,3 +63,6 @@ src/components/admin/AdminCodeVerification.tsx
 src/components/admin/AdminManagement.tsx
 src/models/AdminCode.ts
 src/pages/ProfilesPage.tsx
+
+# docs
+docs
