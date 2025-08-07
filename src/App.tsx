@@ -25,7 +25,7 @@ import Changelog from "./pages/Changelog/index";
 import UserManagement from "./pages/UserManagement";
 import { initSessionTimeout } from './utils/sessionTimeout';
 import { IdleTimeoutHandler } from "./components/IdleTimeoutHandler";
-import AdminSettingsTest from './components/AdminSettingsTest';
+// import AdminSettingsTest from './components/AdminSettingsTest';
 import EventInvitation from "./pages/EventInvitation";
 import UserAdmin from './pages/admin/Users';
 // Add this to your imports
@@ -38,6 +38,7 @@ import Home from "./pages/Dashboard/Home";
 import ScheduledEventsPage from "./pages/ScheduledEventsPage";
 import SendEmailPage from "./pages/SendEmailPage";
 import SettingsAdmin from "./pages/SettingsAdmin";
+import AdminSettings from "./pages/AdminSettings";
 
 // import { forceLogout } from './utils/forceLogout';
 // import { UnsavedChangesModal } from "./components/UnsavedChangesModal";
@@ -507,7 +508,9 @@ function App() {
                     <Route path="welcome" element={<NewUserWelcome />} />                    
                     <Route path="sch-events" element={<ScheduledEventsPage />} />
                     <Route path="send-email" element={<SendEmailPage />} />
-                    <Route path="settings-admin" element={<SettingsAdmin />} />            
+                  <Route path="settings-admin" element={<SettingsAdmin />} />  
+                  {/* <Route path="admin-settings" element={<AdminSettings />} />   */}
+                  
                   </Route>
 
                   {/* User Routes */}
@@ -516,8 +519,7 @@ function App() {
                     <Route path="dashboard" element={<NewUserWelcome />} />
                     <Route path="profile" element={<ProfileView />} />
                     
-                  </Route>
-                  <Route path="/test-admin-settings" element={<AdminSettingsTest />} />
+                  </Route>                  
                 </Route>
 
                 {/* Catch All Route */}

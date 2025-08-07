@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import UsersLookup from './UsersLookup';
 import { EmailService } from '../services/email.service';
-import { adminService } from '../services/adminService';
+// import { adminService } from '../services/adminService';
+import { useAdminService } from '../services/adminService';
 import type User from '../types/user';
 import type { AdminSettings } from '../types/rbac.types';
 import Loader from '../components/common/Loader';
@@ -19,6 +20,7 @@ const availableTags = [
 const SettingsAdmin: React.FC = () => {
   const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
   const [settings, setSettings] = useState<AdminSettings | null>(null);
+  const { getAdminSettings, overwriteAllAdminSettings } = useAdminService();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; title: string; message: string } | null>(null);
@@ -32,7 +34,7 @@ const SettingsAdmin: React.FC = () => {
     const fetchSettings = async () => {
       try {
         setLoading(true);
-        const response = await adminService.getAdminSettings(getAccessTokenSilently);
+        const response = await getAdminSettings();
         console.log("Fetched settings:", response.data);
         setSettings(response.data);
       } catch (err: any) {
@@ -117,7 +119,7 @@ const SettingsAdmin: React.FC = () => {
     setStatusMessage(null);
 
     try {
-      const response = await adminService.overwriteAllAdminSettings(settings, getAccessTokenSilently);
+      const response = await overwriteAllAdminSettings(settings);
       setStatusMessage(response.success
         ? { type: 'success', title: 'Success', message: 'Settings saved successfully!' }
         : { type: 'error', title: 'Error', message: response.message || 'Failed to save settings.' }

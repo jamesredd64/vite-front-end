@@ -4,7 +4,7 @@ import PageBreadcrumb from '../components/common/PageBreadCrumb';
 import { UserIcon, MailIcon, CalenderIcon } from '../icons';
 import Checkbox from '../components/form/input/Checkbox';
 import type { AdminSettings, RoleBasedAccess, RolePermissions, RbacAppTypePermissions, AccessFunction } from '../types/rbac.types';
-import { adminService } from '../services/adminService';
+import { useAdminService } from '../services/adminService';
 import { useAuth0 } from '@auth0/auth0-react';
 import Alert from '../components/ui/alert/Alert';
 
@@ -54,6 +54,7 @@ export const initialSettings: AdminSettings = {
 };
 
 const AdminSettings: React.FC = () => {
+  const { getAdminSettings, overwriteAllAdminSettings } = useAdminService();
   const { getAccessTokenSilently } = useAuth0();
   const [settings, setSettings] = useState<AdminSettings>({} as AdminSettings);
   const [isSaving, setIsSaving] = useState(false);
@@ -64,6 +65,7 @@ const AdminSettings: React.FC = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
 
 
   // Effect to clear status message after a few seconds
@@ -83,25 +85,31 @@ const AdminSettings: React.FC = () => {
     };
   }, [statusMessage]);
 
+  // Fetch settings on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        setLoading(true);
+        const response = await getAdminSettings();
+        console.log('Fetched Settings:', response.data);
+        setSettings(response.data);
+      } catch (err: any) {
+        console.error('Error fetching admin settings:', err);
+        setError(err.message || 'Failed to fetch admin settings');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
+    // Auto-clear status messages
     useEffect(() => {
-      const fetchSettings = async () => {
-        try {
-          setLoading(true);
-          const data = await adminService.getAdminSettings(getAccessTokenSilently);
-          console.log("Fetched Settings ", data.data);
-          setSettings(data.data);
-          console.log("Settings ", data.data);
-        } catch (err: any) {
-          setError(err.message || 'Failed to fetch admin settings');
-          console.error('Error fetching admin settings:', err);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchSettings();
-
-    }, []);
+      if (!statusMessage) return;
+      const timeoutId = setTimeout(() => setStatusMessage(null), 5000);
+      return () => clearTimeout(timeoutId);
+    }, [statusMessage]);
 
   // Handlers for role permissions toggles
   const handlePermissionChange = (roleIndex: number, appTypeKey: string, accessFunctionKey: string) => {
@@ -178,22 +186,35 @@ const AdminSettings: React.FC = () => {
     }));
   };
 
+  // Save settings handler
   const handleSave = async () => {
     setIsSaving(true);
     setStatusMessage(null);
 
     try {
-      const response = await adminService.overwriteAllAdminSettings(settings, getAccessTokenSilently);
-      console.log('Save settings response:', response);
+      const response = await overwriteAllAdminSettings(settings);
+      console.log('Save response:', response);
 
       if (response.success) {
-        setStatusMessage({ type: 'success', title: 'Success', message: 'Settings saved successfully!' });
+        setStatusMessage({
+          type: 'success',
+          title: 'Success',
+          message: 'Settings saved successfully!',
+        });
       } else {
-        setStatusMessage({ type: 'error', title: 'Error', message: response.message || 'Failed to save settings.' });
+        setStatusMessage({
+          type: 'error',
+          title: 'Error',
+          message: response.message || 'Failed to save settings.',
+        });
       }
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      setStatusMessage({ type: 'error', title: 'Error', message: error instanceof Error ? error.message : 'An unexpected error occurred while saving settings.' });
+    } catch (err: any) {
+      console.error('Error saving settings:', err);
+      setStatusMessage({
+        type: 'error',
+        title: 'Error',
+        message: err.message || 'Unexpected error occurred while saving.',
+      });
     } finally {
       setIsSaving(false);
     }

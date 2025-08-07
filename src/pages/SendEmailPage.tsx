@@ -1,7 +1,7 @@
  import React, { useState, useEffect } from 'react';
 import UsersLookup from './UsersLookup';
 import { EmailService } from '../services/email.service';
-import { adminService } from '../services/adminService'; // Import adminService
+import { useAdminService } from '../services/adminService'; // Import adminService
 import type User from '../types/user';
 import type { AdminSettings, AdminSettingsResponse } from '../types/rbac.types'; // Import AdminSettings type
 import Loader from '../components/common/Loader';
@@ -9,7 +9,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 
 const SendEmailPage: React.FC = () => {
   const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
-
+   const { getAdminSettings, overwriteAllAdminSettings } = useAdminService();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]); // Store only user IDs
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [subject, setSubject] = useState('');
@@ -42,7 +42,8 @@ const SendEmailPage: React.FC = () => {
     const fetchEmailTemplates = async () => {
       try {
         setLoadingTemplates(true);
-        const response = await adminService.getAdminSettings(getAccessTokenSilently);
+        // const response = await useAdminService.getAdminSettings(getAccessTokenSilently);
+        const response = await getAdminSettings();
         console.log('Fetched admin settings response:', response);
 
         if (!response?.success) {
