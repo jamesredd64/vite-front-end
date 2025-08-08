@@ -14,6 +14,7 @@ function Show-GitMenu {
     Write-Host "11: Overwrite main with backup branch"
     Write-Host "12: Switch Environment (Dev/Prod)"
     Write-Host "13: Delete branch"
+    Write-Host "14: Connect local app to new GitHub repo"
     Write-Host "15: Merge multiple branches into new branch"
     Write-Host "Q: Quit"
     Write-Host "=================================================="
@@ -404,6 +405,33 @@ function Merge-MultipleBranches {
     }
 }
 
+function Connect-ToNewRepo {
+    $repoUrl = Read-Host "Enter the GitHub repository URL (e.g., https://github.com/your-username/showcase.git)"
+    $branchName = Read-Host "Enter the branch name to push to (default: main)"
+    if (-not $branchName) { $branchName = "main" }
+
+    Write-Host "`nInitializing Git repository..."
+    git init
+
+    Write-Host "`nAdding remote origin..."
+    git remote add origin $repoUrl
+
+    Write-Host "`nStaging all files..."
+    git add .
+
+    $commitMsg = Read-Host "Enter commit message (default: Initial commit)"
+    if (-not $commitMsg) { $commitMsg = "Initial commit" }
+
+    Write-Host "`nCommitting changes..."
+    git commit -m "$commitMsg"
+
+    Write-Host "`nPushing to GitHub..."
+    git push -u origin $branchName
+
+    Write-Host "`n✅ Repository connected and code pushed to $repoUrl on branch '$branchName'"
+}
+
+
 # Main loop
 do {
     Show-GitMenu
@@ -427,6 +455,7 @@ do {
         '11' { Reset-ToBackupBranch }
         '12' { Switch-Environment }
         '13' { Delete-Branch }
+        '14' { Connect-ToNewRepo }
         '15' { Merge-MultipleBranches }
     }
     if ($selection -ne 'q') {
